@@ -295,7 +295,7 @@
         import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // Configuración de Firebase con la nueva clave API proporcionada
-const firebaseConfig = {
+        const firebaseConfig = {
             apiKey: "AIzaSyCaI5NPapzEe1jK8EfZrnTW8lEytfy4eR4",
             authDomain: "formulario-9b119.firebaseapp.com",
             projectId: "formulario-9b119",
@@ -454,16 +454,25 @@ const firebaseConfig = {
             document.getElementById('tabla-ingresados-body').innerHTML = html !== "" ? html : `<tr><td colspan="4" class="p-6 text-center text-gray-500">No se encontraron registros en Firestore.</td></tr>`;
         }
 
+        // Apartado: Clientes Página Web
         function renderizarWeb(docs) {
             let html = "";
             docs.forEach(data => {
                 const nombres = `${data.nombres || ''} ${data.apellidos || ''}`.trim() || "Sin nombre";
+                const cedula = data.cedula || "S/C";
+                const sector = data.sector || data.ciudad || "General";
+                const plan = data.plan || "Estándar";
+                const fecha = data.fecha_registro || "Reciente";
+
                 html += `
                     <tr class="hover:bg-[#202024]/60 transition-colors">
-                        <td class="p-3.5"><span class="text-white font-medium block">${nombres}</span><span class="text-[10px] text-gray-500 font-mono">C.I: ${data.cedula || "S/C"}</span></td>
-                        <td class="p-3.5 text-gray-300">${data.sector || "General"}</td>
-                        <td class="p-3.5"><span class="bg-cyan-950/60 text-cyan-400 border border-cyan-800/50 px-2 py-0.5 rounded text-[10px] font-bold">${data.plan || "Estándar"}</span></td>
-                        <td class="p-3.5 text-gray-400 font-mono text-[11px]">${data.fecha_registro || "Reciente"}</td>
+                        <td class="p-3.5">
+                            <span class="text-white font-medium block">${nombres}</span>
+                            <span class="text-[10px] text-gray-500 font-mono">C.I: ${cedula}</span>
+                        </td>
+                        <td class="p-3.5 text-gray-300">${sector}</td>
+                        <td class="p-3.5"><span class="text-cyan-400 font-semibold">${plan}</span></td>
+                        <td class="p-3.5 text-gray-400 font-mono text-[11px]">${fecha}</td>
                     </tr>
                 `;
             });
@@ -471,49 +480,62 @@ const firebaseConfig = {
             document.getElementById('tabla-web-body').innerHTML = html !== "" ? html : `<tr><td colspan="4" class="p-6 text-center text-gray-500">No hay registros web.</td></tr>`;
         }
 
+        // Apartado: Promotores
         function renderizarPromotores(docs) {
             let html = "";
-            let resumenMap = {};
+            let resumenHtml = "";
+            let promotoresConteo = {};
 
             docs.forEach(data => {
-                const promotor = data.promotor || "Oficina / General";
-                resumenMap[promotor] = (resumenMap[promotor] || 0) + 1;
+                const promotor = data.promotor || data.asesor || "Directo / Web";
+                promotoresConteo[promotor] = (promotoresConteo[promotor] || 0) + 1;
+
                 const nombres = `${data.nombres || ''} ${data.apellidos || ''}`.trim() || "Sin nombre";
+                const sector = data.sector || "General";
+                const fecha = data.fecha_registro || "Reciente";
 
                 html += `
                     <tr class="hover:bg-[#202024]/60 transition-colors">
-                        <td class="p-3.5 text-purple-400 font-medium">${promotor}</td>
-                        <td class="p-3.5 text-white">${nombres} (${data.cedula || "S/C"})</td>
-                        <td class="p-3.5 text-gray-300">${data.sector || "General"}</td>
-                        <td class="p-3.5 text-gray-400 font-mono text-[11px]">${data.fecha_registro || "Reciente"}</td>
+                        <td class="p-3.5 text-purple-400 font-semibold">${promotor}</td>
+                        <td class="p-3.5 text-white">${nombres}</td>
+                        <td class="p-3.5 text-gray-300">${sector}</td>
+                        <td class="p-3.5 text-gray-400 font-mono text-[11px]">${fecha}</td>
                     </tr>
                 `;
             });
 
-            let resumenHtml = "";
-            for (let [prom, cant] of Object.entries(resumenMap)) {
+            for (let [promotor, total] of Object.entries(promotoresConteo)) {
                 resumenHtml += `
-                    <div class="flex items-center justify-between p-2.5 bg-[#202024]/80 rounded-xl border border-zinc-800">
-                        <span class="text-white font-medium truncate max-w-[140px]"><i class="fa-solid fa-user-tie text-purple-400 mr-2 text-xs"></i>${prom}</span>
-                        <span class="bg-purple-950/60 text-purple-400 border border-purple-800/50 px-2 py-0.5 rounded-lg text-[10px] font-bold">${cant} contratos</span>
+                    <div class="flex items-center justify-between p-2.5 bg-[#202024]/50 rounded-xl border border-zinc-800">
+                        <span class="text-white font-medium truncate max-w-[130px]">${promotor}</span>
+                        <span class="bg-purple-950/60 text-purple-400 border border-purple-800/50 px-2 py-0.5 rounded-lg text-[10px] font-bold">${total} regs</span>
                     </div>
                 `;
             }
 
             document.getElementById('promotores-resumen-list').innerHTML = resumenHtml !== "" ? resumenHtml : `<p class="text-gray-500 text-center py-4">Sin promotores registrados.</p>`;
-            document.getElementById('tabla-promotores-body').innerHTML = html !== "" ? html : `<tr><td colspan="4" class="p-6 text-center text-gray-500">Sin datos de promotores.</td></tr>`;
+            document.getElementById('tabla-promotores-body').innerHTML = html !== "" ? html : `<tr><td colspan="4" class="p-6 text-center text-gray-500">No hay detalles de promotores.</td></tr>`;
         }
 
+        // Apartado: Censo
         function renderizarCenso(docs) {
             let html = "";
             docs.forEach(data => {
-                const nombres = `${data.nombres || ''} ${data.apellidos || ''}`.trim() || "Ciudadano";
+                const nombres = `${data.nombres || ''} ${data.apellidos || ''}`.trim() || "Sin nombre";
+                const cedula = data.cedula || "S/C";
+                const sector = data.sector || data.zona || "Nueva Esparta";
+                const estado = data.estado || "Prospecto Censo";
+                const fecha = data.fecha_registro || "Reciente";
+
                 html += `
                     <tr class="hover:bg-[#202024]/60 transition-colors">
-                        <td class="p-3.5"><span class="text-white font-medium block">${nombres}</span><span class="text-[10px] text-gray-500 font-mono">C.I: ${data.cedula || "S/C"}</span></td>
-                        <td class="p-3.5 text-gray-300"><span class="bg-amber-950/40 text-amber-400 border border-amber-800/40 px-2.5 py-1 rounded-lg text-[10px]">${data.sector || data.ciudad || "Nueva Esparta"}</span></td>
-                        <td class="p-3.5"><span class="bg-zinc-800 text-gray-300 px-2 py-0.5 rounded text-[10px]">${data.estado || "Procesado"}</span></td>
-                        <td class="p-3.5 text-gray-400 font-mono text-[11px]">${data.fecha_registro || "Reciente"}</td>
+                        <td class="p-3.5">
+                            <span class="text-white font-medium block">${nombres}</span>
+                            <span class="text-[10px] text-gray-500 font-mono">C.I: ${cedula}</span>
+                        </td>
+                        <td class="p-3.5 text-gray-300">${sector}</td>
+                        <td class="p-3.5"><span class="bg-amber-950/60 text-amber-400 border border-amber-800/50 px-2 py-0.5 rounded text-[10px] font-bold">${estado}</span></td>
+                        <td class="p-3.5 text-gray-400 font-mono text-[11px]">${fecha}</td>
                     </tr>
                 `;
             });
