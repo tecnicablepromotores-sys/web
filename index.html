@@ -118,14 +118,14 @@
                             <h3 id="stat-dash-censo" class="text-3xl font-extrabold text-white mt-1">0</h3>
                         </div>
                         <div class="bg-[#18181b] border border-zinc-800/80 rounded-xl p-5 shadow-lg">
-                            <p class="text-xs uppercase tracking-wider text-gray-400 font-medium">Total Instalados (WispHub)</p>
+                            <p class="text-xs uppercase tracking-wider text-gray-400 font-medium">Total Registros</p>
                             <h3 id="stat-dash-total" class="text-3xl font-extrabold text-white mt-1">0</h3>
                         </div>
                     </div>
                     <div class="bg-[#18181b] border border-zinc-800/80 rounded-xl p-6 shadow-lg text-center py-12">
                         <i class="fa-solid fa-server text-blue-500 text-4xl mb-3"></i>
                         <h3 class="text-white font-bold text-lg">Panel de Control de Órdenes y Conectividad</h3>
-                        <p class="text-xs text-gray-400 max-w-md mx-auto mt-1">Selecciona **Clientes Ingresados** en el menú lateral para auditar las órdenes cerradas, el control de cédulas y el volcado de datos hacia WispHub.</p>
+                        <p class="text-xs text-gray-400 max-w-md mx-auto mt-1">Selecciona **Clientes Página Web** o **Clientes Ingresados** en el menú lateral para auditar las órdenes de la base de datos.</p>
                     </div>
                 </div>
 
@@ -133,13 +133,13 @@
                 <div id="view-ingresados" class="seccion-view space-y-6 hidden">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="bg-[#18181b] border border-zinc-800 rounded-xl p-5">
-                            <p class="text-xs text-gray-400 uppercase">Órdenes Instaladas (WispHub)</p>
+                            <p class="text-xs text-gray-400 uppercase">Órdenes / Clientes</p>
                             <h3 id="stat-ing-total" class="text-2xl font-bold text-emerald-400 mt-1">0</h3>
                         </div>
                         <div class="bg-[#18181b] border border-zinc-800 rounded-xl p-5 md:col-span-2 flex items-center justify-between">
                             <div>
-                                <h4 class="text-white font-medium text-sm">Control de Órdenes Cerradas</h4>
-                                <p class="text-xs text-gray-400">Clientes con orden cerrada y datos sincronizados en WispHub.</p>
+                                <h4 class="text-white font-medium text-sm">Control de Órdenes</h4>
+                                <p class="text-xs text-gray-400">Registros sincronizados desde la base de datos.</p>
                             </div>
                             <input type="text" id="busqueda-ingresados" placeholder="Buscar por cédula o nombre..." onkeyup="renderizarIngresados()" class="bg-[#202024] border border-zinc-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-blue-600 w-64">
                         </div>
@@ -151,12 +151,12 @@
                                     <tr>
                                         <th class="p-3 rounded-l-lg">Cliente / Cédula</th>
                                         <th class="p-3">Sector / Zona</th>
-                                        <th class="p-3">Estado Orden & WispHub</th>
-                                        <th class="p-3 rounded-r-lg">Fecha Cierre / Instalación</th>
+                                        <th class="p-3">Plan / Estado</th>
+                                        <th class="p-3 rounded-r-lg">Fecha de Registro</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tabla-ingresados-body" class="divide-y divide-zinc-800">
-                                    <tr><td colspan="4" class="p-4 text-center text-gray-500">Cargando registros de instalación...</td></tr>
+                                    <tr><td colspan="4" class="p-4 text-center text-gray-500">Cargando registros...</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -167,13 +167,13 @@
                 <div id="view-web" class="seccion-view space-y-6 hidden">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="bg-[#18181b] border border-zinc-800 rounded-xl p-5">
-                            <p class="text-xs text-gray-400 uppercase">Leads / Registros Web</p>
+                            <p class="text-xs text-gray-400 uppercase">Leads / Contratos Web</p>
                             <h3 id="stat-web-total" class="text-2xl font-bold text-cyan-400 mt-1">0</h3>
                         </div>
                         <div class="bg-[#18181b] border border-zinc-800 rounded-xl p-5 flex items-center justify-between">
                             <div>
                                 <h4 class="text-white font-medium text-sm">Canal Digital Servitel+</h4>
-                                <p class="text-xs text-gray-400">Clientes capturados a través del portal web.</p>
+                                <p class="text-xs text-gray-400">Clientes capturados a través de Contratos_Web.</p>
                             </div>
                         </div>
                     </div>
@@ -184,7 +184,7 @@
                                     <tr>
                                         <th class="p-3 rounded-l-lg">Cliente Web / Cédula</th>
                                         <th class="p-3">Sector</th>
-                                        <th class="p-3">Origen Digital</th>
+                                        <th class="p-3">Plan</th>
                                         <th class="p-3 rounded-r-lg">Fecha Registro</th>
                                     </tr>
                                 </thead>
@@ -206,7 +206,7 @@
                             </div>
                         </div>
                         <div class="bg-[#18181b] border border-zinc-800 rounded-xl p-5 lg:col-span-2">
-                            <h3 class="text-white font-semibold text-sm mb-4 border-b border-zinc-800 pb-2">Detalle de Registros por Promotor en Campo</h3>
+                            <h3 class="text-white font-semibold text-sm mb-4 border-b border-zinc-800 pb-2">Detalle de Registros por Promotor</h3>
                             <div class="overflow-x-auto max-h-[350px]">
                                 <table class="w-full text-left text-xs text-gray-400">
                                     <thead class="bg-[#202024] text-gray-300 uppercase sticky top-0">
@@ -235,7 +235,7 @@
                         </div>
                         <div class="bg-[#18181b] border border-zinc-800 rounded-xl p-5 flex items-center justify-between">
                             <div>
-                                <h4 class="text-white font-medium text-sm">Zonas y Sectores Censados</h4>
+                                <h4 class="text-white font-medium text-sm">Zonas y Sectores</h4>
                                 <p class="text-xs text-gray-400">Auditoría geográfica y levantamiento de sectores.</p>
                             </div>
                         </div>
@@ -246,8 +246,8 @@
                                 <thead class="bg-[#202024] text-gray-300 uppercase sticky top-0">
                                     <tr>
                                         <th class="p-3 rounded-l-lg">Ciudadano / Cédula</th>
-                                        <th class="p-3">Sector / Zona Censada</th>
-                                        <th class="p-3">Tipo de Registro</th>
+                                        <th class="p-3">Sector / Zona</th>
+                                        <th class="p-3">Estado</th>
                                         <th class="p-3 rounded-r-lg">Fecha</th>
                                     </tr>
                                 </thead>
@@ -351,7 +351,7 @@
 
             const titulos = {
                 'dashboard': 'Dashboard General',
-                'ingresados': 'Clientes Ingresados (Instalados & WispHub)',
+                'ingresados': 'Clientes Ingresados',
                 'web': 'Registros y Leads de la Página Web',
                 'promotores': 'Rendimiento y Auditoría de Promotores',
                 'censo': 'Opción de Censo en Zonas Operativas'
@@ -359,10 +359,10 @@
             document.getElementById('seccion-titulo').innerText = titulos[seccionId] || 'Panel Servitel+';
         }
 
-        // Lector general de Firestore
+        // Lector general de Firestore (Apunta a la colección correcta: Contratos_Web)
         async function leerDatosFirebase() {
             try {
-                const querySnapshot = await getDocs(collection(db, "clientes"));
+                const querySnapshot = await getDocs(collection(db, "Contratos_Web"));
                 cacheGlobalDocs = [];
                 querySnapshot.forEach((doc) => {
                     cacheGlobalDocs.push({ id: doc.id, ...doc.data() });
@@ -381,36 +381,25 @@
 
         function procesarDashboard(docs) {
             let total = docs.length;
-            let hoyCount = 0;
-            let webCount = 0;
-            let censoCount = 0;
-            const hoyStr = new Date().toISOString().split('T')[0];
-
-            docs.forEach(data => {
-                const fecha = data.fechaRegistro || data.fecha || "";
-                const origen = (data.origen || data.tipo || "").toLowerCase();
-                if (fecha === hoyStr || fecha.startsWith(hoyStr)) hoyCount++;
-                if (origen.includes("web") || origen.includes("pagina")) webCount++;
-                if (origen.includes("censo")) censoCount++;
-            });
-
             document.getElementById('stat-dash-total').innerText = total;
-            document.getElementById('stat-dash-hoy').innerText = hoyCount;
-            document.getElementById('stat-dash-web').innerText = webCount;
-            document.getElementById('stat-dash-censo').innerText = censoCount;
+            document.getElementById('stat-dash-hoy').innerText = total; // Muestra total disponible
+            document.getElementById('stat-dash-web').innerText = total;
+            document.getElementById('stat-dash-censo').innerText = total;
         }
 
-        // Apartado: Clientes Ingresados (Órdenes cerradas e instaladas en WispHub)
+        // Apartado: Clientes Ingresados
         window.renderizarIngresados = function() {
             const texto = (document.getElementById('busqueda-ingresados').value || "").toLowerCase();
             let html = "";
             let count = 0;
 
             cacheGlobalDocs.forEach(data => {
-                const nombres = data.nombres || data.nombre || "Sin nombre";
-                const cedula = data.cedula || data.dni || "S/C";
-                const sector = data.sector || data.zona || "General";
-                const fecha = data.fechaRegistro || data.fecha || "Reciente";
+                const nombres = `${data.nombres || ''} ${data.apellidos || ''}`.trim() || "Sin nombre";
+                const cedula = data.cedula || "S/C";
+                const sector = data.sector || data.ciudad || "General";
+                const plan = data.plan || "Estándar";
+                const estado = data.estado || "Registrado";
+                const fecha = data.fecha_registro || "Reciente";
 
                 if (texto === "" || `${nombres} ${cedula} ${sector}`.toLowerCase().includes(texto)) {
                     count++;
@@ -424,10 +413,8 @@
                                 <span class="bg-zinc-800 px-2 py-0.5 rounded text-[11px] border border-zinc-700/50">${sector}</span>
                             </td>
                             <td class="p-3">
-                                <span class="bg-emerald-950 text-emerald-400 border border-emerald-800/50 px-2 py-0.5 rounded text-[10px] font-bold">
-                                    <i class="fa-solid fa-circle-check mr-1"></i> INSTALADO (WISPHUB)
-                                </span>
-                                <span class="block text-[10px] text-gray-400 mt-1">Orden Cerrada / Sincronizado</span>
+                                <span class="bg-emerald-950 text-emerald-400 border border-emerald-800/50 px-2 py-0.5 rounded text-[10px] font-bold">${plan}</span>
+                                <span class="block text-[10px] text-gray-400 mt-1">${estado}</span>
                             </td>
                             <td class="p-3 text-gray-400 font-mono text-xs">${fecha}</td>
                         </tr>
@@ -436,29 +423,24 @@
             });
 
             document.getElementById('stat-ing-total').innerText = count;
-            document.getElementById('tabla-ingresados-body').innerHTML = html !== "" ? html : `<tr><td colspan="4" class="p-4 text-center text-gray-500">No se encontraron clientes instalados.</td></tr>`;
+            document.getElementById('tabla-ingresados-body').innerHTML = html !== "" ? html : `<tr><td colspan="4" class="p-4 text-center text-gray-500">No se encontraron registros.</td></tr>`;
         }
 
         function renderizarWeb(docs) {
             let html = "";
-            let count = 0;
-
             docs.forEach(data => {
-                const origen = (data.origen || data.tipo || "").toLowerCase();
-                if (origen.includes("web") || origen.includes("pagina")) {
-                    count++;
-                    html += `
-                        <tr class="hover:bg-[#202024] transition-colors">
-                            <td class="p-3"><span class="text-white font-medium block">${data.nombres || data.nombre || "Sin nombre"}</span><span class="text-[11px] text-gray-500 font-mono">C.I: ${data.cedula || data.dni || "S/C"}</span></td>
-                            <td class="p-3 text-gray-300">${data.sector || data.zona || "General"}</td>
-                            <td class="p-3"><span class="bg-cyan-950 text-cyan-400 border border-cyan-800/50 px-2 py-0.5 rounded text-[10px] font-bold">PÁGINA WEB</span></td>
-                            <td class="p-3 text-gray-400 font-mono text-xs">${data.fechaRegistro || data.fecha || "Reciente"}</td>
-                        </tr>
-                    `;
-                }
+                const nombres = `${data.nombres || ''} ${data.apellidos || ''}`.trim() || "Sin nombre";
+                html += `
+                    <tr class="hover:bg-[#202024] transition-colors">
+                        <td class="p-3"><span class="text-white font-medium block">${nombres}</span><span class="text-[11px] text-gray-500 font-mono">C.I: ${data.cedula || "S/C"}</span></td>
+                        <td class="p-3 text-gray-300">${data.sector || "General"}</td>
+                        <td class="p-3"><span class="bg-cyan-950 text-cyan-400 border border-cyan-800/50 px-2 py-0.5 rounded text-[10px] font-bold">${data.plan || "Web"}</span></td>
+                        <td class="p-3 text-gray-400 font-mono text-xs">${data.fecha_registro || "Reciente"}</td>
+                    </tr>
+                `;
             });
 
-            document.getElementById('stat-web-total').innerText = count;
+            document.getElementById('stat-web-total').innerText = docs.length;
             document.getElementById('tabla-web-body').innerHTML = html !== "" ? html : `<tr><td colspan="4" class="p-4 text-center text-gray-500">No hay registros web en Firestore.</td></tr>`;
         }
 
@@ -467,18 +449,18 @@
             let htmlTabla = "";
 
             docs.forEach(data => {
-                const promotor = data.promotor || data.asesor || "Oficina / Directo";
-                if (promotor !== "Oficina / Directo") {
-                    promotoresMap[promotor] = (promotoresMap[promotor] || 0) + 1;
-                    htmlTabla += `
-                        <tr class="hover:bg-[#202024] transition-colors">
-                            <td class="p-3 text-purple-400 font-medium"><i class="fa-solid fa-id-badge mr-1"></i>${promotor}</td>
-                            <td class="p-3 text-white">${data.nombres || data.nombre || "Sin nombre"} (C.I: ${data.cedula || data.dni || "S/C"})</td>
-                            <td class="p-3 text-gray-300">${data.sector || data.zona || "General"}</td>
-                            <td class="p-3 text-gray-400 font-mono text-xs">${data.fechaRegistro || data.fecha || "Reciente"}</td>
-                        </tr>
-                    `;
-                }
+                const promotor = data.promotor || "Oficina / Directo";
+                promotoresMap[promotor] = (promotoresMap[promotor] || 0) + 1;
+                const nombres = `${data.nombres || ''} ${data.apellidos || ''}`.trim() || "Sin nombre";
+                
+                htmlTabla += `
+                    <tr class="hover:bg-[#202024] transition-colors">
+                        <td class="p-3 text-purple-400 font-medium"><i class="fa-solid fa-id-badge mr-1"></i>${promotor}</td>
+                        <td class="p-3 text-white">${nombres} (C.I: ${data.cedula || "S/C"})</td>
+                        <td class="p-3 text-gray-300">${data.sector || "General"}</td>
+                        <td class="p-3 text-gray-400 font-mono text-xs">${data.fecha_registro || "Reciente"}</td>
+                    </tr>
+                `;
             });
 
             const resumenContainer = document.getElementById('promotores-resumen-list');
@@ -490,7 +472,7 @@
                     </div>
                 `).join('');
             } else {
-                resumenContainer.innerHTML = `<p class="text-gray-500 text-xs">No hay promotores activos registrados.</p>`;
+                resumenContainer.innerHTML = `<p class="text-gray-500 text-xs">No hay promotores registrados.</p>`;
             }
 
             document.getElementById('tabla-promotores-body').innerHTML = htmlTabla !== "" ? htmlTabla : `<tr><td colspan="4" class="p-4 text-center text-gray-500">No hay datos de promotores.</td></tr>`;
@@ -498,25 +480,20 @@
 
         function renderizarCenso(docs) {
             let html = "";
-            let count = 0;
-
             docs.forEach(data => {
-                const origen = (data.origen || data.tipo || "").toLowerCase();
-                if (origen.includes("censo")) {
-                    count++;
-                    html += `
-                        <tr class="hover:bg-[#202024] transition-colors">
-                            <td class="p-3"><span class="text-white font-medium block">${data.nombres || data.nombre || "Sin nombre"}</span><span class="text-[11px] text-gray-500 font-mono">C.I: ${data.cedula || data.dni || "S/C"}</span></td>
-                            <td class="p-3 text-gray-300"><span class="bg-amber-950/40 text-amber-300 border border-amber-800/50 px-2 py-0.5 rounded text-xs">${data.sector || data.zona || "Nueva Esparta"}</span></td>
-                            <td class="p-3"><span class="bg-amber-950 text-amber-400 border border-amber-800/50 px-2 py-0.5 rounded text-[10px] font-bold">CENSO OPERATIVO</span></td>
-                            <td class="p-3 text-gray-400 font-mono text-xs">${data.fechaRegistro || data.fecha || "Reciente"}</td>
-                        </tr>
-                    `;
-                }
+                const nombres = `${data.nombres || ''} ${data.apellidos || ''}`.trim() || "Sin nombre";
+                html += `
+                    <tr class="hover:bg-[#202024] transition-colors">
+                        <td class="p-3"><span class="text-white font-medium block">${nombres}</span><span class="text-[11px] text-gray-500 font-mono">C.I: ${data.cedula || "S/C"}</span></td>
+                        <td class="p-3 text-gray-300"><span class="bg-amber-950/40 text-amber-300 border border-amber-800/50 px-2 py-0.5 rounded text-xs">${data.sector || "Nueva Esparta"}</span></td>
+                        <td class="p-3"><span class="bg-amber-950 text-amber-400 border border-amber-800/50 px-2 py-0.5 rounded text-[10px] font-bold">${data.estado || "Censo"}</span></td>
+                        <td class="p-3 text-gray-400 font-mono text-xs">${data.fecha_registro || "Reciente"}</td>
+                    </tr>
+                `;
             });
 
-            document.getElementById('stat-censo-total').innerText = count;
-            document.getElementById('stat-dash-censo').innerText = count;
+            document.getElementById('stat-censo-total').innerText = docs.length;
+            document.getElementById('stat-dash-censo').innerText = docs.length;
             document.getElementById('tabla-censo-body').innerHTML = html !== "" ? html : `<tr><td colspan="4" class="p-4 text-center text-gray-500">No hay registros de censo disponibles.</td></tr>`;
         }
     </script>
