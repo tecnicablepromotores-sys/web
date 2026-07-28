@@ -129,7 +129,7 @@
                     </div>
                 </div>
 
-                <!-- 2. SECCIÓN: CLIENTES INGRESADOS (Órdenes cerradas e instaladas en WispHub) -->
+                <!-- 2. SECCIÓN: CLIENTES INGRESADOS -->
                 <div id="view-ingresados" class="seccion-view space-y-6 hidden">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="bg-[#18181b] border border-zinc-800 rounded-xl p-5">
@@ -508,7 +508,7 @@
                         <tr class="hover:bg-[#202024] transition-colors">
                             <td class="p-3"><span class="text-white font-medium block">${data.nombres || data.nombre || "Sin nombre"}</span><span class="text-[11px] text-gray-500 font-mono">C.I: ${data.cedula || data.dni || "S/C"}</span></td>
                             <td class="p-3 text-gray-300"><span class="bg-amber-950/40 text-amber-300 border border-amber-800/50 px-2 py-0.5 rounded text-xs">${data.sector || data.zona || "Nueva Esparta"}</span></td>
-                            <td class="p-3"><span class="bg-amber-950 text-amber-400 border border-amber-800/50 px-2 py-0.5 rounded text-[10px] font-bold">CENSO ACTIVO</span></td>
+                            <td class="p-3"><span class="bg-amber-950 text-amber-400 border border-amber-800/50 px-2 py-0.5 rounded text-[10px] font-bold">CENSO OPERATIVO</span></td>
                             <td class="p-3 text-gray-400 font-mono text-xs">${data.fechaRegistro || data.fecha || "Reciente"}</td>
                         </tr>
                     `;
@@ -516,7 +516,8 @@
             });
 
             document.getElementById('stat-censo-total').innerText = count;
-            document.getElementById('tabla-censo-body').innerHTML = html !== "" ? html : `<tr><td colspan="4" class="p-4 text-center text-gray-500">No hay registros de censo en Firestore.</td></tr>`;
+            document.getElementById('stat-dash-censo').innerText = count;
+            document.getElementById('tabla-censo-body').innerHTML = html !== "" ? html : `<tr><td colspan="4" class="p-4 text-center text-gray-500">No hay registros de censo disponibles.</td></tr>`;
         }
     </script>
 </body>
