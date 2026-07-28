@@ -42,7 +42,7 @@
             </div>
 
             <!-- BOTÓN DE GOOGLE SIGN-IN / SIGN-UP -->
-            <button id="btn-google-login" type="button" class="w-full bg-white hover:bg-gray-100 text-gray-900 font-medium py-2.5 rounded-lg transition-colors text-sm flex items-center justify-center gap-3 shadow-sm">
+            <button id="btn-google-login" type="button" class="w-full bg-white hover:bg-gray-100 text-gray-900 font-medium py-2.5 rounded-lg transition-colors text-sm flex items-center justify-center gap-3 shadow-sm cursor-pointer">
                 <i class="fa-brands fa-google text-red-500 text-base"></i> Iniciar o Registrarse con Google
             </button>
         </div>
@@ -180,7 +180,7 @@
         const loginForm = document.getElementById('login-form');
         const errorMsg = document.getElementById('error-msg');
 
-        // 1. Inicio de sesión con credenciales de Tecnicable
+        // 1. Inicio de sesión tradicional con credenciales
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const userInput = document.getElementById('email').value.trim();
@@ -216,7 +216,7 @@
                 leerDatosFirebase();
             } catch (error) {
                 console.error("Error en Google Auth:", error);
-                errorMsg.innerText = "No se pudo iniciar sesión con Google. Verifique la configuración de Firebase.";
+                errorMsg.innerText = "No se pudo iniciar sesión con Google. Verifique la configuración en Firebase.";
                 errorMsg.classList.remove('hidden');
             }
         });
