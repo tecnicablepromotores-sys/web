@@ -380,14 +380,19 @@
             document.getElementById('seccion-titulo').innerText = titulos[seccionId] || 'Panel Servitel+';
         }
 
-        // Lector general de Firestore apuntando a la colección Contratos_Web
+        // Lector general con consola de depuración para verificar la colección
         window.leerDatosFirebase = async function() {
             try {
+                console.log("Conectando a Firestore... Intentando leer colección: Contratos_Web");
                 const querySnapshot = await getDocs(collection(db, "Contratos_Web"));
+                
                 cacheGlobalDocs = [];
                 querySnapshot.forEach((doc) => {
+                    console.log("Documento encontrado ID:", doc.id, "Data:", doc.data());
                     cacheGlobalDocs.push({ id: doc.id, ...doc.data() });
                 });
+                
+                console.log(`Total de documentos cargados con éxito: ${cacheGlobalDocs.length}`);
                 
                 procesarDashboard(cacheGlobalDocs);
                 renderizarIngresados();
@@ -396,7 +401,8 @@
                 renderizarCenso(cacheGlobalDocs);
 
             } catch (error) {
-                console.error("Error leyendo Firestore:", error);
+                console.error("ERROR CRÍTICO LEYENDO FIRESTORE:", error);
+                alert("Error al leer la base de datos. Revisa la consola (F12) para ver los detalles de permisos o conexión.");
             }
         }
 
@@ -444,7 +450,7 @@
             });
 
             document.getElementById('stat-ing-total').innerText = count;
-            document.getElementById('tabla-ingresados-body').innerHTML = html !== "" ? html : `<tr><td colspan="4" class="p-6 text-center text-gray-500">No se encontraron registros.</td></tr>`;
+            document.getElementById('tabla-ingresados-body').innerHTML = html !== "" ? html : `<tr><td colspan="4" class="p-6 text-center text-gray-500">No se encontraron registros en Firestore.</td></tr>`;
         }
 
         function renderizarWeb(docs) {
