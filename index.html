@@ -288,14 +288,15 @@
         </div>
     </div>
 
-    <!-- SCRIPT DE CONEXIÓN Y LÓGICA MODULAR -->
+    <!-- SCRIPT DE CONEXIÓN Y LÓGICA MODULAR CON API ACTUALIZADA -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+        // Configuración de Firebase con la nueva clave API proporcionada
         const firebaseConfig = {
-            apiKey: "AIzaSyCaI5NPapzEe1jK8EfZrnTW8lEytfy4eR4",
+            apiKey: "AIzaSyAbnLpJIPOxhf1Fe4DUWZkpGJ7Y871o52Y",
             authDomain: "formulario-9b119.firebaseapp.com",
             projectId: "formulario-9b119",
             storageBucket: "formulario-9b119.firebasestorage.app",
@@ -461,74 +462,64 @@
                     <tr class="hover:bg-[#202024]/60 transition-colors">
                         <td class="p-3.5"><span class="text-white font-medium block">${nombres}</span><span class="text-[10px] text-gray-500 font-mono">C.I: ${data.cedula || "S/C"}</span></td>
                         <td class="p-3.5 text-gray-300">${data.sector || "General"}</td>
-                        <td class="p-3.5"><span class="bg-cyan-950/60 text-cyan-400 border border-cyan-800/50 px-2 py-0.5 rounded text-[10px] font-bold">${data.plan || "Web"}</span></td>
+                        <td class="p-3.5"><span class="bg-cyan-950/60 text-cyan-400 border border-cyan-800/50 px-2 py-0.5 rounded text-[10px] font-bold">${data.plan || "Estándar"}</span></td>
                         <td class="p-3.5 text-gray-400 font-mono text-[11px]">${data.fecha_registro || "Reciente"}</td>
                     </tr>
                 `;
             });
-
             document.getElementById('stat-web-total').innerText = docs.length;
-            document.getElementById('tabla-web-body').innerHTML = html !== "" ? html : `<tr><td colspan="4" class="p-6 text-center text-gray-500">No hay registros web en Firestore.</td></tr>`;
+            document.getElementById('tabla-web-body').innerHTML = html !== "" ? html : `<tr><td colspan="4" class="p-6 text-center text-gray-500">No hay registros web.</td></tr>`;
         }
 
         function renderizarPromotores(docs) {
-            let promotoresMap = {};
-            let htmlTabla = "";
+            let html = "";
+            let resumenMap = {};
 
             docs.forEach(data => {
-                const promotor = data.promotor || "Oficina / Directo";
-                promotoresMap[promotor] = (promotoresMap[promotor] || 0) + 1;
+                const promotor = data.promotor || "Oficina / General";
+                resumenMap[promotor] = (resumenMap[promotor] || 0) + 1;
                 const nombres = `${data.nombres || ''} ${data.apellidos || ''}`.trim() || "Sin nombre";
-                
-                htmlTabla += `
+
+                html += `
                     <tr class="hover:bg-[#202024]/60 transition-colors">
-                        <td class="p-3.5 text-purple-400 font-medium"><i class="fa-solid fa-id-badge mr-1.5 opacity-80"></i>${promotor}</td>
-                        <td class="p-3.5 text-white">${nombres} <span class="text-[10px] text-gray-500 font-mono block">C.I: ${data.cedula || "S/C"}</span></td>
+                        <td class="p-3.5 text-purple-400 font-medium">${promotor}</td>
+                        <td class="p-3.5 text-white">${nombres} (${data.cedula || "S/C"})</td>
                         <td class="p-3.5 text-gray-300">${data.sector || "General"}</td>
                         <td class="p-3.5 text-gray-400 font-mono text-[11px]">${data.fecha_registro || "Reciente"}</td>
                     </tr>
                 `;
             });
 
-            const resumenContainer = document.getElementById('promotores-resumen-list');
-            if (Object.keys(promotoresMap).length > 0) {
-                resumenContainer.innerHTML = Object.entries(promotoresMap).map(([prom, total]) => `
-                    <div class="flex items-center justify-between p-3 bg-[#202024] rounded-xl border border-zinc-800/80 shadow-sm">
-                        <span class="text-white font-medium text-xs">${prom}</span>
-                        <span class="bg-purple-600/20 text-purple-300 border border-purple-500/30 px-2.5 py-1 rounded-lg text-[10px] font-bold">${total} contratos</span>
+            let resumenHtml = "";
+            for (let [prom, cant] of Object.entries(resumenMap)) {
+                resumenHtml += `
+                    <div class="flex items-center justify-between p-2.5 bg-[#202024]/80 rounded-xl border border-zinc-800">
+                        <span class="text-white font-medium truncate max-w-[140px]"><i class="fa-solid fa-user-tie text-purple-400 mr-2 text-xs"></i>${prom}</span>
+                        <span class="bg-purple-950/60 text-purple-400 border border-purple-800/50 px-2 py-0.5 rounded-lg text-[10px] font-bold">${cant} contratos</span>
                     </div>
-                `).join('');
-            } else {
-                resumenContainer.innerHTML = `<p class="text-gray-500 text-xs text-center py-4">No hay promotores registrados.</p>`;
+                `;
             }
 
-            document.getElementById('tabla-promotores-body').innerHTML = htmlTabla !== "" ? htmlTabla : `<tr><td colspan="4" class="p-6 text-center text-gray-500">No hay datos de promotores.</td></tr>`;
+            document.getElementById('promotores-resumen-list').innerHTML = resumenHtml !== "" ? resumenHtml : `<p class="text-gray-500 text-center py-4">Sin promotores registrados.</p>`;
+            document.getElementById('tabla-promotores-body').innerHTML = html !== "" ? html : `<tr><td colspan="4" class="p-6 text-center text-gray-500">Sin datos de promotores.</td></tr>`;
         }
 
         function renderizarCenso(docs) {
             let html = "";
             docs.forEach(data => {
-                const nombres = `${data.nombres || ''} ${data.apellidos || ''}`.trim() || "Sin nombre";
+                const nombres = `${data.nombres || ''} ${data.apellidos || ''}`.trim() || "Ciudadano";
                 html += `
                     <tr class="hover:bg-[#202024]/60 transition-colors">
                         <td class="p-3.5"><span class="text-white font-medium block">${nombres}</span><span class="text-[10px] text-gray-500 font-mono">C.I: ${data.cedula || "S/C"}</span></td>
-                        <td class="p-3.5 text-gray-300"><span class="bg-amber-950/40 text-amber-300 border border-amber-800/50 px-2 py-0.5 rounded text-xs">${data.sector || "Nueva Esparta"}</span></td>
-                        <td class="p-3.5"><span class="bg-amber-950/60 text-amber-400 border border-amber-800/50 px-2 py-0.5 rounded text-[10px] font-bold">${data.estado || "Prospecto"}</span></td>
+                        <td class="p-3.5 text-gray-300"><span class="bg-amber-950/40 text-amber-400 border border-amber-800/40 px-2.5 py-1 rounded-lg text-[10px]">${data.sector || data.ciudad || "Nueva Esparta"}</span></td>
+                        <td class="p-3.5"><span class="bg-zinc-800 text-gray-300 px-2 py-0.5 rounded text-[10px]">${data.estado || "Procesado"}</span></td>
                         <td class="p-3.5 text-gray-400 font-mono text-[11px]">${data.fecha_registro || "Reciente"}</td>
                     </tr>
                 `;
             });
-
             document.getElementById('stat-censo-total').innerText = docs.length;
-            document.getElementById('stat-dash-censo').innerText = docs.length;
-            document.getElementById('tabla-censo-body').innerHTML = html !== "" ? html : `<tr><td colspan="4" class="p-6 text-center text-gray-500">No hay registros de censo disponibles.</td></tr>`;
+            document.getElementById('tabla-censo-body').innerHTML = html !== "" ? html : `<tr><td colspan="4" class="p-6 text-center text-gray-500">No hay datos de censo.</td></tr>`;
         }
     </script>
-    <style>
-        .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #141416; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
-    </style>
 </body>
 </html>
