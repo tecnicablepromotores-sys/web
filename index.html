@@ -7,20 +7,22 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet" />
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
+        /* ... (estilos sin cambios) ... */
         * { box-sizing: border-box; }
         body {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             background: #0b0b0e;
             color: #d1d5db;
         }
-        /* Scrollbar personalizada */
         .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #1a1a1e; border-radius: 8px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #3b3b44; border-radius: 8px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #5a5a66; }
 
-        /* Navegación lateral */
         .nav-btn {
             position: relative;
             transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
@@ -44,7 +46,6 @@
             border-radius: 4px;
         }
 
-        /* Animación de vistas */
         .seccion-view {
             animation: fadeSlide 0.35s ease both;
         }
@@ -53,14 +54,12 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Tarjetas glassmorphism */
         .glass-card {
             background: rgba(24, 24, 28, 0.75);
             backdrop-filter: blur(4px);
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        /* Toast */
         #toast-container {
             position: fixed;
             bottom: 2rem;
@@ -94,7 +93,6 @@
         }
         .toast-out { opacity: 0; transform: translateY(20px); transition: all 0.3s ease; }
 
-        /* Tablas */
         .table-wrap { overflow-x: auto; border-radius: 1.25rem; }
         .table-wrap table {
             width: 100%;
@@ -122,7 +120,6 @@
         }
         .table-wrap tbody tr:hover { background: rgba(255,255,255,0.03); }
 
-        /* Badges */
         .badge {
             display: inline-flex;
             align-items: center;
@@ -143,7 +140,6 @@
         .badge-estado-cancelado { background: rgba(239,68,68,0.2); color: #fca5a5; border-color: rgba(239,68,68,0.3); }
         .badge-estado-procesado { background: rgba(16,185,129,0.25); color: #6ee7b7; border-color: rgba(16,185,129,0.3); }
 
-        /* Inputs oscuros */
         .input-dark {
             background: #18181e;
             border: 1px solid #2a2a32;
@@ -185,7 +181,6 @@
         }
         .btn-ghost:hover { background: #2a2a30; }
 
-        /* Login */
         .login-card {
             background: #131317;
             border: 1px solid #26262e;
@@ -212,10 +207,39 @@
             background: #0b0b0e;
         }
 
+        #mapa-rastreo {
+            height: 450px;
+            width: 100%;
+            border-radius: 1.25rem;
+            border: 1px solid #2a2a32;
+            background: #1a1a1e;
+        }
+        .leaflet-popup-content-wrapper {
+            background: #1c1c22 !important;
+            color: #d1d5db !important;
+            border-radius: 0.75rem !important;
+            border: 1px solid #2a2a32 !important;
+        }
+        .leaflet-popup-tip {
+            background: #1c1c22 !important;
+        }
+        .leaflet-popup-content {
+            font-size: 0.8rem !important;
+        }
+        .leaflet-control-zoom a {
+            background: #1c1c22 !important;
+            color: #d1d5db !important;
+            border-color: #2a2a32 !important;
+        }
+        .leaflet-control-zoom a:hover {
+            background: #2a2a30 !important;
+        }
+
         @media (max-width: 768px) {
             .table-wrap table { font-size: 0.7rem; }
             .table-wrap thead th, .table-wrap tbody td { padding: 0.5rem 0.6rem; }
             .nav-btn { padding: 0.5rem 0.8rem; font-size: 0.7rem; }
+            #mapa-rastreo { height: 300px; }
         }
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
@@ -313,6 +337,9 @@
                     <button data-seccion="censo" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium cursor-pointer">
                         <i class="fa-solid fa-map-location-dot w-4 text-sm"></i> Censo
                     </button>
+                    <button data-seccion="rastreo" id="btn-rastreo" class="nav-btn hidden w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium cursor-pointer">
+                        <i class="fa-solid fa-satellite-dish w-4 text-sm"></i> Rastreo GPS
+                    </button>
                 </nav>
             </div>
             <div class="p-3.5 border-t border-zinc-800/80 bg-[#18181c] text-xs flex items-center justify-between">
@@ -326,7 +353,6 @@
 
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden bg-[#0b0b0e]">
-            <!-- Header -->
             <header class="h-16 bg-[#111116]/80 backdrop-blur-md border-b border-zinc-800/80 flex items-center justify-between px-6 sticky top-0 z-20 shrink-0">
                 <div class="flex items-center gap-3">
                     <h1 id="seccion-titulo" class="text-white font-bold text-sm tracking-wide">Dashboard General</h1>
@@ -344,7 +370,6 @@
                 </div>
             </header>
 
-            <!-- Scrollable main -->
             <main class="flex-1 overflow-y-auto p-6 space-y-6 max-w-7xl w-full mx-auto custom-scrollbar">
 
                 <!-- DASHBOARD -->
@@ -391,8 +416,6 @@
                             <span class="text-[10px] text-purple-400 font-medium"><i class="fa-solid fa-signal mr-1"></i>Activos</span>
                         </div>
                     </div>
-
-                    <!-- Últimos registros -->
                     <div class="glass-card rounded-2xl p-5 shadow-xl">
                         <div class="flex items-center justify-between mb-4 pb-2 border-b border-zinc-800">
                             <h3 class="text-white font-bold text-xs tracking-wider uppercase flex items-center gap-2">
@@ -569,11 +592,9 @@
                             <option value="">Todos los promotores</option>
                         </select>
                     </div>
-
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="promotores-ranking-grid">
                         <p class="text-gray-500 col-span-full text-center py-4">Generando ranking...</p>
                     </div>
-
                     <div class="glass-card rounded-2xl p-5 shadow-xl">
                         <div class="flex items-center justify-between mb-4 pb-2 border-b border-zinc-800">
                             <h3 id="titulo-tabla-promotor" class="text-white font-bold text-xs tracking-wider uppercase flex items-center gap-2">
@@ -651,6 +672,43 @@
                     </div>
                 </div>
 
+                <!-- RASTREO GPS -->
+                <div id="view-rastreo" class="seccion-view space-y-6 hidden">
+                    <div class="glass-card rounded-2xl p-5 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
+                        <div>
+                            <h3 class="text-white font-bold text-xs tracking-wider uppercase">📍 Rastreo GPS en Tiempo Real</h3>
+                            <p class="text-[11px] text-gray-400">Ubicación actual de cada promotor conectado.</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs text-gray-400">Promotores activos: <strong id="stat-rastreo-total" class="text-cyan-400">0</strong></span>
+                            <button id="btn-centrar-mapa" class="bg-blue-600/20 text-blue-400 hover:bg-blue-600 hover:text-white px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all inline-flex items-center gap-1">
+                                <i class="fa-solid fa-crosshairs"></i> Centrar mapa
+                            </button>
+                        </div>
+                    </div>
+                    <div class="glass-card rounded-2xl p-5 shadow-xl">
+                        <div id="mapa-rastreo"></div>
+                    </div>
+                    <div class="glass-card rounded-2xl p-5 shadow-xl">
+                        <div class="table-wrap max-h-[350px] overflow-y-auto custom-scrollbar">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Promotor</th>
+                                        <th>Latitud</th>
+                                        <th>Longitud</th>
+                                        <th>Última actualización</th>
+                                        <th class="text-center">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-rastreo-body">
+                                    <tr><td colspan="5" class="text-center text-gray-500 py-6">Cargando ubicaciones...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
             </main>
 
             <footer class="mt-auto py-4 px-6 border-t border-zinc-800/80 text-center text-[11px] text-gray-500 bg-[#111116]">
@@ -677,12 +735,12 @@
         </div>
     </div>
 
-    <!-- MODAL EDITAR CENSO -->
+    <!-- MODAL EDITAR REGISTRO (unificado) con opciones esenciales -->
     <div id="modal-editar-censo" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden" role="dialog" aria-modal="true" aria-labelledby="edit-censo-titulo">
         <div class="glass-card rounded-2xl max-w-md w-full p-6 shadow-2xl relative seccion-view">
             <div class="flex items-center justify-between pb-3 border-b border-zinc-800 mb-4">
                 <h3 id="edit-censo-titulo" class="text-white font-bold text-sm flex items-center gap-2">
-                    <i class="fa-solid fa-pen-to-square text-amber-400"></i> Editar Prospecto
+                    <i class="fa-solid fa-pen-to-square text-amber-400"></i> <span id="edit-censo-titulo-texto">Editar Registro</span>
                 </h3>
                 <button onclick="cerrarModalEditarCenso()" class="text-gray-400 hover:text-white p-1.5 rounded-lg hover:bg-zinc-800 transition-colors" aria-label="Cerrar edición">
                     <i class="fa-solid fa-xmark"></i>
@@ -691,19 +749,19 @@
             <input type="hidden" id="edit-censo-id" />
             <div class="space-y-4 text-xs">
                 <div>
-                    <label class="block text-gray-400 uppercase font-semibold mb-1">Estado del Prospecto</label>
+                    <label class="block text-gray-400 uppercase font-semibold mb-1">Estado</label>
                     <select id="edit-censo-estado" class="input-dark">
-                        <option value="Prospecto">Prospecto</option>
-                        <option value="Contactado">Contactado</option>
-                        <option value="Interesado">Interesado</option>
-                        <option value="No Interesado">No Interesado</option>
-                        <option value="Convertido">Convertido</option>
+                        <!-- Opciones esenciales -->
+                        <option value="Pendiente">Pendiente</option>
+                        <option value="En Proceso">En Proceso</option>
                         <option value="Procesado">Procesado</option>
+                        <option value="Completado">Completado</option>
+                        <option value="Cancelado">Cancelado</option>
                     </select>
                 </div>
                 <div>
                     <label class="block text-gray-400 uppercase font-semibold mb-1">Notas / Comentarios</label>
-                    <textarea id="edit-censo-notas" rows="4" placeholder="Observaciones de campo..." class="input-dark resize-none"></textarea>
+                    <textarea id="edit-censo-notas" rows="4" placeholder="Observaciones..." class="input-dark resize-none"></textarea>
                 </div>
             </div>
             <div class="mt-6 pt-3 border-t border-zinc-800 flex justify-end gap-2">
@@ -747,7 +805,6 @@
         } from "firebase/firestore";
         import { getDatabase, ref, get, child } from "firebase/database";
 
-        // Configuración
         const firebaseConfig = {
             apiKey: "AIzaSyCaI5NPapzEe1jK8EfZrnTW8lEytfy4eR4",
             authDomain: "formulario-9b119.firebaseapp.com",
@@ -786,16 +843,21 @@
         const vinculoCedula = document.getElementById('vinculacion-cedula');
         const vinculoError = document.getElementById('vinculacion-error');
         const btnVincularGuardar = document.getElementById('btn-vincular-guardar');
+        const btnRastreo = document.getElementById('btn-rastreo');
 
         // Estado global
         let allDocs = [];
         let previousIds = new Set();
         let unsubscribeFirestore = null;
+        let unsubscribeUbicaciones = null;
         let currentSection = 'dashboard';
         let usuarioPromotor = null;
         let usuarioUid = null;
         let usuarioEmail = null;
-        let usuariosPromotores = []; // Lista de todos los promotores registrados
+        let usuariosPromotores = [];
+        let ubicacionesPromotores = [];
+        let mapa = null;
+        let marcadoresGrupo = null;
 
         // --- TOAST ---
         function mostrarToast(mensaje, tipo = 'success') {
@@ -835,11 +897,16 @@
             web: document.getElementById('view-web'),
             completados: document.getElementById('view-completados'),
             promotores: document.getElementById('view-promotores'),
-            censo: document.getElementById('view-censo')
+            censo: document.getElementById('view-censo'),
+            rastreo: document.getElementById('view-rastreo')
         };
         const tituloSeccion = document.getElementById('seccion-titulo');
 
         function cambiarSeccion(seccion) {
+            if (seccion === 'rastreo' && !ADMIN_EMAILS.includes(usuarioEmail)) {
+                seccion = 'dashboard';
+                mostrarToast('Acceso restringido a administradores', 'warning');
+            }
             Object.values(views).forEach(v => v.classList.add('hidden'));
             if (views[seccion]) views[seccion].classList.remove('hidden');
             navBtns.forEach(btn => btn.classList.remove('active'));
@@ -850,10 +917,18 @@
                 web: 'Contratos Web',
                 completados: 'Contratos Completados',
                 promotores: 'Rendimiento de Promotores',
-                censo: 'Censo de Prospectos'
+                censo: 'Censo de Prospectos',
+                rastreo: '📍 Rastreo GPS en Tiempo Real'
             };
             tituloSeccion.innerText = titulos[seccion] || seccion;
             currentSection = seccion;
+            if (seccion === 'rastreo') {
+                setTimeout(() => {
+                    if (!mapa) inicializarMapa();
+                    else mapa.invalidateSize();
+                    renderizarRastreo();
+                }, 200);
+            }
         }
 
         navBtns.forEach(btn => {
@@ -967,7 +1042,7 @@
             return docs.filter(d => (d.promotor || '').trim().toLowerCase() === usuarioPromotor.trim().toLowerCase());
         }
 
-        // --- SUSCRIPCIÓN A USUARIOS (para lista de promotores) ---
+        // --- SUSCRIPCIÓN A USUARIOS ---
         function suscribirseUsuarios() {
             onSnapshot(collection(db, "usuarios"), (snapshot) => {
                 const lista = [];
@@ -976,14 +1051,13 @@
                     if (data.nombre) lista.push({ id: doc.id, nombre: data.nombre, cedula: data.cedula });
                 });
                 usuariosPromotores = lista;
-                // Actualizar selects de promotores
                 actualizarSelectsPromotores();
             }, (error) => {
                 console.error('Error en suscripción de usuarios:', error);
             });
         }
 
-        // --- ACTUALIZAR SELECTS DE PROMOTORES (usando usuariosPromotores) ---
+        // --- ACTUALIZAR SELECTS DE PROMOTORES ---
         function actualizarSelectsPromotores() {
             const selects = [
                 'filtro-promotor-app',
@@ -1005,13 +1079,160 @@
             });
         }
 
-        // --- FIRESTORE SUSCRIPCIÓN EN TIEMPO REAL (Contratos_Web) ---
+        // --- SUSCRIPCIÓN A UBICACIONES ---
+        function suscribirseUbicaciones() {
+            if (unsubscribeUbicaciones) {
+                unsubscribeUbicaciones();
+                unsubscribeUbicaciones = null;
+            }
+            unsubscribeUbicaciones = onSnapshot(
+                collection(db, "promotores_ubicacion"),
+                (snapshot) => {
+                    const nuevasUbicaciones = [];
+                    snapshot.forEach(doc => {
+                        const data = { id: doc.id, ...doc.data() };
+                        if (data.promotor && data.lat !== undefined && data.lng !== undefined) {
+                            nuevasUbicaciones.push(data);
+                        }
+                    });
+                    ubicacionesPromotores = nuevasUbicaciones;
+                    if (currentSection === 'rastreo') {
+                        renderizarRastreo();
+                        actualizarMarcadores();
+                    }
+                },
+                (error) => {
+                    console.error('Error en suscripción de ubicaciones:', error);
+                    mostrarToast('Error al cargar ubicaciones en tiempo real', 'error');
+                }
+            );
+        }
+
+        // --- MAPA ---
+        function inicializarMapa() {
+            if (mapa) {
+                mapa.invalidateSize();
+                return;
+            }
+            const contenedor = document.getElementById('mapa-rastreo');
+            if (!contenedor) return;
+            mapa = L.map('mapa-rastreo', {
+                center: [10.4806, -66.9036],
+                zoom: 12,
+                zoomControl: true,
+                fadeAnimation: true,
+                attributionControl: true
+            });
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            }).addTo(mapa);
+            marcadoresGrupo = L.layerGroup().addTo(mapa);
+            window.addEventListener('resize', () => {
+                if (mapa) mapa.invalidateSize();
+            });
+            document.getElementById('btn-centrar-mapa')?.addEventListener('click', centrarMapa);
+        }
+
+        function actualizarMarcadores() {
+            if (!marcadoresGrupo) return;
+            marcadoresGrupo.clearLayers();
+            if (!ubicacionesPromotores.length) {
+                L.popup()
+                    .setLatLng(mapa.getCenter())
+                    .setContent('No hay promotores con ubicación activa.')
+                    .openOn(mapa);
+                return;
+            }
+            const bounds = [];
+            ubicacionesPromotores.forEach(ubic => {
+                const lat = parseFloat(ubic.lat);
+                const lng = parseFloat(ubic.lng);
+                if (isNaN(lat) || isNaN(lng)) return;
+                const popupContent = `
+                    <strong>${ubic.promotor}</strong><br />
+                    Lat: ${lat.toFixed(6)}<br />
+                    Lng: ${lng.toFixed(6)}<br />
+                    <small>${ubic.timestamp ? new Date(ubic.timestamp).toLocaleString('es-VE', { hour12: false }) : 'Reciente'}</small>
+                `;
+                const marker = L.marker([lat, lng], {
+                    title: ubic.promotor,
+                    riseOnHover: true
+                }).bindPopup(popupContent);
+                marcadoresGrupo.addLayer(marker);
+                bounds.push([lat, lng]);
+            });
+            if (bounds.length > 0) {
+                mapa.fitBounds(bounds, { padding: [30, 30], maxZoom: 15 });
+            }
+        }
+
+        function centrarMapa() {
+            if (!marcadoresGrupo) return;
+            const markers = marcadoresGrupo.getLayers();
+            if (markers.length === 0) {
+                mostrarToast('No hay marcadores para centrar', 'warning');
+                return;
+            }
+            const bounds = markers.map(m => m.getLatLng());
+            mapa.fitBounds(bounds, { padding: [30, 30], maxZoom: 15 });
+        }
+
+        // --- RENDERIZAR RASTREO ---
+        function renderizarRastreo() {
+            const tbody = document.getElementById('tabla-rastreo-body');
+            const totalSpan = document.getElementById('stat-rastreo-total');
+            if (!tbody) return;
+            if (!ADMIN_EMAILS.includes(usuarioEmail)) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center text-gray-500 py-6">Acceso restringido a administradores.</td></tr>`;
+                if (totalSpan) totalSpan.innerText = '0';
+                return;
+            }
+            if (!ubicacionesPromotores.length) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center text-gray-500 py-6">No hay promotores con ubicación activa.</td></tr>`;
+                if (totalSpan) totalSpan.innerText = '0';
+                return;
+            }
+            let html = '';
+            const sorted = [...ubicacionesPromotores].sort((a, b) => {
+                const ta = a.timestamp || a.ultima_actualizacion || '';
+                const tb = b.timestamp || b.ultima_actualizacion || '';
+                return tb.localeCompare(ta);
+            });
+            sorted.forEach(ubic => {
+                const promotor = ubic.promotor || 'Desconocido';
+                const lat = ubic.lat ?? ubic.latitude ?? 'N/D';
+                const lng = ubic.lng ?? ubic.longitude ?? 'N/D';
+                const timestamp = ubic.timestamp || ubic.ultima_actualizacion || 'Reciente';
+                let fechaFormateada = timestamp;
+                try {
+                    const date = new Date(timestamp);
+                    if (!isNaN(date.getTime())) {
+                        fechaFormateada = date.toLocaleString('es-VE', { hour12: false });
+                    }
+                } catch (e) {}
+                const mapaUrl = `https://www.google.com/maps?q=${lat},${lng}`;
+                html += `<tr>
+                    <td class="text-white font-medium">${promotor}</td>
+                    <td class="font-mono text-cyan-400">${lat}</td>
+                    <td class="font-mono text-cyan-400">${lng}</td>
+                    <td class="text-gray-400 text-[11px]">${fechaFormateada}</td>
+                    <td class="text-center space-x-1">
+                        <a href="${mapaUrl}" target="_blank" rel="noopener noreferrer" 
+                           class="bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600 hover:text-white px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all inline-flex items-center gap-1">
+                            <i class="fa-solid fa-map-location-dot"></i> Ver Mapa
+                        </a>
+                    </td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+            if (totalSpan) totalSpan.innerText = sorted.length;
+        }
+
+        // --- FIRESTORE SUSCRIPCIÓN ---
         function suscribirseFirestore() {
             if (unsubscribeFirestore) { unsubscribeFirestore(); unsubscribeFirestore = null; }
-
             syncBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span> Conectando...';
             syncBadge.className = 'flex items-center gap-2 bg-yellow-950/40 text-yellow-400 border border-yellow-800/40 px-3 py-1 rounded-full text-[11px] font-medium shadow-sm';
-
             unsubscribeFirestore = onSnapshot(
                 collection(db, "Contratos_Web"),
                 (snapshot) => {
@@ -1026,7 +1247,6 @@
                         newDocs.push(data);
                         currentIds.add(doc.id);
                     });
-
                     if (usuarioPromotor || ADMIN_EMAILS.includes(usuarioEmail)) {
                         const nuevos = [];
                         currentIds.forEach(id => {
@@ -1041,13 +1261,10 @@
                             mostrarToast(`📦 Nuevo registro agregado: ${nombres}`, 'success');
                         }
                     }
-
                     allDocs = newDocs;
                     previousIds = currentIds;
-
                     syncBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Tiempo Real';
                     syncBadge.className = 'flex items-center gap-2 bg-emerald-950/40 text-emerald-400 border border-emerald-800/40 px-3 py-1 rounded-full text-[11px] font-medium shadow-sm';
-
                     actualizarUI();
                 },
                 (error) => {
@@ -1059,8 +1276,14 @@
             );
         }
 
-        // --- RENDERIZADO PRINCIPAL ---
+        // --- ACTUALIZAR UI PRINCIPAL ---
         function actualizarUI() {
+            if (ADMIN_EMAILS.includes(usuarioEmail)) {
+                btnRastreo.classList.remove('hidden');
+            } else {
+                btnRastreo.classList.add('hidden');
+                if (currentSection === 'rastreo') cambiarSeccion('dashboard');
+            }
             const docsFiltrados = filtrarPorPromotor(allDocs);
             procesarDashboard(docsFiltrados);
             renderizarRecientes(docsFiltrados);
@@ -1170,7 +1393,7 @@
             if (usuarioPromotor || ADMIN_EMAILS.includes(usuarioEmail)) renderizarTodosRegistros(filtrarPorPromotor(allDocs));
         });
 
-        // --- CONTRATOS WEB ---
+        // --- CONTRATOS WEB (con botón de edición) ---
         function renderizarContratosWeb(docs) {
             const promotorFiltro = document.getElementById('filtro-promotor-web')?.value || '';
             const estadoFiltro = document.getElementById('filtro-estado-web')?.value || '';
@@ -1197,7 +1420,8 @@
                     <td class="text-gray-400 font-mono text-[11px]">${getFecha(d)}</td>
                     <td class="text-center space-x-1">
                         <button onclick="verDetalle('${d.id}')" class="bg-blue-600/20 text-blue-400 hover:bg-blue-600 hover:text-white px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all" title="Ver detalle"><i class="fa-solid fa-eye"></i></button>
-                        <button onclick="cambiarEstadoWeb('${d.id}','${estado}')" class="bg-amber-600/20 text-amber-400 hover:bg-amber-600 hover:text-white px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all" title="Cambiar estado"><i class="fa-solid fa-arrows-rotate"></i></button>
+                        <button onclick="abrirEditarRegistro('${d.id}')" class="bg-amber-600/20 text-amber-400 hover:bg-amber-600 hover:text-white px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="cambiarEstadoWeb('${d.id}','${estado}')" class="bg-purple-600/20 text-purple-400 hover:bg-purple-600 hover:text-white px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all" title="Cambiar estado"><i class="fa-solid fa-arrows-rotate"></i></button>
                         <button onclick="eliminarRegistro('${d.id}')" class="bg-red-600/20 text-red-400 hover:bg-red-600 hover:text-white px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
                     </td>
                 </tr>`;
@@ -1240,7 +1464,8 @@
                     <td class="text-gray-400 font-mono text-[11px]">${getFecha(d)}</td>
                     <td class="text-center space-x-1">
                         <button onclick="verDetalle('${d.id}')" class="bg-blue-600/20 text-blue-400 hover:bg-blue-600 hover:text-white px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all" title="Ver detalle"><i class="fa-solid fa-eye"></i></button>
-                        <button onclick="cambiarEstadoWeb('${d.id}','Completado')" class="bg-amber-600/20 text-amber-400 hover:bg-amber-600 hover:text-white px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all" title="Cambiar estado"><i class="fa-solid fa-arrows-rotate"></i></button>
+                        <button onclick="abrirEditarRegistro('${d.id}')" class="bg-amber-600/20 text-amber-400 hover:bg-amber-600 hover:text-white px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="cambiarEstadoWeb('${d.id}','Completado')" class="bg-purple-600/20 text-purple-400 hover:bg-purple-600 hover:text-white px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all" title="Cambiar estado"><i class="fa-solid fa-arrows-rotate"></i></button>
                         <button onclick="eliminarRegistro('${d.id}')" class="bg-red-600/20 text-red-400 hover:bg-red-600 hover:text-white px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
                     </td>
                 </tr>`;
@@ -1355,7 +1580,7 @@
                     <td>${getBadgeMetodo(metodo)}</td>
                     <td class="text-gray-400 font-mono text-[11px]">${getFecha(d)}</td>
                     <td class="text-center space-x-1">
-                        <button onclick="abrirEditarCenso('${d.id}')" class="bg-amber-600/20 text-amber-400 hover:bg-amber-600 hover:text-white px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="abrirEditarRegistro('${d.id}')" class="bg-amber-600/20 text-amber-400 hover:bg-amber-600 hover:text-white px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all" title="Editar"><i class="fa-solid fa-pen"></i></button>
                         <button onclick="verDetalle('${d.id}')" class="bg-blue-600/20 text-blue-400 hover:bg-blue-600 hover:text-white px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all" title="Ver detalle"><i class="fa-solid fa-eye"></i></button>
                         <button onclick="eliminarRegistro('${d.id}')" class="bg-red-600/20 text-red-400 hover:bg-red-600 hover:text-white px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
                     </td>
@@ -1380,7 +1605,7 @@
             if (usuarioPromotor || ADMIN_EMAILS.includes(usuarioEmail)) renderizarCenso(filtrarPorPromotor(allDocs));
         });
 
-        // --- FUNCIONES GLOBALES (onclick) ---
+        // --- FUNCIONES GLOBALES ---
         window.verDetalle = function(id) {
             const d = allDocs.find(doc => doc.id === id);
             if (!d) return;
@@ -1400,6 +1625,42 @@
         };
         window.cerrarModalDetalle = function() { document.getElementById('modal-detalle').classList.add('hidden'); };
 
+        // --- EDITAR REGISTRO (unificado) ---
+        window.abrirEditarRegistro = function(id) {
+            const d = allDocs.find(doc => doc.id === id);
+            if (!d) {
+                mostrarToast('Registro no encontrado', 'error');
+                return;
+            }
+            document.getElementById('edit-censo-id').value = id;
+            document.getElementById('edit-censo-estado').value = d.estado || 'Pendiente';
+            document.getElementById('edit-censo-notas').value = d.notas || '';
+            const tituloSpan = document.getElementById('edit-censo-titulo-texto');
+            if (d.origen && d.origen.toLowerCase() === 'censo') {
+                tituloSpan.textContent = 'Editar Prospecto';
+            } else {
+                tituloSpan.textContent = 'Editar Contrato';
+            }
+            document.getElementById('modal-editar-censo').classList.remove('hidden');
+        };
+        window.cerrarModalEditarCenso = function() {
+            document.getElementById('modal-editar-censo').classList.add('hidden');
+        };
+        window.guardarEdicionCenso = async function() {
+            const id = document.getElementById('edit-censo-id').value;
+            const estado = document.getElementById('edit-censo-estado').value;
+            const notas = document.getElementById('edit-censo-notas').value;
+            try {
+                await updateDoc(doc(db, "Contratos_Web", id), { estado, notas });
+                cerrarModalEditarCenso();
+                mostrarToast('Registro actualizado correctamente', 'success');
+            } catch (err) {
+                console.error(err);
+                mostrarToast('Error al guardar los cambios', 'error');
+            }
+        };
+
+        // --- CAMBIAR ESTADO (prompt) ---
         window.cambiarEstadoWeb = async function(id, estadoActual) {
             const estados = ['Pendiente','En Proceso','Procesado','Completado','Cancelado'];
             const nuevo = prompt(`Cambiar estado (${estados.join(', ')}):`, estadoActual);
@@ -1411,6 +1672,7 @@
             } catch (err) { mostrarToast('Error al actualizar estado', 'error'); }
         };
 
+        // --- ELIMINAR ---
         window.eliminarRegistro = async function(id) {
             if (!confirm('¿Eliminar este registro permanentemente?')) return;
             try {
@@ -1419,27 +1681,7 @@
             } catch (err) { mostrarToast('Error al eliminar', 'error'); }
         };
 
-        window.abrirEditarCenso = function(id) {
-            const d = allDocs.find(doc => doc.id === id);
-            if (!d) return;
-            document.getElementById('edit-censo-id').value = id;
-            document.getElementById('edit-censo-estado').value = d.estado || 'Prospecto';
-            document.getElementById('edit-censo-notas').value = d.notas || '';
-            document.getElementById('modal-editar-censo').classList.remove('hidden');
-        };
-        window.cerrarModalEditarCenso = function() { document.getElementById('modal-editar-censo').classList.add('hidden'); };
-        window.guardarEdicionCenso = async function() {
-            const id = document.getElementById('edit-censo-id').value;
-            const estado = document.getElementById('edit-censo-estado').value;
-            const notas = document.getElementById('edit-censo-notas').value;
-            try {
-                await updateDoc(doc(db, "Contratos_Web", id), { estado, notas });
-                cerrarModalEditarCenso();
-                mostrarToast('Prospecto actualizado', 'success');
-            } catch (err) { mostrarToast('Error al guardar', 'error'); }
-        };
-
-        // --- IMPORTAR DESDE REALTIME ---
+        // --- IMPORTAR ---
         async function importarDesdeRealtime() {
             try {
                 mostrarToast('Iniciando importación desde Realtime Database...', 'warning');
@@ -1492,25 +1734,32 @@
                 if (!unsubscribeFirestore) {
                     suscribirseFirestore();
                     suscribirseUsuarios();
+                    suscribirseUbicaciones();
                 } else {
                     actualizarUI();
                 }
             } else {
                 if (unsubscribeFirestore) { unsubscribeFirestore(); unsubscribeFirestore = null; }
+                if (unsubscribeUbicaciones) { unsubscribeUbicaciones(); unsubscribeUbicaciones = null; }
                 loginContainer.classList.remove('hidden');
                 appContainer.classList.add('hidden');
                 allDocs = [];
                 previousIds = new Set();
+                ubicacionesPromotores = [];
                 usuarioPromotor = null;
                 usuarioUid = null;
                 usuarioEmail = null;
                 promotorBadge.classList.add('hidden');
                 modalVinculacion.classList.add('hidden');
+                if (mapa) {
+                    mapa.remove();
+                    mapa = null;
+                    marcadoresGrupo = null;
+                }
             }
         });
 
-        // Inicializar
-        console.log('✅ Tecnicable Pro con sincronización de promotores - Listo.');
+        console.log('✅ Tecnicable Pro con edición esencial y rastreo GPS - Listo.');
     </script>
 </body>
 </html>
