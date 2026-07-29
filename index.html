@@ -7,230 +7,126 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
-            --bg-primary: #0f0f0f;
-            --bg-secondary: #18181b;
-            --bg-tertiary: #202024;
-        }
-
-        * {
-            scrollbar-width: thin;
-            scrollbar-color: #3f3f46 transparent;
-        }
-
-        body {
-            background-color: var(--bg-primary);
-            color: #9ca3af;
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-        }
-
         .nav-btn {
             position: relative;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid transparent;
+            transition: background-color .25s ease, color .25s ease, transform .18s ease, box-shadow .25s ease;
         }
-        .nav-btn:hover { 
-            transform: translateX(4px); 
-            border-color: rgba(255,255,255,0.05);
-        }
-        .nav-btn:active { transform: translateX(4px) scale(0.97); }
-        .nav-btn i { transition: transform 0.25s ease; }
+        .nav-btn:hover { transform: translateX(3px); }
+        .nav-btn:active { transform: translateX(3px) scale(0.97); }
+        .nav-btn i { transition: transform .25s ease; }
         .nav-btn:hover i { transform: scale(1.15); }
-        
-        .nav-btn.active {
-            animation: nav-pop 0.3s ease;
-            border-color: rgba(59, 130, 246, 0.3);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
-        }
-        
+        .nav-btn.active { animation: nav-pop .3s ease; }
         @keyframes nav-pop {
             0% { transform: translateX(0) scale(0.96); }
-            60% { transform: translateX(4px) scale(1.02); }
-            100% { transform: translateX(4px) scale(1); }
+            60% { transform: translateX(3px) scale(1.02); }
+            100% { transform: translateX(3px) scale(1); }
         }
-        
         .nav-btn::before {
             content: "";
             position: absolute;
-            left: -12px;
+            left: -0.75rem;
             top: 50%;
             transform: translateY(-50%) scaleY(0);
             width: 3px;
             height: 60%;
             border-radius: 4px;
-            background: #3b82f6;
-            transition: transform 0.25s ease;
+            background: #60a5fa;
+            transition: transform .25s ease;
         }
         .nav-btn.active::before { transform: translateY(-50%) scaleY(1); }
 
-        .seccion-view { 
-            animation: fade-slide-in 0.4s cubic-bezier(0.4, 0, 0.2, 1) both; 
-        }
+        .seccion-view { animation: fade-slide-in .35s ease both; }
         @keyframes fade-slide-in {
-            from { opacity: 0; transform: translateY(12px); }
+            from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .stat-card { 
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-        .stat-card:hover { 
-            transform: translateY(-4px); 
-            border-color: rgba(255,255,255,0.1);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-        }
+        .stat-card { transition: transform .25s ease, border-color .25s ease; }
+        .stat-card:hover { transform: translateY(-3px); }
 
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 2px 10px;
-            border-radius: 20px;
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border: 1px solid;
-        }
-        .badge-app { background: rgba(16, 185, 129, 0.1); color: #10b981; border-color: rgba(16, 185, 129, 0.3); }
-        .badge-web { background: rgba(6, 182, 212, 0.1); color: #06b6d4; border-color: rgba(6, 182, 212, 0.3); }
-        .badge-censo { background: rgba(245, 158, 11, 0.1); color: #f59e0b; border-color: rgba(245, 158, 11, 0.3); }
-        .badge-success { background: rgba(16, 185, 129, 0.1); color: #10b981; border-color: rgba(16, 185, 129, 0.3); }
-        .badge-danger { background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: rgba(239, 68, 68, 0.3); }
-        .badge-warning { background: rgba(245, 158, 11, 0.1); color: #f59e0b; border-color: rgba(245, 158, 11, 0.3); }
-        .badge-info { background: rgba(59, 130, 246, 0.1); color: #3b82f6; border-color: rgba(59, 130, 246, 0.3); }
+        #login-form button[type="submit"] { transition: transform .15s ease, opacity .2s ease; }
+        #login-form button[type="submit"]:active { transform: scale(0.97); }
 
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 14px;
-            border-radius: 10px;
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 1px solid transparent;
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner { animation: spin .7s linear infinite; }
+
+        .skeleton {
+            background: linear-gradient(90deg, #202024 25%, #27272a 37%, #202024 63%);
+            background-size: 400% 100%;
+            animation: skeleton-loading 1.4s ease infinite;
         }
-        .btn:active { transform: scale(0.96); }
-        .btn-primary { background: #3b82f6; color: white; }
-        .btn-primary:hover { background: #2563eb; }
-        .btn-danger { background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: rgba(239, 68, 68, 0.3); }
-        .btn-danger:hover { background: rgba(239, 68, 68, 0.2); }
-        .btn-success { background: rgba(16, 185, 129, 0.1); color: #10b981; border-color: rgba(16, 185, 129, 0.3); }
-        .btn-success:hover { background: rgba(16, 185, 129, 0.2); }
-        .btn-warning { background: rgba(245, 158, 11, 0.1); color: #f59e0b; border-color: rgba(245, 158, 11, 0.3); }
-        .btn-warning:hover { background: rgba(245, 158, 11, 0.2); }
-        .btn-ghost { background: transparent; color: #9ca3af; }
-        .btn-ghost:hover { background: rgba(255,255,255,0.05); color: white; }
-        .btn-sm { padding: 4px 10px; font-size: 10px; }
+        @keyframes skeleton-loading {
+            0% { background-position: 100% 50%; }
+            100% { background-position: 0 50%; }
+        }
 
         .modal-overlay {
             animation: fadeIn 0.2s ease;
-        }
-        .modal-content {
-            animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
+        .modal-content {
+            animation: slideUp 0.3s ease;
+        }
         @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px) scale(0.97); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        .toast {
-            animation: slideInRight 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-        @keyframes slideInRight {
-            from { transform: translateX(120%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        .skeleton {
-            background: linear-gradient(90deg, #202024 25%, #27272a 37%, #202024 63%);
-            background-size: 400% 100%;
-            animation: shimmer 1.5s ease infinite;
-        }
-        @keyframes shimmer {
-            0% { background-position: 100% 50%; }
-            100% { background-position: 0 50%; }
-        }
-
-        input, select, textarea {
-            background: #202024;
-            border: 1px solid rgba(255,255,255,0.08);
-            color: white;
-            border-radius: 10px;
-            padding: 8px 12px;
-            font-size: 12px;
-            transition: all 0.2s;
-            outline: none;
-        }
-        input:focus, select:focus, textarea:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after { 
-                animation-duration: 0.001ms !important; 
-                transition-duration: 0.001ms !important; 
-            }
+            *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
         }
     </style>
 </head>
-<body class="selection:bg-blue-600 selection:text-white">
+<body class="bg-[#0f0f0f] text-gray-300 font-sans antialiased selection:bg-blue-600 selection:text-white">
 
-    <!-- TOAST CONTAINER -->
-    <div id="toast-container" class="fixed top-4 right-4 z-[100] space-y-2"></div>
-
-    <!-- ==================== PANTALLA DE LOGIN ==================== -->
+    <!-- PANTALLA DE LOGIN -->
     <div id="login-container" class="fixed inset-0 bg-[#0f0f0f] z-50 flex items-center justify-center p-4">
         <div class="bg-[#18181b] border border-zinc-800/80 p-8 rounded-2xl shadow-2xl w-full max-w-md relative overflow-hidden">
             <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-cyan-400"></div>
             <div class="text-center mb-6">
                 <span class="bg-blue-600/10 text-blue-400 border border-blue-600/20 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Tecnicable C.A.</span>
                 <h2 class="text-white text-2xl font-bold tracking-wider mt-3">SERVITEL+ <span class="text-blue-500">PRO</span></h2>
-                <p class="text-xs text-gray-400 mt-1">Sistema Integral de Gestión y Monitoreo</p>
+                <p class="text-xs text-gray-400 mt-1">Monitoreo y Auditoría de Red e Infraestructura</p>
             </div>
             <div id="error-msg" class="hidden mb-4 p-3 bg-red-950/40 border border-red-800/60 text-red-400 text-xs rounded-lg"></div>
 
             <form id="login-form" class="space-y-4">
                 <div>
                     <label class="block text-xs uppercase tracking-wider text-gray-400 mb-1 font-medium">Correo Electrónico</label>
-                    <input type="email" id="email" required placeholder="admin@tecnicable.com" autocomplete="username" class="w-full">
+                    <input type="email" id="email" required placeholder="usuario@tecnicable.com" autocomplete="username" 
+                           class="w-full bg-[#202024] border border-zinc-700/80 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 text-sm transition-all">
                 </div>
                 <div>
                     <label class="block text-xs uppercase tracking-wider text-gray-400 mb-1 font-medium">Contraseña</label>
-                    <input type="password" id="password" required placeholder="••••••••" autocomplete="current-password" class="w-full">
+                    <input type="password" id="password" required placeholder="••••••••" autocomplete="current-password" 
+                           class="w-full bg-[#202024] border border-zinc-700/80 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 text-sm transition-all">
                 </div>
                 <button type="submit" id="btn-login-submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2.5 rounded-lg transition-all text-sm shadow-lg shadow-blue-600/20 cursor-pointer active:scale-[0.98] flex items-center justify-center gap-2">
-                    <i id="login-spinner" class="fa-solid fa-circle-notch animate-spin hidden"></i>
-                    <span id="login-btn-label">Ingresar al Sistema</span>
+                    <i id="login-spinner" class="fa-solid fa-circle-notch spinner hidden"></i>
+                    <span id="login-btn-label">Entrar al Sistema</span>
                 </button>
             </form>
 
             <div class="relative flex py-4 items-center">
                 <div class="flex-grow border-t border-zinc-800"></div>
-                <span class="flex-shrink mx-4 text-gray-500 text-[10px] uppercase tracking-wider">o</span>
+                <span class="flex-shrink mx-4 text-gray-500 text-[10px] uppercase tracking-wider">o acceso rápido</span>
                 <div class="flex-grow border-t border-zinc-800"></div>
             </div>
 
             <button id="btn-google-login" type="button" class="w-full bg-white hover:bg-zinc-100 text-gray-900 font-medium py-2.5 rounded-lg transition-all text-sm flex items-center justify-center gap-3 shadow-sm cursor-pointer active:scale-[0.98]">
                 <i class="fa-brands fa-google text-red-500 text-base"></i> Cuenta de Google
             </button>
-            
-            <p class="text-center text-[10px] text-gray-600 mt-4">
-                Solo usuarios autorizados • Tecnicable C.A.
-            </p>
         </div>
     </div>
 
-    <!-- ==================== APLICACIÓN PRINCIPAL ==================== -->
+    <!-- APLICACIÓN PRINCIPAL -->
     <div id="app-container" class="flex h-screen overflow-hidden hidden">
 
         <!-- SIDEBAR -->
@@ -241,93 +137,85 @@
                     <span class="text-white font-bold text-sm tracking-wider">SERVITEL+ <span class="text-blue-500 text-xs">PRO</span></span>
                 </div>
                 <nav class="p-3 space-y-1.5" id="sidebar-nav">
-                    <button data-seccion="dashboard" class="nav-btn active w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-blue-600 text-white font-medium text-xs cursor-pointer">
+                    <button data-seccion="dashboard" class="nav-btn active w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-blue-600 text-white font-medium text-xs shadow-md shadow-blue-600/20 cursor-pointer">
                         <i class="fa-solid fa-chart-pie w-4 text-sm"></i> Dashboard
                     </button>
-                    <button data-seccion="ingresados" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-gray-400 text-xs cursor-pointer">
-                        <i class="fa-solid fa-mobile-screen-button w-4 text-sm"></i> App Móvil (WispHub)
+                    <button data-seccion="ingresados" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-zinc-800/50 text-gray-400 hover:text-white text-xs cursor-pointer">
+                        <i class="fa-solid fa-mobile-screen-button w-4 text-sm"></i> Clientes App Móvil
                     </button>
-                    <button data-seccion="web" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-gray-400 text-xs cursor-pointer">
+                    <button data-seccion="web" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-zinc-800/50 text-gray-400 hover:text-white text-xs cursor-pointer">
                         <i class="fa-solid fa-globe w-4 text-sm"></i> Contratos Web
                     </button>
-                    <button data-seccion="promotores" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-gray-400 text-xs cursor-pointer">
+                    <button data-seccion="promotores" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-zinc-800/50 text-gray-400 hover:text-white text-xs cursor-pointer">
                         <i class="fa-solid fa-user-tie w-4 text-sm"></i> Promotores
                     </button>
-                    <button data-seccion="censo" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-gray-400 text-xs cursor-pointer">
+                    <button data-seccion="censo" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-zinc-800/50 text-gray-400 hover:text-white text-xs cursor-pointer">
                         <i class="fa-solid fa-clipboard-list w-4 text-sm"></i> Censo Prospectos
                     </button>
                 </nav>
             </div>
-            <div class="p-3.5 border-t border-zinc-800/80 bg-[#18181b] text-xs">
-                <div class="flex items-center justify-between mb-1">
-                    <div class="truncate flex items-center gap-1.5">
-                        <i class="fa-solid fa-circle text-emerald-500 text-[8px]"></i>
-                        <span id="user-email-display" class="font-medium text-gray-300 text-[11px] truncate max-w-[140px]"></span>
-                    </div>
-                    <button id="btn-logout" class="text-red-400 hover:text-red-300 cursor-pointer p-1.5 rounded-lg hover:bg-red-950/30 transition-colors" title="Cerrar sesión">
-                        <i class="fa-solid fa-right-from-bracket text-xs"></i>
-                    </button>
+            <div class="p-3.5 border-t border-zinc-800/80 bg-[#18181b] text-xs flex items-center justify-between">
+                <div class="truncate text-gray-400 flex items-center gap-1.5">
+                    <i class="fa-solid fa-shield-halved text-emerald-500 text-xs"></i>
+                    <span id="user-email-display" class="font-medium text-gray-300 text-[11px] truncate max-w-[140px]"></span>
                 </div>
-                <span id="user-role-display" class="text-[10px] text-gray-500"></span>
+                <button id="btn-logout" class="text-red-400 hover:text-red-300 cursor-pointer p-1.5 rounded-lg hover:bg-red-950/30 transition-colors" title="Cerrar sesión">
+                    <i class="fa-solid fa-right-from-bracket text-xs"></i>
+                </button>
             </div>
         </aside>
 
         <!-- CONTENIDO PRINCIPAL -->
-        <div class="flex-1 flex flex-col overflow-hidden bg-[#0f0f0f]">
-            <header class="h-16 bg-[#141416]/80 backdrop-blur-md border-b border-zinc-800/80 flex items-center justify-between px-6 shrink-0">
+        <div class="flex-1 flex flex-col overflow-y-auto bg-[#0f0f0f]">
+            <header class="h-16 bg-[#141416]/80 backdrop-blur-md border-b border-zinc-800/80 flex items-center justify-between px-6 sticky top-0 z-20">
                 <div class="flex items-center gap-3">
-                    <button class="md:hidden text-gray-400 hover:text-white" onclick="toggleMobileSidebar()">
-                        <i class="fa-solid fa-bars"></i>
-                    </button>
                     <h1 id="seccion-titulo" class="text-white font-bold text-sm tracking-wide">Dashboard General</h1>
                 </div>
                 <div class="flex items-center gap-3">
-                    <span id="sync-badge" class="flex items-center gap-2 bg-emerald-950/40 text-emerald-400 border border-emerald-800/40 px-3 py-1 rounded-full text-[11px] font-medium">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> 
-                        <span class="hidden sm:inline">Sincronizado</span>
+                    <span id="sync-badge" class="flex items-center gap-2 bg-emerald-950/40 text-emerald-400 border border-emerald-800/40 px-3 py-1 rounded-full text-[11px] font-medium shadow-sm">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Sincronizado Firebase
                     </span>
                 </div>
             </header>
 
-            <main class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 max-w-7xl w-full mx-auto">
+            <main class="p-6 space-y-6 max-w-7xl w-full mx-auto">
 
-                <!-- ==================== 1. DASHBOARD ==================== -->
+                <!-- 1. DASHBOARD -->
                 <div id="view-dashboard" class="seccion-view space-y-6">
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div class="stat-card bg-[#18181b] rounded-2xl p-5 shadow-lg relative overflow-hidden group">
+                        <div class="stat-card bg-[#18181b] border border-zinc-800/80 rounded-2xl p-5 shadow-lg relative overflow-hidden group hover:border-blue-500/40">
                             <div class="absolute right-3 top-3 text-blue-500/10 text-4xl"><i class="fa-solid fa-bolt"></i></div>
                             <p class="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">Registros Hoy</p>
-                            <h3 id="stat-dash-hoy" class="text-3xl font-black text-white mt-2">0</h3>
-                            <span class="text-[10px] text-blue-400 mt-1 block font-medium"><i class="fa-solid fa-clock mr-1"></i>Tiempo real</span>
+                            <h3 id="stat-dash-hoy" class="text-3xl font-black text-white mt-2 skeleton rounded w-12 h-8">&nbsp;</h3>
+                            <span class="text-[10px] text-blue-400 mt-1 block font-medium"><i class="fa-solid fa-arrow-trend-up mr-1"></i>Tiempo real</span>
                         </div>
-                        <div class="stat-card bg-[#18181b] rounded-2xl p-5 shadow-lg relative overflow-hidden group">
+                        <div class="stat-card bg-[#18181b] border border-zinc-800/80 rounded-2xl p-5 shadow-lg relative overflow-hidden group hover:border-green-500/40">
                             <div class="absolute right-3 top-3 text-green-500/10 text-4xl"><i class="fa-solid fa-mobile-screen"></i></div>
-                            <p class="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">App Móvil</p>
-                            <h3 id="stat-dash-app" class="text-3xl font-black text-white mt-2">0</h3>
+                            <p class="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">Clientes App</p>
+                            <h3 id="stat-dash-app" class="text-3xl font-black text-white mt-2 skeleton rounded w-12 h-8">&nbsp;</h3>
                             <span class="text-[10px] text-green-400 mt-1 block font-medium"><i class="fa-solid fa-wifi mr-1"></i>WispHub</span>
                         </div>
-                        <div class="stat-card bg-[#18181b] rounded-2xl p-5 shadow-lg relative overflow-hidden group">
+                        <div class="stat-card bg-[#18181b] border border-zinc-800/80 rounded-2xl p-5 shadow-lg relative overflow-hidden group hover:border-cyan-500/40">
                             <div class="absolute right-3 top-3 text-cyan-500/10 text-4xl"><i class="fa-solid fa-globe"></i></div>
                             <p class="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">Contratos Web</p>
-                            <h3 id="stat-dash-web" class="text-3xl font-black text-white mt-2">0</h3>
-                            <span class="text-[10px] text-cyan-400 mt-1 block font-medium"><i class="fa-solid fa-link mr-1"></i>Portal</span>
+                            <h3 id="stat-dash-web" class="text-3xl font-black text-white mt-2 skeleton rounded w-12 h-8">&nbsp;</h3>
+                            <span class="text-[10px] text-cyan-400 mt-1 block font-medium"><i class="fa-solid fa-link mr-1"></i>Portal Web</span>
                         </div>
-                        <div class="stat-card bg-[#18181b] rounded-2xl p-5 shadow-lg relative overflow-hidden group">
+                        <div class="stat-card bg-[#18181b] border border-zinc-800/80 rounded-2xl p-5 shadow-lg relative overflow-hidden group hover:border-amber-500/40">
                             <div class="absolute right-3 top-3 text-amber-500/10 text-4xl"><i class="fa-solid fa-clipboard-list"></i></div>
-                            <p class="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">Censo Activo</p>
-                            <h3 id="stat-dash-censo" class="text-3xl font-black text-white mt-2">0</h3>
-                            <span class="text-[10px] text-amber-400 mt-1 block font-medium"><i class="fa-solid fa-map-pin mr-1"></i>Prospectos</span>
+                            <p class="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">Censo Prospectos</p>
+                            <h3 id="stat-dash-censo" class="text-3xl font-black text-white mt-2 skeleton rounded w-12 h-8">&nbsp;</h3>
+                            <span class="text-[10px] text-amber-400 mt-1 block font-medium"><i class="fa-solid fa-map-pin mr-1"></i>Nueva Esparta</span>
                         </div>
                     </div>
 
-                    <!-- Últimos registros -->
-                    <div class="bg-[#18181b] border border-zinc-800/80 rounded-2xl p-5 shadow-lg">
+                    <div class="bg-[#18181b] border border-zinc-800/80 rounded-2xl p-5 shadow-xl">
                         <h3 class="text-white font-bold text-xs tracking-wider uppercase mb-4 flex items-center gap-2">
                             <i class="fa-solid fa-clock-rotate-left text-gray-400"></i> Últimos Registros
                         </h3>
-                        <div class="overflow-x-auto max-h-[350px]">
+                        <div class="overflow-x-auto max-h-[300px] custom-scrollbar">
                             <table class="w-full text-left text-xs text-gray-400">
-                                <thead class="text-gray-300 uppercase text-[10px] tracking-wider sticky top-0 bg-[#202024] z-10">
+                                <thead class="bg-[#202024] text-gray-300 uppercase text-[10px] tracking-wider sticky top-0 z-10">
                                     <tr>
                                         <th class="p-3 rounded-l-xl">Cliente</th>
                                         <th class="p-3">Origen</th>
@@ -344,36 +232,45 @@
                     </div>
                 </div>
 
-                <!-- ==================== 2. APP MÓVIL ==================== -->
+                <!-- 2. CLIENTES APP MÓVIL -->
                 <div id="view-ingresados" class="seccion-view space-y-6 hidden">
                     <div class="bg-gradient-to-r from-green-950/30 to-blue-950/30 border border-green-800/40 rounded-2xl p-5 shadow-lg">
                         <div class="flex items-center gap-3 mb-2">
                             <i class="fa-solid fa-mobile-screen-button text-green-400 text-xl"></i>
                             <h3 class="text-white font-bold text-sm tracking-wider">CLIENTES INGRESADOS DESDE APP MÓVIL (WISPHUB)</h3>
                         </div>
-                        <p class="text-xs text-gray-400">Clientes instalados y registrados por promotores desde la aplicación móvil.</p>
+                        <p class="text-xs text-gray-400">Estos clientes fueron registrados por promotores directamente desde la aplicación móvil.</p>
                     </div>
 
-                    <div class="flex flex-wrap gap-3 items-center justify-between bg-[#18181b] border border-zinc-800/80 rounded-2xl p-4">
-                        <div class="flex items-center gap-3 flex-wrap">
-                            <input type="text" id="busqueda-ingresados" placeholder="🔍 Buscar cliente..." class="w-48">
-                            <select id="filtro-promotor-ingresados" class="w-40">
-                                <option value="">Todos los promotores</option>
-                            </select>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-[#18181b] border border-zinc-800/80 rounded-2xl p-5 shadow-lg">
+                            <p class="text-[11px] text-gray-400 uppercase font-semibold">Total Clientes App</p>
+                            <h3 id="stat-ing-total" class="text-3xl font-black text-green-400 mt-2">0</h3>
                         </div>
-                        <span class="text-xs text-gray-400">Total: <strong id="stat-ing-total" class="text-green-400">0</strong></span>
+                        <div class="bg-[#18181b] border border-zinc-800/80 rounded-2xl p-5 md:col-span-2 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg">
+                            <div>
+                                <h4 class="text-white font-bold text-xs tracking-wider uppercase">Filtros</h4>
+                                <p class="text-[11px] text-gray-400 mt-0.5">Busca por nombre, cédula o filtrar por promotor</p>
+                            </div>
+                            <div class="flex gap-2 w-full sm:w-auto">
+                                <input type="text" id="busqueda-ingresados" placeholder="🔍 Buscar..." class="bg-[#202024] border border-zinc-700/80 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-green-500 w-full sm:w-48 transition-all">
+                                <select id="filtro-promotor-ingresados" class="bg-[#202024] border border-zinc-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-green-500 w-36">
+                                    <option value="">Todos</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="bg-[#18181b] border border-zinc-800/80 rounded-2xl p-5 shadow-xl">
-                        <div class="overflow-x-auto max-h-[500px]">
+                        <div class="overflow-x-auto max-h-[450px] custom-scrollbar">
                             <table class="w-full text-left text-xs text-gray-400">
-                                <thead class="text-gray-300 uppercase text-[10px] tracking-wider sticky top-0 bg-[#202024] z-10">
+                                <thead class="bg-[#202024] text-gray-300 uppercase text-[10px] tracking-wider sticky top-0 z-10">
                                     <tr>
-                                        <th class="p-3 rounded-l-xl">Cliente / Cédula</th>
-                                        <th class="p-3">Sector</th>
-                                        <th class="p-3">Plan</th>
-                                        <th class="p-3">Promotor</th>
-                                        <th class="p-3 rounded-r-xl">Fecha</th>
+                                        <th class="p-3.5 rounded-l-xl">Cliente / Cédula</th>
+                                        <th class="p-3.5">Sector / Zona</th>
+                                        <th class="p-3.5">Plan</th>
+                                        <th class="p-3.5">Promotor</th>
+                                        <th class="p-3.5 rounded-r-xl">Fecha Instalación</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tabla-ingresados-body">
@@ -384,39 +281,46 @@
                     </div>
                 </div>
 
-                <!-- ==================== 3. CONTRATOS WEB ==================== -->
+                <!-- 3. CONTRATOS WEB -->
                 <div id="view-web" class="seccion-view space-y-6 hidden">
                     <div class="bg-gradient-to-r from-cyan-950/30 to-blue-950/30 border border-cyan-800/40 rounded-2xl p-5 shadow-lg">
                         <div class="flex items-center gap-3 mb-2">
                             <i class="fa-solid fa-globe text-cyan-400 text-xl"></i>
-                            <h3 class="text-white font-bold text-sm tracking-wider">CONTRATOS DESDE PÁGINA WEB</h3>
+                            <h3 class="text-white font-bold text-sm tracking-wider">CONTRATOS REGISTRADOS DESDE PÁGINA WEB</h3>
                         </div>
-                        <p class="text-xs text-gray-400">Solicitudes recibidas del portal web. Puedes cambiar estado y eliminar registros.</p>
+                        <p class="text-xs text-gray-400">Estos contratos son exclusivos del portal web. No se mezclan con la app móvil ni el censo.</p>
                     </div>
 
-                    <div class="flex flex-wrap gap-3 items-center justify-between bg-[#18181b] border border-zinc-800/80 rounded-2xl p-4">
-                        <div class="flex items-center gap-3 flex-wrap">
-                            <select id="filtro-estado-web" class="w-36">
-                                <option value="">Todos los estados</option>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-[#18181b] border border-zinc-800/80 rounded-2xl p-5 shadow-lg">
+                            <p class="text-[11px] text-gray-400 uppercase font-semibold">Total Contratos Web</p>
+                            <h3 id="stat-web-total" class="text-3xl font-black text-cyan-400 mt-2">0</h3>
+                        </div>
+                        <div class="bg-[#18181b] border border-zinc-800/80 rounded-2xl p-5 md:col-span-2 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg">
+                            <div>
+                                <h4 class="text-white font-bold text-xs tracking-wider uppercase">Gestión de Estados</h4>
+                                <p class="text-[11px] text-gray-400 mt-0.5">Cambia el estado o elimina registros completados</p>
+                            </div>
+                            <select id="filtro-estado-web" class="bg-[#202024] border border-zinc-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500 w-36">
+                                <option value="">Todos</option>
                                 <option value="pendiente">Pendiente</option>
                                 <option value="en_proceso">En Proceso</option>
                                 <option value="completado">Completado</option>
                                 <option value="cancelado">Cancelado</option>
                             </select>
                         </div>
-                        <span class="text-xs text-gray-400">Total: <strong id="stat-web-total" class="text-cyan-400">0</strong></span>
                     </div>
 
                     <div class="bg-[#18181b] border border-zinc-800/80 rounded-2xl p-5 shadow-xl">
-                        <div class="overflow-x-auto max-h-[500px]">
+                        <div class="overflow-x-auto max-h-[450px] custom-scrollbar">
                             <table class="w-full text-left text-xs text-gray-400">
-                                <thead class="text-gray-300 uppercase text-[10px] tracking-wider sticky top-0 bg-[#202024] z-10">
+                                <thead class="bg-[#202024] text-gray-300 uppercase text-[10px] tracking-wider sticky top-0 z-10">
                                     <tr>
-                                        <th class="p-3 rounded-l-xl">Cliente / Cédula</th>
-                                        <th class="p-3">Sector</th>
-                                        <th class="p-3">Plan</th>
-                                        <th class="p-3">Estado</th>
-                                        <th class="p-3 rounded-r-xl">Acciones</th>
+                                        <th class="p-3.5 rounded-l-xl">Cliente Web / Cédula</th>
+                                        <th class="p-3.5">Sector</th>
+                                        <th class="p-3.5">Plan</th>
+                                        <th class="p-3.5">Estado</th>
+                                        <th class="p-3.5 rounded-r-xl">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tabla-web-body">
@@ -427,62 +331,100 @@
                     </div>
                 </div>
 
-                <!-- ==================== 4. PROMOTORES ==================== -->
+                <!-- 4. PROMOTORES -->
                 <div id="view-promotores" class="seccion-view space-y-6 hidden">
                     <div class="bg-gradient-to-r from-purple-950/30 to-blue-950/30 border border-purple-800/40 rounded-2xl p-5 shadow-lg">
                         <div class="flex items-center gap-3 mb-2">
                             <i class="fa-solid fa-user-tie text-purple-400 text-xl"></i>
                             <h3 class="text-white font-bold text-sm tracking-wider">RENDIMIENTO POR PROMOTOR</h3>
                         </div>
-                        <p class="text-xs text-gray-400">Métricas detalladas de cada promotor: App, Web y Censo.</p>
+                        <p class="text-xs text-gray-400">Como administrador, puedes ver cuántos contratos ha registrado cada promotor en App, Web y Censo.</p>
                     </div>
 
                     <div id="promotores-ranking-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <p class="text-gray-500 text-center py-4 col-span-full">Cargando datos de promotores...</p>
                     </div>
+
+                    <div class="bg-[#18181b] border border-zinc-800/80 rounded-2xl p-5 shadow-xl">
+                        <h3 class="text-white font-bold text-xs tracking-wider uppercase mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-list-check text-blue-400"></i> Detalle por Promotor
+                        </h3>
+                        <select id="select-promotor-detalle" class="bg-[#202024] border border-zinc-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500 w-48 mb-3">
+                            <option value="">-- Seleccionar promotor --</option>
+                        </select>
+                        <div class="overflow-x-auto max-h-[400px] custom-scrollbar">
+                            <table class="w-full text-left text-xs text-gray-400">
+                                <thead class="bg-[#202024] text-gray-300 uppercase text-[10px] tracking-wider sticky top-0 z-10">
+                                    <tr>
+                                        <th class="p-3.5 rounded-l-xl">Cliente</th>
+                                        <th class="p-3.5">Cédula</th>
+                                        <th class="p-3.5">Origen</th>
+                                        <th class="p-3.5">Plan</th>
+                                        <th class="p-3.5 rounded-r-xl">Fecha</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-promotor-detalle-body">
+                                    <tr><td colspan="5" class="p-6 text-center text-gray-500">Selecciona un promotor para ver sus registros</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="promotor-total-seleccionado" class="mt-3 pt-3 border-t border-zinc-800 text-right">
+                            <span class="text-xs text-gray-400">Total registros: </span>
+                            <span class="text-lg font-black text-purple-400">0</span>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- ==================== 5. CENSO PROSPECTOS ==================== -->
+                <!-- 5. CENSO PROSPECTOS -->
                 <div id="view-censo" class="seccion-view space-y-6 hidden">
                     <div class="bg-gradient-to-r from-amber-950/30 to-orange-950/30 border border-amber-800/40 rounded-2xl p-5 shadow-lg">
                         <div class="flex items-center gap-3 mb-2">
                             <i class="fa-solid fa-clipboard-list text-amber-400 text-xl"></i>
                             <h3 class="text-white font-bold text-sm tracking-wider">CENSO DE PROSPECTOS - NUEVA ESPARTA</h3>
                         </div>
-                        <p class="text-xs text-gray-400">Posibles clientes registrados por promotores. Puedes editar estado y eliminar.</p>
+                        <p class="text-xs text-gray-400">Posibles clientes registrados por promotores durante el censo. Puedes editar estado y eliminar.</p>
                     </div>
 
-                    <div class="flex flex-wrap gap-3 items-center justify-between bg-[#18181b] border border-zinc-800/80 rounded-2xl p-4">
-                        <div class="flex items-center gap-3 flex-wrap">
-                            <select id="filtro-promotor-censo" class="w-40">
-                                <option value="">Todos los promotores</option>
-                            </select>
-                            <select id="filtro-estado-censo" class="w-36">
-                                <option value="">Todos los estados</option>
-                                <option value="prospecto">Prospecto</option>
-                                <option value="contactado">Contactado</option>
-                                <option value="interesado">Interesado</option>
-                                <option value="no_interesado">No Interesado</option>
-                                <option value="convertido">Convertido</option>
-                            </select>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-[#18181b] border border-zinc-800/80 rounded-2xl p-5 shadow-lg">
+                            <p class="text-[11px] text-gray-400 uppercase font-semibold">Total Prospectos</p>
+                            <h3 id="stat-censo-total" class="text-3xl font-black text-amber-400 mt-2">0</h3>
                         </div>
-                        <span class="text-xs text-gray-400">Total: <strong id="stat-censo-total" class="text-amber-400">0</strong></span>
+                        <div class="bg-[#18181b] border border-zinc-800/80 rounded-2xl p-5 flex items-center justify-between shadow-lg">
+                            <div>
+                                <h4 class="text-white font-bold text-xs tracking-wider uppercase">Filtros de Censo</h4>
+                                <p class="text-[11px] text-gray-400 mt-0.5">Filtrar por promotor y estado del prospecto</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <select id="filtro-promotor-censo" class="bg-[#202024] border border-zinc-700/80 rounded-xl px-3 py-2 text-xs text-white w-32">
+                                    <option value="">Todos</option>
+                                </select>
+                                <select id="filtro-estado-censo" class="bg-[#202024] border border-zinc-700/80 rounded-xl px-3 py-2 text-xs text-white w-32">
+                                    <option value="">Todos</option>
+                                    <option value="prospecto">Prospecto</option>
+                                    <option value="contactado">Contactado</option>
+                                    <option value="interesado">Interesado</option>
+                                    <option value="no_interesado">No Interesado</option>
+                                    <option value="convertido">Convertido</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
 
                     <div id="censo-promotores-resumen" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                        <p class="text-gray-500 text-center py-4 col-span-full">Cargando resumen...</p>
+                        <p class="text-gray-500 text-center py-4 col-span-full">Cargando resumen de promotores...</p>
                     </div>
 
                     <div class="bg-[#18181b] border border-zinc-800/80 rounded-2xl p-5 shadow-xl">
-                        <div class="overflow-x-auto max-h-[500px]">
+                        <div class="overflow-x-auto max-h-[450px] custom-scrollbar">
                             <table class="w-full text-left text-xs text-gray-400">
-                                <thead class="text-gray-300 uppercase text-[10px] tracking-wider sticky top-0 bg-[#202024] z-10">
+                                <thead class="bg-[#202024] text-gray-300 uppercase text-[10px] tracking-wider sticky top-0 z-10">
                                     <tr>
-                                        <th class="p-3 rounded-l-xl">Ciudadano / Cédula</th>
-                                        <th class="p-3">Sector</th>
-                                        <th class="p-3">Promotor</th>
-                                        <th class="p-3">Estado</th>
-                                        <th class="p-3 rounded-r-xl">Acciones</th>
+                                        <th class="p-3.5 rounded-l-xl">Ciudadano / Cédula</th>
+                                        <th class="p-3.5">Sector / Zona</th>
+                                        <th class="p-3.5">Promotor</th>
+                                        <th class="p-3.5">Estado</th>
+                                        <th class="p-3.5 rounded-r-xl">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tabla-censo-body">
@@ -495,20 +437,18 @@
 
             </main>
 
-            <footer class="py-3 px-6 border-t border-zinc-800/80 text-center text-[11px] text-gray-500 bg-[#141416] shrink-0">
+            <footer class="mt-auto py-4 px-6 border-t border-zinc-800/80 text-center text-[11px] text-gray-500 bg-[#141416]">
                 Tecnicable C.A. / Servitel+ • Sistema Integral de Telecomunicaciones y Censo • Nueva Esparta
             </footer>
         </div>
     </div>
 
-    <!-- ==================== MODALES ==================== -->
-    
-    <!-- Modal Detalle -->
+    <!-- MODAL DE DETALLE -->
     <div id="modal-detalle" class="fixed inset-0 bg-black/70 z-[60] hidden flex items-center justify-center p-4 modal-overlay">
-        <div class="bg-[#18181b] border border-zinc-700/80 rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] overflow-y-auto modal-content">
+        <div class="bg-[#18181b] border border-zinc-700/80 rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] overflow-y-auto custom-scrollbar modal-content">
             <div class="sticky top-0 bg-[#18181b] border-b border-zinc-800 p-5 flex items-center justify-between">
                 <h3 class="text-white font-bold text-sm">Detalle del Registro</h3>
-                <button onclick="document.getElementById('modal-detalle').classList.add('hidden')" class="text-gray-400 hover:text-white">
+                <button onclick="document.getElementById('modal-detalle').classList.add('hidden')" class="text-gray-400 hover:text-white text-lg">
                     <i class="fa-solid fa-times"></i>
                 </button>
             </div>
@@ -517,20 +457,21 @@
         </div>
     </div>
 
-    <!-- Modal Editar Censo -->
+    <!-- MODAL EDITAR CENSO -->
     <div id="modal-editar-censo" class="fixed inset-0 bg-black/70 z-[60] hidden flex items-center justify-center p-4 modal-overlay">
         <div class="bg-[#18181b] border border-zinc-700/80 rounded-2xl shadow-2xl w-full max-w-md modal-content">
             <div class="sticky top-0 bg-[#18181b] border-b border-zinc-800 p-5 flex items-center justify-between">
                 <h3 class="text-white font-bold text-sm">Editar Prospecto</h3>
-                <button onclick="document.getElementById('modal-editar-censo').classList.add('hidden')" class="text-gray-400 hover:text-white">
+                <button onclick="document.getElementById('modal-editar-censo').classList.add('hidden')" class="text-gray-400 hover:text-white text-lg">
                     <i class="fa-solid fa-times"></i>
                 </button>
             </div>
             <div class="p-5 space-y-3">
                 <input type="hidden" id="edit-censo-id">
+                <input type="hidden" id="edit-censo-doc-id">
                 <div>
                     <label class="block text-[10px] uppercase text-gray-400 mb-1">Estado</label>
-                    <select id="edit-censo-estado" class="w-full">
+                    <select id="edit-censo-estado" class="w-full bg-[#202024] border border-zinc-700/80 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-amber-500 text-sm">
                         <option value="prospecto">Prospecto</option>
                         <option value="contactado">Contactado</option>
                         <option value="interesado">Interesado</option>
@@ -540,7 +481,4 @@
                 </div>
                 <div>
                     <label class="block text-[10px] uppercase text-gray-400 mb-1">Nota / Comentario</label>
-                    <textarea id="edit-censo-nota" rows="2" class="w-full" placeholder="Nota opcional..."></textarea>
-                </div>
-                <div class="flex gap-2 justify-end pt-2">
-                    <button onclick="document.getElementById('modal-editar-censo').classList
+                    <textarea id="edit-censo-nota" rows="3" class="w-full bg-[#202024] border border-zinc-700/80 rounded-lg px-
