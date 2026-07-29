@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servitel+ Pro - Sistema de Gestión Firebase</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ===== Animaciones y transiciones suaves ===== */
+        .nav-btn {
+            position: relative;
+            transition: background-color .25s ease, color .25s ease, transform .18s ease, box-shadow .25s ease;
+        }
+        .nav-btn:hover { transform: translateX(3px); }
+        .nav-btn:active { transform: translateX(3px) scale(0.97); }
+        .nav-btn i { transition: transform .25s ease; }
+        .nav-btn:hover i { transform: scale(1.15); }
+        .nav-btn.active {
+            animation: nav-pop .3s ease;
+        }
+        @keyframes nav-pop {
+            0% { transform: translateX(0) scale(0.96); }
+            60% { transform: translateX(3px) scale(1.02); }
+            100% { transform: translateX(3px) scale(1); }
+        }
+        /* Indicador lateral deslizante en el botón activo */
+        .nav-btn::before {
+            content: "";
+            position: absolute;
+            left: -0.75rem;
+            top: 50%;
+            transform: translateY(-50%) scaleY(0);
+            width: 3px;
+            height: 60%;
+            border-radius: 4px;
+            background: #60a5fa;
+            transition: transform .25s ease;
+        }
+        .nav-btn.active::before { transform: translateY(-50%) scaleY(1); }
+
+        .seccion-view { animation: fade-slide-in .35s ease both; }
+        @keyframes fade-slide-in {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stat-card { transition: transform .25s ease, border-color .25s ease; }
+        .stat-card:hover { transform: translateY(-3px); }
+
+        #login-form button[type="submit"] { transition: transform .15s ease, opacity .2s ease; }
+        #login-form button[type="submit"]:active { transform: scale(0.97); }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner { animation: spin .7s linear infinite; }
+
+        .skeleton {
+            background: linear-gradient(90deg, #202024 25%, #27272a 37%, #202024 63%);
+            background-size: 400% 100%;
+            animation: skeleton-loading 1.4s ease infinite;
+        }
+        @keyframes skeleton-loading {
+            0% { background-position: 100% 50%; }
+            100% { background-position: 0 50%; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+        }
+    </style>
+</head>
+<body class="bg-[#0f0f0f] text-gray-300 font-sans antialiased selection:bg-blue-600 selection:text-white">
+
+    <!-- PANTALLA DE LOGIN -->
+    <div id="login-container" class="fixed inset-0 bg-[#0f0f0f] z-50 flex items-center justify-center p-4">
+        <div class="bg-[#18181b] border border-zinc-800/80 p-8 rounded-2xl shadow-2xl w-full max-w-md relative overflow-hidden">
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-cyan-400"></div>
+            <div class="text-center mb-6">
+                <span class="bg-blue-600/10 text-blue-400 border border-blue-600/20 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Tecnicable C.A.</span>
+                <h2 class="text-white text-2xl font-bold tracking-wider mt-3">SERVITEL+ <span class="text-blue-500">PRO</span></h2>
+                <p class="text-xs text-gray-400 mt-1">Monitoreo y Auditoría de Red e Infraestructura</p>
+            </div>
+            <div id="error-msg" class="hidden mb-4 p-3 bg-red-950/40 border border-red-800/60 text-red-400 text-xs rounded-lg"></div>
+
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label class="block text-xs uppercase tracking-wider text-gray-400 mb-1 font-medium">Usuario / Correo</label>
+                    <input type="text" id="email" required placeholder="usuario@tecnicable.com" autocomplete="username" class="w-full bg-[#202024] border border-zinc-700/80 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 text-sm transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs uppercase tracking-wider text-gray-400 mb-1 font-medium">Contraseña</label>
+                    <input type="password" id="password" required placeholder="••••••••" autocomplete="current-password" class="w-full bg-[#202024] border border-zinc-700/80 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 text-sm transition-all">
+                </div>
+                <button type="submit" id="btn-login-submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2.5 rounded-lg transition-all text-sm shadow-lg shadow-blue-600/20 cursor-pointer active:scale-[0.98] flex items-center justify-center gap-2">
+                    <i id="login-spinner" class="fa-solid fa-circle-notch spinner hidden"></i>
+                    <span id="login-btn-label">Entrar al Sistema</span>
+                </button>
+            </form>
+
+            <div class="relative flex py-4 items-center">
+                <div class="flex-grow border-t border-zinc-800"></div>
+                <span class="flex-shrink mx-4 text-gray-500 text-[10px] uppercase tracking-wider">o acceso rápido</span>
+                <div class="flex-grow border-t border-zinc-800"></div>
+            </div>
+
+            <button id="btn-google-login" type="button" class="w-full bg-white hover:bg-zinc-100 text-gray-900 font-medium py-2.5 rounded-lg transition-all text-sm flex items-center justify-center gap-3 shadow-sm cursor-pointer active:scale-[0.98]">
+                <i class="fa-brands fa-google text-red-500 text-base"></i> Cuenta de Google
+            </button>
+        </div>
+    </div>
+
+    <!-- APLICACIÓN PRINCIPAL -->
+    <div id="app-container" class="flex h-screen overflow-hidden hidden">
+
+        <aside class="w-64 bg-[#141416] border-r border-zinc-800/80 flex flex-col justify-between hidden md:flex">
+            <div>
+                <div class="flex items-center justify-center h-16 bg-[#18181b] border-b border-zinc-800/80 gap-2.5">
+                    <i class="fa-solid fa-network-wired text-blue-500 text-lg"></i>
+                    <span class="text-white font-bold text-sm tracking-wider">SERVITEL+ <span class="text-blue-500 text-xs">PRO</span></span>
+                </div>
+                <nav class="p-3 space-y-1.5" id="sidebar-nav">
+                    <button data-seccion="dashboard" class="nav-btn active w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-blue-600 text-white font-medium text-xs shadow-md shadow-blue-600/20 cursor-pointer">
+                        <i class="fa-solid fa-chart-pie w-4 text-sm"></i> Dashboard
+                    </button>
+                    <button data-seccion="ingresados" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-zinc-800/50 text-gray-400 hover:text-white text-xs cursor-pointer">
+                        <i class="fa-solid fa-users w-4 text-sm"></i> Clientes Ingresados
+                    </button>
+                    <button data-seccion="web" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-zinc-800/50 text-gray-400 hover:text-white text-xs cursor-pointer">
+                        <i class="fa-solid fa-globe w-4 text-sm"></i> Clientes Página Web
+                    </button>
+                    <button data-seccion="promotores" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-zinc-800/50 text-gray-400 hover:text-white text-xs cursor-pointer">
+                        <i class="fa-solid fa-id-card-clip w-4 text-sm"></i> Promotores
+                    </button>
+                    <button data-seccion="censo" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-zinc-800/50 text-gray-400 hover:text-white text-xs cursor-pointer">
+                        <i class="fa-solid fa-map-location-dot w-4 text-sm"></i> Opción de Censo
+                    </button>
+                </nav>
+            </div>
+            <div class="p-3.5 border-t border-zinc-800/80 bg-[#18181b] text-xs flex items-center justify-between">
+                <div class="truncate text-gray-400 flex items-center gap-1.5">
+                    <i class="fa-solid fa-shield-halved text-emerald-500 text-xs"></i>
+                    <span id="user-email-display" class="font-medium text-gray-300 text-[11px] truncate max-w-[140px]"></span>
+                </div>
+                <button id="btn-logout" class="text-red-400 hover:text-red-300 cursor-pointer p-1.5 rounded-lg hover:bg-red-950/30 transition-colors" title="Cerrar sesión"><i class="fa-solid fa-right-from-bracket text-xs"></i></button>
+            </div>
+        </aside>
+
+        <div class="flex-1 flex flex-col overflow-y-auto bg-[#0f0f0f]">
+            <header class="h-16 bg-[#141416]/80 backdrop-blur-md border-b border-zinc-800/80 flex items-center justify-between px-6 sticky top-0 z-20">
+                <div class="flex items-center gap-3">
+                    <h1 id="seccion-titulo" class="text-white font-bold text-sm tracking-wide">Dashboard General</h1>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span id="sync-badge" class="flex items-center gap-2 bg-emerald-950/40 text-emerald-400 border border-emerald-800/40 px-3 py-1 rounded-full text-[11px] font-medium shadow-sm">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Sincronizado Firebase
+                    </span>
+                </div>
+            </header>
+
+            <main class="p-6 space-y-6 max-w-7xl w-full mx-auto">
+
+                <!-- 1. DASHBOARD -->
+                <div id="view-dashboard" class="seccion-view space-y-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="stat-card bg-[#18181b] border border-zinc-800/80 rounded-2xl p-5 shadow-lg relative overflow-hidden group hover:border-blue-500/40">
+                            <div class="absolute right-3 top-3 text-blue-500/10 text-4xl"><i class="fa-solid fa-bolt"></i></div>
+                            <p class="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">Registros Hoy</p>
+                            <h3 id="stat-dash-hoy" class="text-3xl font-black text-white mt-2 skeleton rounded w-12 h-8">&nbsp;</h3>
+                            <span class="text-[10px] text-blue-400 mt-1 block font-medium"><i class="fa-solid fa-arrow-trend-up mr-1"></i>Tiempo real</span>
+                        </div>
+                        <div class="stat-card bg-[#18181b] border border-zinc-800/80 rounded-2xl p-5 shadow-lg relative overflow-hidden group hover:border-cyan-500/40">
+                            <div class="absolute right-3 top-3 text-cyan-500/10 text-4xl"><i class="fa-solid fa-globe"></i></div>
+                            <p class="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">Contratos Web</p>
+                            <h3 id="stat-dash-web" class="text-3xl font-black text-white mt-2 skeleton rounded w-12 h-8">&nbsp;</h3>
+                            <span class="text-[10px] text-cyan-400 mt-1 block font-medium"><i class="fa-solid fa-link mr-1"></i>Portal Activo</span>
+                        </div>
+                        <div class="stat-card bg-[#18181b] border border-zinc-800/80 rounded-2xl p-5 shadow-lg relative overflow-hidden group hover:border-amber-500/40">
+                            <div class="absolute right-3 top-3 text-amber-500/10 text-4xl"><i class="fa-solid fa-map-location-dot"></i></div>
+                            <p class="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">Censo Activo</p>
+                            <h3 id="stat-dash-censo" class="text-3xl font-black text-white mt-2 skeleton rounded w-12 h-8">&nbsp;</h3>
+                            <span class="text-[10px] text-amber-400 mt-1 block font-medium"><i class="fa-solid fa-location-crosshairs mr-1"></i>Nueva Esparta</span>
+                        </div>
+                        <div class="stat-card bg-[#18181b] border border-zinc-800/80 rounded-2xl p-5 shadow-lg relative overflow-hidden group hover:border-emerald-500/40">
+                            <div class="absolute right-3 top-3 text-emerald-500/10 text-4xl"><i class="fa-solid fa-database"></i></div>
+                            <p class="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">Total Base de Datos</p>
+                            <h3 id="stat-dash-total" class="text-3xl font-black text-white mt-2 skeleton rounded w-12 h-8">&nbsp;</h3>
+                            <span class="text-[10px] text-emerald-400 mt-1 block font-medium"><i class="fa-solid fa-check-circle mr-1"></i>Sincronizado</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-[#18181b] to-[#141416] border border-zinc-800/80 rounded-2xl p-8 shadow-xl text-center relative overflow-hidden">
+                        <div class="w-16 h-16 bg-blue-600/10 border border-blue-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4 text-blue-400 text-2xl shadow-inner">
+                            <i class="fa-solid fa-network-wired"></i>
+                        </div>
+                        <h3 class="text-white font-bold text-base tracking-wide">Panel de Control Integral - Tecnicable C.A.</h3>
+                        <p class="text-xs text-gray-400 max-w-lg mx-auto mt-1.5 leading-relaxed">Selecciona una opción en el menú lateral para supervisar los contratos en tiempo real, auditar los registros de la página web o revisar los reportes por promotor.</p>
+                    </div>
+                </div>
+
+                <!-- 2. CLIENTES INGRESADOS -->
+                <div id="view-ingresados" class="seccion-view space-y-6 hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-[#18181b] border border-zinc-800/80 rounded-2xl p-5 shadow-lg">
+                            <p class="text-[11px] text-gray-400 uppercase font-semibold">Órdenes / Clientes Totales</p>
+                            <h3 id="stat-ing-total" class="text-3xl font-black text-emerald-400 mt-2">0</h3>
+                        </div>
+                        <div class="bg-[#18181b] border border-zinc-800/80 rounded-2xl p-5 md:col-span-2 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg">
+                            <div>
+                                <h4 class="text-white font-bold text-xs tracking-wider uppercase">Control de Órdenes</h4>
+                                <p class="text-[11px] text-gray-400 mt-0.5">Registros sincronizados de Contratos_Web.</p>
+                            </div>
+                            <div class="relative w-full sm:w-auto">
+                                <i class="fa-solid fa-search absolute left-3 top-2.5 text-gray-500 text-xs"></i>
+                                <input type="text" id="busqueda-ingresados" placeholder="Buscar cédula, nombre..." class="bg-[#202024] border border-zinc-700/80 rounded-xl pl-9 pr-4 py-2 text-xs text-white focus:outline-none focus:border-blue-500 w-full sm:w-64 transition-all">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-[#18181b] border border-zinc-800/80 rounded-2xl p-5 shadow-xl">
+                        <div class="overflow-x-auto max-h-[450px] custom-scrollbar">
+                            <table class="w-full text-left text-xs text-gray-400">
+                                <thead class="bg-[#202024] text-gray-300 uppercase text-[10px] tracking-wider sticky top-0 z-10">
+                                    <tr>
+                                        <th class="p-3.5 rounded-l-xl">Cliente / Cédula</th>
+                                        <th class="p-3.5">Sector / Zona</th>
+                                        <th class="p-3.5">Plan / Estado</th>
+                                        <th class="p-3.5 rounded-r-xl">Fecha de Registro</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-ingresados-body" class="divide-y divide-zinc-800/60">
+                                    <tr><td colspan="4" class="p-6 text-center text-gray-500">Cargando registros...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. CLIENTES PÁGINA WEB -->
+                <div id="view-web" class="seccion-view space-y-6 hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-[#18181b] border border-zinc-800/80 rounded-2xl p-5 shadow-lg">
+                            <p class="text-[11px] text-gray-400 uppercase font-semibold">Leads / Contratos Web</p>
+                            <h3 id="stat-web-total" class="text-3xl font-black text-cyan-400 mt-2">0</h3>
+                        </div>
+                        <div class="bg-[#18181b] border border-zinc-800/80 rounded-2xl p-5 flex items-center justify-between shadow-lg">
+                            <div>
+                                <h4 class="text-white font-bold text-xs tracking-wider uppercase">Canal Digital Servitel+</h4>
+                                <p class="text-[11px] text-gray-400 mt-0.5">Clientes capturados a través del portal web.</p>
+                            </div>
+                            <span class="bg-cyan-950/40 text-cyan-400 border border-cyan-800/50 p-2.5 rounded-xl"><i class="fa-solid fa-globe text-base"></i></span>
+                        </div>
+                    </div>
+                    <div class="bg-[#18181b] border border-zinc-800/80 rounded-2xl p-5 shadow-xl">
+                        <div class="overflow-x-auto max-h-[450px] custom-scrollbar">
+                            <table class="w-full text-left text-xs text-gray-400">
+                                <thead class="bg-[#202024] text-gray-300 uppercase text-[10px] tracking-wider sticky top-0 z-10">
+                                    <tr>
+                                        <th class="p-3.5 rounded-l-xl">Cliente Web / Cédula</th>
+                                        <th class="p-3.5">Sector</th>
+                                        <th class="p-3.5">Plan</th>
+                                        <th class="p-3.5 rounded-r-xl">Fecha Registro</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-web-body" class="divide-y divide-zinc-800/60">
+                                    <tr><td colspan="4" class="p-6 text-center text-gray-500">Cargando datos web...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. PROMOTORES -->
+                <div id="view-promotores" class="seccion-view space-y-6 hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="bg-[#18181b] border border-zinc-800/80 rounded-2xl p-5 shadow-lg flex flex-col">
+                            <h3 class="text-white font-bold text-xs tracking-wider uppercase mb-3.5 pb-2 border-b border-zinc-800 flex items-center gap-2">
+                                <i class="fa-solid fa-id-badge text-purple-400"></i> Asesores Activos
+                            </h3>
+                            <div id="promotores-resumen-list" class="space-y-2.5 text-xs text-gray-400 max-h-[350px] overflow-y-auto custom-scrollbar flex-1 pr-1">
+                                <p class="text-gray-500 text-center py-4">Analizando promotores...</p>
+                            </div>
+                        </div>
+                        <div class="bg-[#18181b] border border-zinc-800/80 rounded-2xl p-5 lg:col-span-2 shadow-lg">
+                            <h3 class="text-white font-bold text-xs tracking-wider uppercase mb-3.5 pb-2 border-b border-zinc-800 flex items-center gap-2">
+                                <i class="fa-solid fa-list-check text-blue-400"></i> Detalle de Registros por Promotor
+                            </h3>
+                            <div class="overflow-x-auto max-h-[380px] custom-scrollbar">
+                                <table class="w-full text-left text-xs text-gray-400">
+                                    <thead class="bg-[#202024] text-gray-300 uppercase text-[10px] tracking-wider sticky top-0 z-10">
+                                        <tr>
+                                            <th class="p-3.5 rounded-l-xl">Promotor</th>
+                                            <th class="p-3.5">Cliente Registrado</th>
+                                            <th class="p-3.5">Sector</th>
+                                            <th class="p-3.5 rounded-r-xl">Fecha</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabla-promotores-body" class="divide-y divide-zinc-800/60">
+                                        <tr><td colspan="4" class="p-6 text-center text-gray-500">Cargando promotores...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. CENSO -->
+                <div id="view-censo" class="seccion-view space-y-6 hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-[#18181b] border border-zinc-800/80 rounded-2xl p-5 shadow-lg">
+                            <p class="text-[11px] text-gray-400 uppercase font-semibold">Censo de Prospectos (Nueva Esparta)</p>
+                            <h3 id="stat-censo-total" class="text-3xl font-black text-amber-400 mt-2">0</h3>
+                        </div>
+                        <div class="bg-[#18181b] border border-zinc-800/80 rounded-2xl p-5 flex items-center justify-between shadow-lg">
+                            <div>
+                                <h4 class="text-white font-bold text-xs tracking-wider uppercase">Zonas y Sectores</h4>
+                                <p class="text-[11px] text-gray-400 mt-0.5">Auditoría geográfica y levantamiento operativo.</p>
+                            </div>
+                            <span class="bg-amber-950/40 text-amber-400 border border-amber-800/50 p-2.5 rounded-xl"><i class="fa-solid fa-map-location-dot text-base"></i></span>
+                        </div>
+                    </div>
+                    <div class="bg-[#18181b] border border-zinc-800/80 rounded-2xl p-5 shadow-xl">
+                        <div class="overflow-x-auto max-h-[450px] custom-scrollbar">
+                            <table class="w-full text-left text-xs text-gray-400">
+                                <thead class="bg-[#202024] text-gray-300 uppercase text-[10px] tracking-wider sticky top-0 z-10">
+                                    <tr>
+                                        <th class="p-3.5 rounded-l-xl">Ciudadano / Cédula</th>
+                                        <th class="p-3.5">Sector / Zona</th>
+                                        <th class="p-3.5">Estado</th>
+                                        <th class="p-3.5 rounded-r-xl">Fecha</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-censo-body" class="divide-y divide-zinc-800/60">
+                                    <tr><td colspan="4" class="p-6 text-center text-gray-500">Cargando censo...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+
+            <footer class="mt-auto py-4 px-6 border-t border-zinc-800/80 text-center text-[11px] text-gray-500 bg-[#141416]">
+                Tecnicable C.A. / Servitel+ • Sistema Integral de Telecomunicaciones y Censo
+            </footer>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import {
+            getAuth, onAuthStateChanged, signInWithEmailAndPassword,
+            signInWithPopup, GoogleAuthProvider, signOut
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCaI5NPapzEe1jK8EfZrnTW8lEytfy4eR4",
+            authDomain: "formulario-9b119.firebaseapp.com",
+            projectId: "formulario-9b119",
+            storageBucket: "formulario-9b119.firebasestorage.app",
+            messagingSenderId: "648279847643",
+            appId: "1:648279847643:web:802107ded1f0f5957f52fe",
+            measurementId: "G-VSFYQB6FQ9"
+        };
+
+        // Si tus usuarios internos inician sesión con un nombre corto (sin @dominio),
+        // aquí se completa automáticamente con este dominio antes de llamar a Firebase Auth.
+        // Ajusta esto al dominio real que uses para las cuentas de tu equipo.
+        const DOMINIO_USUARIOS_INTERNOS = "tecnicable.com";
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const googleProvider = new GoogleAuthProvider();
+
+        const loginContainer = document.getElementById('login-container');
+        const appContainer = document.getElementById('app-container');
+        const loginForm = document.getElementById('login-form');
+        const errorMsg = document.getElementById('error-msg');
+        const btnSubmit = document.getElementById('btn-login-submit');
+        const loginSpinner = document.getElementById('login-spinner');
+        const loginBtnLabel = document.getElementById('login-btn-label');
+
+        let cacheGlobalDocs = [];
+        let unsubscribeFirestore = null;
+
+        function mostrarError(texto) {
+            errorMsg.innerText = texto;
+            errorMsg.classList.remove('hidden');
+        }
+        function ocultarError() {
+            errorMsg.classList.add('hidden');
+        }
+        function setCargandoLogin(cargando) {
+            btnSubmit.disabled = cargando;
+            btnSubmit.classList.toggle('opacity-70', cargando);
+            loginSpinner.classList.toggle('hidden', !cargando);
+            loginBtnLabel.innerText = cargando ? 'Verificando...' : 'Entrar al Sistema';
+        }
+
+        // Traduce los códigos de error de Firebase a mensajes claros para el usuario
+        function traducirErrorFirebase(codigo) {
+            const mapa = {
+                'auth/invalid-email': 'El formato del correo no es válido.',
+                'auth/user-not-found': 'No existe una cuenta con ese usuario.',
+                'auth/wrong-password': 'Contraseña incorrecta.',
+                'auth/invalid-credential': 'Usuario o contraseña incorrectos.',
+                'auth/too-many-requests': 'Demasiados intentos. Intenta de nuevo en unos minutos.',
+                'auth/network-request-failed': 'Error de conexión. Revisa tu internet.'
+            };
+            return mapa[codigo] || 'No se pudo iniciar sesión. Verifica tus datos.';
+        }
+
+        // 1. Login por credenciales — 100% Firebase Authentication, sin bypass en el cliente
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            ocultarError();
+
+            let userInput = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!userInput.includes('@')) {
+                userInput = `${userInput}@${DOMINIO_USUARIOS_INTERNOS}`;
+            }
+
+            setCargandoLogin(true);
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, userInput, password);
+                accesoExitoso(userCredential.user.email);
+            } catch (error) {
+                console.error("Error de autenticación:", error.code);
+                mostrarError(traducirErrorFirebase(error.code));
+            } finally {
+                setCargandoLogin(false);
+            }
+        });
+
+        // 2. Login con Google
+        document.getElementById('btn-google-login').addEventListener('click', async () => {
+            ocultarError();
+            try {
+                const result = await signInWithPopup(auth, googleProvider);
+                accesoExitoso(result.user.email);
+            } catch (error) {
+                console.error("Error Google Auth:", error);
+                mostrarError("Error al autenticar con Google. Verifica la configuración en Firebase.");
+            }
+        });
+
+        document.getElementById('btn-logout').addEventListener('click', () => {
+            signOut(auth);
+        });
+
+        // 3. Persistencia de sesión: si ya hay sesión activa (ej. al recargar), entra directo.
+        // Esto también es lo que realmente controla el acceso: nunca un valor hardcodeado en el HTML.
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                accesoExitoso(user.email);
+            } else {
+                if (unsubscribeFirestore) { unsubscribeFirestore(); unsubscribeFirestore = null; }
+                loginContainer.classList.remove('hidden');
+                appContainer.classList.add('hidden');
+            }
+        });
+
+        function accesoExitoso(emailUsuario) {
+            loginContainer.classList.add('hidden');
+            appContainer.classList.remove('hidden');
+            document.getElementById('user-email-display').innerText = emailUsuario;
+            suscribirseAFirestore();
+        }
+
+        // Navegación modular con animación de entrada por sección
+        document.getElementById('sidebar-nav').addEventListener('click', (e) => {
+            const btn = e.target.closest('.nav-btn');
+            if (!btn) return;
+            cambiarSeccion(btn.dataset.seccion, btn);
+        });
+
+        function cambiarSeccion(seccionId, btnElement) {
+            document.querySelectorAll('.seccion-view').forEach(v => v.classList.add('hidden'));
+            const vista = document.getElementById(`view-${seccionId}`);
+            vista.classList.remove('hidden');
+            // reinicia la animación de entrada
+            vista.classList.remove('seccion-view');
+            void vista.offsetWidth;
+            vista.classList.add('seccion-view');
+
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                b.classList.remove('active', 'bg-blue-600', 'text-white', 'shadow-md', 'shadow-blue-600/20');
+                b.classList.add('hover:bg-zinc-800/50', 'text-gray-400');
+            });
+            btnElement.classList.add('active', 'bg-blue-600', 'text-white', 'shadow-md', 'shadow-blue-600/20');
+            btnElement.classList.remove('hover:bg-zinc-800/50', 'text-gray-400');
+
+            const titulos = {
+                'dashboard': 'Dashboard General',
+                'ingresados': 'Clientes Ingresados',
+                'web': 'Registros y Leads de la Página Web',
+                'promotores': 'Rendimiento y Contratos por Promotor',
+                'censo': 'Opción de Censo y Prospectos'
+            };
+            document.getElementById('seccion-titulo').innerText = titulos[seccionId] || 'Panel Servitel+';
+        }
+
+        // Búsqueda en vivo dentro de "Clientes Ingresados"
+        document.getElementById('busqueda-ingresados').addEventListener('keyup', renderizarIngresados);
+
+        // Listener en tiempo real: cualquier cambio en Firestore actualiza el dashboard al instante,
+        // sin necesidad de un botón "Recargar".
+        function suscribirseAFirestore() {
+            const syncBadge = document.getElementById('sync-badge');
+            if (unsubscribeFirestore) unsubscribeFirestore();
+
+            unsubscribeFirestore = onSnapshot(
+                collection(db, "Contratos_Web"),
+                (querySnapshot) => {
+                    cacheGlobalDocs = [];
+                    querySnapshot.forEach((doc) => {
+                        cacheGlobalDocs.push({ id: doc.id, ...doc.data() });
+                    });
+
+                    syncBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Sincronizado Firebase';
+                    syncBadge.className = "flex items-center gap-2 bg-emerald-950/40 text-emerald-400 border border-emerald-800/40 px-3 py-1 rounded-full text-[11px] font-medium shadow-sm";
+
+                    procesarDashboard(cacheGlobalDocs);
+                    renderizarIngresados();
+                    renderizarWeb(cacheGlobalDocs);
+                    renderizarPromotores(cacheGlobalDocs);
+                    renderizarCenso(cacheGlobalDocs);
+                },
+                (error) => {
+                    console.error("ERROR LEYENDO FIRESTORE:", error);
+                    syncBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-500"></span> Sin conexión';
+                    syncBadge.className = "flex items-center gap-2 bg-red-950/40 text-red-400 border border-red-800/40 px-3 py-1 rounded-full text-[11px] font-medium shadow-sm";
+                }
+            );
+        }
+
+        // Compara solo la parte de fecha (no la hora) contra hoy.
+        // Soporta: Timestamp de Firestore, string 'YYYY-MM-DD', o cualquier string parseable por Date.
+        function esDeHoy(valorFecha) {
+            if (!valorFecha) return false;
+            let fecha;
+            if (typeof valorFecha.toDate === 'function') {
+                fecha = valorFecha.toDate();
+            } else {
+                fecha = new Date(valorFecha);
+            }
+            if (isNaN(fecha.getTime())) return false;
+            const hoy = new Date();
+            return fecha.getFullYear() === hoy.getFullYear()
+                && fecha.getMonth() === hoy.getMonth()
+                && fecha.getDate() === hoy.getDate();
+        }
+
+        // NOTA sobre el origen de los datos: como todo vive en una sola colección "Contratos_Web",
+        // "Contratos Web" y "Censo Activo" usan un campo `origen`/`tipo` si existe en el documento
+        // (ej. origen: "web" u origen: "censo"). Si tu colección no tiene ese campo todavía,
+        // te recomiendo agregarlo al guardar cada registro para que estas tarjetas sean exactas;
+        // mientras tanto, caen de vuelta al total general para no mostrar un 0 engañoso.
+        function procesarDashboard(docs) {
+            const hoy = docs.filter(d => esDeHoy(d.fecha_registro)).length;
+            const web = docs.filter(d => (d.origen || d.canal || '').toLowerCase() === 'web');
+            const censo = docs.filter(d => (d.origen || d.tipo || '').toLowerCase() === 'censo');
+
+            document.getElementById('stat-dash-total').innerText = docs.length;
+            document.getElementById('stat-dash-total').classList.remove('skeleton', 'w-12', 'h-8');
+            document.getElementById('stat-dash-hoy').innerText = hoy;
+            document.getElementById('stat-dash-hoy').classList.remove('skeleton', 'w-12', 'h-8');
+            document.getElementById('stat-dash-web').innerText = web.length > 0 ? web.length : docs.length;
+            document.getElementById('stat-dash-web').classList.remove('skeleton', 'w-12', 'h-8');
+            document.getElementById('stat-dash-censo').innerText = censo.length;
+            document.getElementById('stat-dash-censo').classList.remove('skeleton', 'w-12', 'h-8');
+        }
+
+        function renderizarIngresados() {
+            const texto = (document.getElementById('busqueda-ingresados').value || "").toLowerCase();
+            let html = "";
+            let count = 0;
+
+            cacheGlobalDocs.forEach(data => {
+                const nombres = `${data.nombres || ''} ${data.apellidos || ''}`.trim() || "Sin nombre";
+                const cedula = data.cedula || "S/C";
+                const sector = data.sector || data.ciudad || "General";
+                const plan = data.plan || "Estándar";
+                const estado = data.estado || "Registrado";
+                const fecha = data.fecha_registro || "Reciente";
+
+                if (texto === "" || `${nombres} ${cedula} ${sector}`.toLowerCase().includes(texto)) {
+                    count++;
+                    html += `
+                        <tr class="hover:bg-[#202024]/60 transition-colors">
+                            <td class="p-3.5">
+                                <span class="text-white font-medium block">${nombres}</span>
+                                <span class="text-[10px] text-gray-500 font-mono">C.I: ${cedula}</span>
+                            </td>
+                            <td class="p-3.5 text-gray-300">
+                                <span class="bg-zinc-800/80 px-2.5 py-1 rounded-lg text-[10px] border border-zinc-700/50">${sector}</span>
+                            </td>
+                            <td class="p-3.5">
+                                <span class="bg-emerald-950/60 text-emerald-400 border border-emerald-800/50 px-2 py-0.5 rounded text-[10px] font-bold">${plan}</span>
+                                <span class="block text-[10px] text-gray-400 mt-0.5">${estado}</span>
+                            </td>
+                            <td class="p-3.5 text-gray-400 font-mono text-[11px]">${fecha}</td>
+                        </tr>
+                    `;
+                }
+            });
+
+            document.getElementById('stat-ing-total').innerText = count;
+            document.getElementById('tabla-ingresados-body').innerHTML = html !== "" ? html : `<tr><td colspan="4" class="p-6 text-center text-gray-500">No se encontraron registros en Firestore.</td></tr>`;
+        }
+
+        function renderizarWeb(docs) {
+            let html = "";
+            docs.forEach(data => {
+                const nombres = `${data.nombres || ''} ${data.apellidos || ''}`.trim() || "Sin nombre";
+                const cedula = data.cedula || "S/C";
+                const sector = data.sector || data.ciudad || "General";
+                const plan = data.plan || "Estándar";
+                const fecha = data.fecha_registro || "Reciente";
+
+                html += `
+                    <tr class="hover:bg-[#202024]/60 transition-colors">
+                        <td class="p-3.5">
+                            <span class="text-white font-medium block">${nombres}</span>
+                            <span class="text-[10px] text-gray-500 font-mono">C.I: ${cedula}</span>
+                        </td>
+                        <td class="p-3.5 text-gray-300">${sector}</td>
+                        <td class="p-3.5"><span class="text-cyan-400 font-semibold">${plan}</span></td>
+                        <td class="p-3.5 text-gray-400 font-mono text-[11px]">${fecha}</td>
+                    </tr>
+                `;
+            });
+            document.getElementById('stat-web-total').innerText = docs.length;
+            document.getElementById('tabla-web-body').innerHTML = html !== "" ? html : `<tr><td colspan="4" class="p-6 text-center text-gray-500">No hay registros web.</td></tr>`;
+        }
+
+        function renderizarPromotores(docs) {
+            let html = "";
+            let resumenHtml = "";
+            let promotoresConteo = {};
+
+            docs.forEach(data => {
+                const promotor = data.promotor || data.asesor || "Directo / Web";
+                promotoresConteo[promotor] = (promotoresConteo[promotor] || 0) + 1;
+
+                const nombres = `${data.nombres || ''} ${data.apellidos || ''}`.trim() || "Sin nombre";
+                const sector = data.sector || "General";
+                const fecha = data.fecha_registro || "Reciente";
+
+                html += `
+                    <tr class="hover:bg-[#202024]/60 transition-colors">
+                        <td class="p-3.5 text-purple-400 font-semibold">${promotor}</td>
+                        <td class="p-3.5 text-white">${nombres}</td>
+                        <td class="p-3.5 text-gray-300">${sector}</td>
+                        <td class="p-3.5 text-gray-400 font-mono text-[11px]">${fecha}</td>
+                    </tr>
+                `;
+            });
+
+            for (const [promotor, total] of Object.entries(promotoresConteo)) {
+                resumenHtml += `
+                    <div class="flex items-center justify-between p-2.5 bg-[#202024]/50 rounded-xl border border-zinc-800">
+                        <span class="text-white font-medium truncate max-w-[130px]">${promotor}</span>
+                        <span class="bg-purple-950/60 text-purple-400 border border-purple-800/50 px-2 py-0.5 rounded-lg text-[10px] font-bold">${total} regs</span>
+                    </div>
+                `;
+            }
+
+            document.getElementById('promotores-resumen-list').innerHTML = resumenHtml !== "" ? resumenHtml : `<p class="text-gray-500 text-center py-4">Sin promotores registrados.</p>`;
+            document.getElementById('tabla-promotores-body').innerHTML = html !== "" ? html : `<tr><td colspan="4" class="p-6 text-center text-gray-500">No hay detalles de promotores.</td></tr>`;
+        }
+
+        function renderizarCenso(docs) {
+            let html = "";
+            const censo = docs.filter(d => (d.origen || d.tipo || '').toLowerCase() === 'censo');
+            const lista = censo.length > 0 ? censo : docs;
+
+            lista.forEach(data => {
+                const nombres = `${data.nombres || ''} ${data.apellidos || ''}`.trim() || "Sin nombre";
+                const cedula = data.cedula || "S/C";
+                const sector = data.sector || data.zona || "Nueva Esparta";
+                const estado = data.estado || "Prospecto Censo";
+                const fecha = data.fecha_registro || "Reciente";
+
+                html += `
+                    <tr class="hover:bg-[#202024]/60 transition-colors">
+                        <td class="p-3.5">
+                            <span class="text-white font-medium block">${nombres}</span>
+                            <span class="text-[10px] text-gray-500 font-mono">C.I: ${cedula}</span>
+                        </td>
+                        <td class="p-3.5 text-gray-300">${sector}</td>
+                        <td class="p-3.5"><span class="bg-amber-950/60 text-amber-400 border border-amber-800/50 px-2 py-0.5 rounded text-[10px] font-bold">${estado}</span></td>
+                        <td class="p-3.5 text-gray-400 font-mono text-[11px]">${fecha}</td>
+                    </tr>
+                `;
+            });
+            document.getElementById('stat-censo-total').innerText = lista.length;
+            document.getElementById('tabla-censo-body').innerHTML = html !== "" ? html : `<tr><td colspan="4" class="p-6 text-center text-gray-500">No hay datos de censo.</td></tr>`;
+        }
+    </script>
+</body>
+</html>
