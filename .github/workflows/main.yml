@@ -1,0 +1,40 @@
+name: Generar HTML Estático
+
+on:
+  workflow_dispatch:  # Para que lo ejecutes manualmente con un botón
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clonar repositorio
+        uses: actions/checkout@v4
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Instalar pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+        working-directory: web/tecnicable-gestion
+
+      - name: Agregar configuración estática y construir
+        run: |
+          if ! grep -q "output: 'export'" next.config.mjs; then
+            sed -i "s/export default {/export default { output: 'export', /g" next.config.mjs
+          fi
+          pnpm build
+        working-directory: web/tecnicable-gestion
+
+      - name: Subir los archivos HTML generados
+        uses: actions/upload-artifact@v4
+        with:
+          name: sitio-estatico-html
+          path: web/tecnicable-gestion/out
