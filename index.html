@@ -38,7 +38,7 @@
             --text-secondary: #475569;
             --text-muted: #94a3b8;
             --shadow: 0 8px 32px rgba(0,0,0,0.08);
-            --accent: #0d9488; /* Verde WispHub */
+            --accent: #0d9488;
             --accent-hover: #0f766e;
             --map-tile: 'light_all';
         }
@@ -501,7 +501,7 @@
         </div>
     </div>
 
-    <!-- MODAL VINCULACIÓN (se muestra la primera vez) -->
+    <!-- MODAL VINCULACIÓN -->
     <div id="modal-vincular" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay hidden">
         <div class="glass-card rounded-2xl max-w-md w-full p-6 shadow-2xl relative modal-content">
             <div class="text-center mb-4">
@@ -929,7 +929,7 @@
         </div>
     </div>
 
-    <!-- MODAL PERFIL (ampliado) -->
+    <!-- MODAL PERFIL -->
     <div id="modal-perfil" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay hidden">
         <div class="glass-card rounded-2xl max-w-4xl w-full p-6 shadow-2xl relative modal-content max-h-[90vh] overflow-y-auto custom-scrollbar">
             <div class="flex items-center justify-between pb-3" style="border-bottom:1px solid var(--border-color); margin-bottom:1rem;">
@@ -941,7 +941,6 @@
                 </button>
             </div>
 
-            <!-- Info usuario -->
             <div class="flex flex-col md:flex-row items-center md:items-start gap-6 mb-6 pb-4" style="border-bottom:1px solid var(--border-color);">
                 <img id="perfil-avatar" src="" alt="Avatar" class="w-24 h-24 rounded-full object-cover" style="border:2px solid var(--accent);" />
                 <div class="flex-1 text-center md:text-left">
@@ -959,7 +958,6 @@
                 </div>
             </div>
 
-            <!-- Gestión de usuarios (solo admin) -->
             <div id="admin-usuarios-section" class="hidden">
                 <div class="flex items-center justify-between mb-3">
                     <h4 class="font-bold text-sm" style="color:var(--text-primary);">
@@ -1074,7 +1072,6 @@
     </script>
 
     <script type="module">
-        // ========== IMPORTS ==========
         import { initializeApp } from "firebase/app";
         import {
             getAuth,
@@ -1099,7 +1096,6 @@
         } from "firebase/firestore";
         import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 
-        // ========== CONFIG ==========
         const firebaseConfig = {
             apiKey: "AIzaSyAXWVUw7b1B0IICyAU_wlYjYxdkYxMTm_E",
             authDomain: "tecnicable-e00d3.firebaseapp.com",
@@ -1120,7 +1116,6 @@
         const googleProvider = new GoogleAuthProvider();
         googleProvider.setCustomParameters({ prompt: 'select_account', hd: 'tecnicable.com' });
 
-        // ========== DOM REFS ==========
         const loginContainer = document.getElementById('login-container');
         const appContainer = document.getElementById('app-container');
         const loginForm = document.getElementById('login-form');
@@ -1147,7 +1142,6 @@
         const tablaUsuariosBody = document.getElementById('tabla-usuarios-body');
         const statUsuariosTotal = document.getElementById('stat-usuarios-total');
 
-        // ========== ESTADO GLOBAL ==========
         let allDocs = [];
         let previousIds = new Set();
         let unsubscribeFirestore = null;
@@ -1169,7 +1163,6 @@
         let tileLayer = null;
         let currentUserData = {};
 
-        // ========== TOAST ==========
         function mostrarToast(mensaje, tipo = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -1199,7 +1192,6 @@
             } catch (e) {}
         }
 
-        // ========== TEMA ==========
         function setTheme(theme) {
             const body = document.body;
             if (theme === 'light') {
@@ -1229,7 +1221,6 @@
         const savedTheme = localStorage.getItem('theme') || 'dark';
         setTheme(savedTheme);
 
-        // ========== SIDEBAR TOGGLE ==========
         window.toggleSidebar = function(open) {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebar-overlay');
@@ -1244,7 +1235,6 @@
             }
         };
 
-        // ========== NAVEGACIÓN ==========
         const navBtns = document.querySelectorAll('.nav-btn');
         const views = {
             dashboard: document.getElementById('view-dashboard'),
@@ -1302,7 +1292,6 @@
             });
         });
 
-        // ========== LOGIN ==========
         function mostrarError(texto) { errorMsg.innerText = texto; errorMsg.classList.remove('hidden'); }
         function ocultarError() { errorMsg.classList.add('hidden'); }
         function setCargandoLogin(cargando) {
@@ -1356,7 +1345,6 @@
         btnLogoutSidebar.addEventListener('click', cerrarSesion);
         btnLogoutHeader.addEventListener('click', cerrarSesion);
 
-        // ========== VINCULACIÓN ==========
         async function verificarVinculacion(uid, email) {
             usuarioEmail = email;
             try {
@@ -1382,7 +1370,6 @@
                         }
                         vinculoError.classList.add('hidden');
                         try {
-                            // --- CORRECCIÓN: agregamos los campos faltantes ---
                             const newData = {
                                 nombre,
                                 cedula,
@@ -1414,7 +1401,6 @@
             }
         }
 
-        // ========== PERFIL ==========
         function actualizarPerfilUI(user, data = {}) {
             if (!user) return;
             const photoURL = user.photoURL || data.foto || '';
@@ -1436,7 +1422,6 @@
             userNameDisplay.classList.remove('hidden');
             profileName.innerText = displayName;
             profileEmail.innerText = email;
-            // Datos adicionales en perfil
             document.getElementById('perfil-nombre').innerText = displayName;
             document.getElementById('perfil-email').innerText = email;
             document.getElementById('perfil-cedula').innerText = `Cédula: ${data.cedula || '--'}`;
@@ -1445,13 +1430,11 @@
             const esAdmin = ADMIN_EMAILS.includes(email);
             document.getElementById('perfil-rol').innerText = `Rol: ${esAdmin ? 'Administrador' : 'Promotor'}`;
             document.getElementById('perfil-avatar').src = userAvatar.src;
-            // Rellenar formulario editar
             document.getElementById('edit-perfil-nombre').value = displayName;
             document.getElementById('edit-perfil-telefono').value = data.telefono || '';
             document.getElementById('edit-perfil-direccion').value = data.direccion || '';
             document.getElementById('edit-perfil-avatar-preview').src = userAvatar.src;
 
-            // Mostrar u ocultar sección de administración de usuarios
             if (esAdmin) {
                 adminSection.classList.remove('hidden');
                 renderizarUsuarios();
@@ -1489,7 +1472,6 @@
             document.getElementById('modal-perfil').classList.add('hidden');
         };
 
-        // ========== EDITAR PERFIL PROPIO ==========
         window.abrirEditarPerfil = function() {
             const user = auth.currentUser;
             if (!user) return;
@@ -1568,7 +1550,6 @@
             }
         };
 
-        // ========== GESTIÓN DE USUARIOS (Admin) ==========
         function suscribirseUsuarios() {
             if (unsubscribeUsuarios) {
                 unsubscribeUsuarios();
@@ -1643,7 +1624,6 @@
             if (statUsuariosTotal) statUsuariosTotal.innerText = allUsers.length;
         }
 
-        // --- CORRECCIÓN: editarUsuario ahora lee el rol del documento ---
         window.editarUsuario = function(uid) {
             const user = allUsers.find(u => u.id === uid);
             if (!user) {
@@ -1654,7 +1634,6 @@
             document.getElementById('edit-usuario-nombre').value = user.nombre || '';
             document.getElementById('edit-usuario-telefono').value = user.telefono || '';
             document.getElementById('edit-usuario-direccion').value = user.direccion || '';
-            // Usar el rol guardado o determinarlo por email
             document.getElementById('edit-usuario-rol').value = user.rol || (ADMIN_EMAILS.includes(user.email) ? 'administrador' : 'promotor');
             document.getElementById('modal-editar-usuario').classList.remove('hidden');
         };
@@ -1729,7 +1708,6 @@
                 });
         };
 
-        // ========== FILTRADO ==========
         function filtrarPorPromotor(docs) {
             if (ADMIN_EMAILS.includes(usuarioEmail)) return docs;
             if (!usuarioPromotor) return docs;
@@ -1737,7 +1715,6 @@
             return docs.filter(d => (d.promotor || '').trim().toLowerCase() === lower);
         }
 
-        // ========== UBICACIONES ==========
         function suscribirseUbicaciones() {
             if (unsubscribeUbicaciones) {
                 unsubscribeUbicaciones();
@@ -1766,7 +1743,6 @@
             );
         }
 
-        // ========== MAPA ==========
         function inicializarMapa() {
             if (mapa) {
                 mapa.invalidateSize();
@@ -1786,7 +1762,7 @@
                 ? 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
                 : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
             tileLayer = L.tileLayer(tileUrl, {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; CartoDB'
+                attribution: '&copy; OpenStreetMap, &copy; CartoDB'
             }).addTo(mapa);
             marcadoresGrupo = L.layerGroup().addTo(mapa);
             window.addEventListener('resize', () => {
@@ -1839,7 +1815,6 @@
             mapa.fitBounds(bounds, { padding: [30, 30], maxZoom: 15 });
         }
 
-        // ========== RENDER RASTREO ==========
         function renderizarRastreo() {
             const tbody = document.getElementById('tabla-rastreo-body');
             const totalSpan = document.getElementById('stat-rastreo-total');
@@ -1890,13 +1865,11 @@
             if (totalSpan) totalSpan.innerText = sorted.length;
         }
 
-        // ========== FIRESTORE ==========
-        // Enrutador: decide a qué colección pertenece un registro según su campo "origen"
         function obtenerColeccionPorOrigen(origen) {
             const o = (origen || '').toLowerCase();
             if (o === 'censo') return 'censo_prospectos';
             if (o === 'web') return 'portal_web';
-            return 'clientes_app'; // 'app' o cualquier valor por defecto
+            return 'clientes_app';
         }
 
         function fusionarYRenderizar() {
@@ -1974,7 +1947,6 @@
                 }
             );
 
-            // Se mantiene por compatibilidad con el resto del código que revisa unsubscribeFirestore
             unsubscribeFirestore = () => {
                 if (unsubscribeCenso) unsubscribeCenso();
                 if (unsubscribeClientesApp) unsubscribeClientesApp();
@@ -1985,7 +1957,6 @@
             };
         }
 
-        // ========== ACTUALIZAR UI ==========
         function actualizarUI() {
             const esAdmin = ADMIN_EMAILS.includes(usuarioEmail);
             if (esAdmin) {
@@ -2006,7 +1977,6 @@
             if (sel) renderizarDetallePromotorSeleccionado(sel.value, docsFiltrados);
         }
 
-        // ========== AUXILIARES ==========
         function getBadgeEstado(estado) {
             const e = (estado || 'Pendiente').toLowerCase();
             if (e.includes('completado') || e.includes('activo')) return `<span class="badge badge-estado-completado">${estado}</span>`;
@@ -2023,432 +1993,399 @@
             return '<span class="badge badge-app"><i class="fa-solid fa-mobile-screen mr-0.5"></i>App</span>';
         }
 
-        function getNombreCompleto(d) { return `${d.nombres || ''} ${d.apellidos || ''}`.trim() || 'Sin nombre'; }
-        function getFecha(d) { return d.fecha_registro || 'Reciente'; }
-        function setStat(id, value) { const el = document.getElementById(id); if (el) el.innerText = value; }
-
-        // ========== DASHBOARD ==========
-        function procesarDashboard(docs) {
-            setStat('stat-dash-total', docs.length);
-            const promotores = new Set(docs.map(d => d.promotor).filter(Boolean));
-            setStat('stat-dash-promotores', promotores.size);
-            const estados = new Set(docs.map(d => d.estado).filter(Boolean));
-            setStat('stat-dash-estados', estados.size);
-            const planes = new Set(docs.map(d => d.plan).filter(Boolean));
-            setStat('stat-dash-planes', planes.size);
+        function getNombreCompleto(d) {
+            return d.cliente || d.nombre || d.nombreCompleto || d.ciudadano || 'Sin nombre';
         }
 
-        // ========== RECIENTES ==========
+        function procesarDashboard(docs) {
+            const total = docs.length;
+            const promotoresSet = new Set(docs.map(d => d.promotor).filter(Boolean));
+            const estadosSet = new Set(docs.map(d => d.estado).filter(Boolean));
+            const planesSet = new Set(docs.map(d => d.plan).filter(Boolean));
+
+            document.getElementById('stat-dash-total').innerText = total;
+            document.getElementById('stat-dash-promotores').innerText = promotoresSet.size;
+            document.getElementById('stat-dash-estados').innerText = estadosSet.size;
+            document.getElementById('stat-dash-planes').innerText = planesSet.size;
+        }
+
         function renderizarRecientes(docs) {
             const tbody = document.getElementById('tabla-recientes-body');
-            const sorted = [...docs].reverse().slice(0, 10);
-            if (!sorted.length) {
+            if (!tbody) return;
+            if (!docs.length) {
                 tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-xs" style="color:var(--text-muted);">No hay registros recientes.</td></tr>`;
                 return;
             }
+            const sorted = [...docs].sort((a, b) => {
+                const ta = a.fecha || a.creado || '';
+                const tb = b.fecha || b.creado || '';
+                return tb.localeCompare(ta);
+            }).slice(0, 10);
+
             let html = '';
             sorted.forEach(d => {
                 html += `<tr>
                     <td class="font-medium" style="color:var(--text-primary);">${getNombreCompleto(d)}</td>
-                    <td style="color:var(--accent); font-weight:600;">${d.plan || 'Estándar'}</td>
-                    <td style="color:#a78bfa;">${d.promotor || 'Directo'}</td>
-                    <td>${getBadgeEstado(d.estado || 'Pendiente')}</td>
+                    <td>${d.plan || '--'}</td>
+                    <td>${d.promotor || '--'}</td>
+                    <td>${getBadgeEstado(d.estado)}</td>
                     <td>${getBadgeMetodo(d.origen)}</td>
-                    <td class="font-mono text-[10px]" style="color:var(--text-secondary);">${getFecha(d)}</td>
+                    <td class="text-[10px]" style="color:var(--text-secondary);">${d.fecha || d.creado || '--'}</td>
                 </tr>`;
             });
             tbody.innerHTML = html;
         }
 
-        // ========== TODOS LOS REGISTROS ==========
-        let busquedaTimeout = null;
         function renderizarTodosRegistros(docs) {
-            const texto = (document.getElementById('busqueda-ingresados')?.value || '').toLowerCase();
-            const promotorFiltro = document.getElementById('filtro-promotor-app')?.value || '';
             const tbody = document.getElementById('tabla-ingresados-body');
-            let count = 0, html = '';
-            docs.forEach(d => {
-                const nombre = getNombreCompleto(d);
-                const cedula = d.cedula || 'S/C';
-                const sector = d.sector || d.ciudad || 'General';
-                const plan = d.plan || 'Estándar';
-                const promotor = d.promotor || 'Sin promotor';
-                const estado = d.estado || 'Pendiente';
-                const metodo = d.origen || 'App';
-                if (promotorFiltro && promotor !== promotorFiltro) return;
-                if (texto && !`${nombre} ${cedula} ${sector}`.toLowerCase().includes(texto)) return;
-                count++;
-                html += `<tr>
-                    <td><span class="font-medium block" style="color:var(--text-primary);">${nombre}</span><span class="text-[10px] font-mono" style="color:var(--text-muted);">C.I: ${cedula}</span></td>
-                    <td><span class="px-2 py-0.5 rounded-lg text-[10px]" style="background:var(--bg-input); border:1px solid var(--border-color);">${sector}</span></td>
-                    <td><span style="color:var(--accent); font-weight:bold;">${plan}</span></td>
-                    <td style="color:#a78bfa;">${promotor}</td>
-                    <td>${getBadgeEstado(estado)}</td>
-                    <td>${getBadgeMetodo(metodo)}</td>
-                    <td class="font-mono text-[10px]" style="color:var(--text-secondary);">${getFecha(d)}</td>
-                </tr>`;
+            const statTotal = document.getElementById('stat-ing-total');
+            const filtroPromotor = document.getElementById('filtro-promotor-app')?.value || '';
+            const busqueda = document.getElementById('busqueda-ingresados')?.value.toLowerCase() || '';
+
+            if (!tbody) return;
+
+            let filtrados = docs.filter(d => {
+                if (filtroPromotor && (d.promotor || '') !== filtroPromotor) return false;
+                if (busqueda) {
+                    const texto = `${getNombreCompleto(d)} ${d.cedula || ''} ${d.sector || ''} ${d.plan || ''}`.toLowerCase();
+                    if (!texto.includes(busqueda)) return false;
+                }
+                return true;
             });
-            document.getElementById('stat-ing-total').innerText = count;
-            tbody.innerHTML = count ? html : `<tr><td colspan="7" class="text-center py-4 text-xs" style="color:var(--text-muted);">No se encontraron registros.</td></tr>`;
-        }
 
-        document.getElementById('busqueda-ingresados')?.addEventListener('input', () => {
-            clearTimeout(busquedaTimeout);
-            busquedaTimeout = setTimeout(() => { if (usuarioPromotor || ADMIN_EMAILS.includes(usuarioEmail)) renderizarTodosRegistros(filtrarPorPromotor(allDocs)); }, 300);
-        });
-        document.getElementById('filtro-promotor-app')?.addEventListener('change', () => {
-            if (usuarioPromotor || ADMIN_EMAILS.includes(usuarioEmail)) renderizarTodosRegistros(filtrarPorPromotor(allDocs));
-        });
-
-        // ========== CONTRATOS WEB ==========
-        function renderizarContratosWeb(docs) {
-            const promotorFiltro = document.getElementById('filtro-promotor-web')?.value || '';
-            const estadoFiltro = document.getElementById('filtro-estado-web')?.value || '';
-            const tbody = document.getElementById('tabla-web-body');
-            let count = 0, html = '';
-            docs.forEach(d => {
-                const promotor = d.promotor || 'Sin promotor';
-                const estado = d.estado || 'Pendiente';
-                if (promotorFiltro && promotor !== promotorFiltro) return;
-                if (estadoFiltro && estado !== estadoFiltro) return;
-                count++;
-                const nombre = getNombreCompleto(d);
-                const cedula = d.cedula || 'S/C';
-                const sector = d.sector || 'General';
-                const plan = d.plan || 'Estándar';
-                const metodo = d.origen || 'App';
-                html += `<tr>
-                    <td><span class="font-medium block" style="color:var(--text-primary);">${nombre}</span><span class="text-[10px] font-mono" style="color:var(--text-muted);">C.I: ${cedula}</span></td>
-                    <td>${sector}</td>
-                    <td><span style="color:#06b6d4; font-weight:600;">${plan}</span></td>
-                    <td style="color:#a78bfa;">${promotor}</td>
-                    <td>${getBadgeEstado(estado)}</td>
-                    <td>${getBadgeMetodo(metodo)}</td>
-                    <td class="font-mono text-[10px]" style="color:var(--text-secondary);">${getFecha(d)}</td>
-                    <td class="text-center whitespace-nowrap">
-                        <button onclick="verDetalle('${d.id}')" class="btn-action ver" title="Ver"><i class="fa-regular fa-eye"></i></button>
-                        <button onclick="abrirEditarRegistro('${d.id}')" class="btn-action editar" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button>
-                        <button onclick="cambiarEstadoWeb('${d.id}','${estado}')" class="btn-action estado" title="Cambiar estado"><i class="fa-solid fa-arrows-rotate"></i></button>
-                        <button onclick="eliminarRegistro('${d.id}')" class="btn-action eliminar" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button>
-                    </td>
-                </tr>`;
-            });
-            document.getElementById('stat-web-total').innerText = count;
-            tbody.innerHTML = count ? html : `<tr><td colspan="8" class="text-center py-4 text-xs" style="color:var(--text-muted);">No hay registros con estos filtros.</td></tr>`;
-        }
-
-        document.getElementById('filtro-promotor-web')?.addEventListener('change', () => {
-            if (usuarioPromotor || ADMIN_EMAILS.includes(usuarioEmail)) renderizarContratosWeb(filtrarPorPromotor(allDocs));
-        });
-        document.getElementById('filtro-estado-web')?.addEventListener('change', () => {
-            if (usuarioPromotor || ADMIN_EMAILS.includes(usuarioEmail)) renderizarContratosWeb(filtrarPorPromotor(allDocs));
-        });
-
-        // ========== COMPLETADOS ==========
-        let busquedaCompletadosTimeout = null;
-        function renderizarCompletados(docs) {
-            const texto = (document.getElementById('busqueda-completados')?.value || '').toLowerCase();
-            const promotorFiltro = document.getElementById('filtro-promotor-completados')?.value || '';
-            const tbody = document.getElementById('tabla-completados-body');
-            const completados = docs.filter(d => (d.estado || '').toLowerCase() === 'completado');
-            let count = 0, html = '';
-            completados.forEach(d => {
-                const promotor = d.promotor || 'Sin promotor';
-                if (promotorFiltro && promotor !== promotorFiltro) return;
-                const nombre = getNombreCompleto(d);
-                const cedula = d.cedula || 'S/C';
-                const sector = d.sector || d.ciudad || 'General';
-                const plan = d.plan || 'Estándar';
-                const metodo = d.origen || 'App';
-                if (texto && !`${nombre} ${cedula} ${sector}`.toLowerCase().includes(texto)) return;
-                count++;
-                html += `<tr>
-                    <td><span class="font-medium block" style="color:var(--text-primary);">${nombre}</span><span class="text-[10px] font-mono" style="color:var(--text-muted);">C.I: ${cedula}</span></td>
-                    <td>${sector}</td>
-                    <td><span style="color:#10b981; font-weight:600;">${plan}</span></td>
-                    <td style="color:#a78bfa;">${promotor}</td>
-                    <td>${getBadgeMetodo(metodo)}</td>
-                    <td class="font-mono text-[10px]" style="color:var(--text-secondary);">${getFecha(d)}</td>
-                    <td class="text-center whitespace-nowrap">
-                        <button onclick="verDetalle('${d.id}')" class="btn-action ver" title="Ver"><i class="fa-regular fa-eye"></i></button>
-                        <button onclick="abrirEditarRegistro('${d.id}')" class="btn-action editar" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button>
-                        <button onclick="cambiarEstadoWeb('${d.id}','Completado')" class="btn-action estado" title="Cambiar estado"><i class="fa-solid fa-arrows-rotate"></i></button>
-                        <button onclick="eliminarRegistro('${d.id}')" class="btn-action eliminar" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button>
-                    </td>
-                </tr>`;
-            });
-            document.getElementById('stat-completados-total').innerText = count;
-            tbody.innerHTML = count ? html : `<tr><td colspan="7" class="text-center py-4 text-xs" style="color:var(--text-muted);">No hay contratos completados.</td></tr>`;
-        }
-
-        document.getElementById('busqueda-completados')?.addEventListener('input', () => {
-            clearTimeout(busquedaCompletadosTimeout);
-            busquedaCompletadosTimeout = setTimeout(() => {
-                if (usuarioPromotor || ADMIN_EMAILS.includes(usuarioEmail)) renderizarCompletados(filtrarPorPromotor(allDocs));
-            }, 300);
-        });
-        document.getElementById('filtro-promotor-completados')?.addEventListener('change', () => {
-            if (usuarioPromotor || ADMIN_EMAILS.includes(usuarioEmail)) renderizarCompletados(filtrarPorPromotor(allDocs));
-        });
-
-        // ========== RANKING PROMOTORES ==========
-        function renderizarRankingPromotores(docs) {
-            const ranking = {};
-            docs.forEach(d => {
-                const p = d.promotor || 'Sin Asignar';
-                if (!ranking[p]) ranking[p] = { total: 0, ultimaFecha: '' };
-                ranking[p].total++;
-                const fecha = d.fecha_registro || '';
-                if (fecha > ranking[p].ultimaFecha) ranking[p].ultimaFecha = fecha;
-            });
-            const grid = document.getElementById('promotores-ranking-grid');
-            const maxRegs = Math.max(...Object.values(ranking).map(r => r.total), 1);
-            let html = '';
-            for (const [promotor, stats] of Object.entries(ranking)) {
-                const porcentaje = Math.round((stats.total / maxRegs) * 100);
-                html += `<div class="glass-card rounded-xl p-4 shadow-lg space-y-1.5" style="border-left:4px solid #a78bfa;">
-                    <div class="flex items-center justify-between">
-                        <h4 class="font-bold text-sm truncate max-w-[140px]" title="${promotor}" style="color:var(--text-primary);"><i class="fa-solid fa-id-badge text-purple-400 mr-1.5"></i>${promotor}</h4>
-                        <span class="bg-purple-950/60 text-purple-400 border border-purple-800/50 px-2.5 py-0.5 rounded-full text-xs font-black">${stats.total}</span>
-                    </div>
-                    <div>
-                        <div class="flex justify-between text-[10px] mb-0.5" style="color:var(--text-secondary);"><span>Progreso</span><span>${stats.total} reg</span></div>
-                        <div class="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden"><div class="bg-gradient-to-r from-purple-500 to-indigo-500 h-full rounded-full" style="width:${porcentaje}%"></div></div>
-                    </div>
-                    ${stats.ultimaFecha ? `<div class="text-[10px] text-right" style="color:var(--text-secondary);">Último: ${stats.ultimaFecha}</div>` : ''}
-                </div>`;
+            if (statTotal) statTotal.innerText = filtrados.length;
+            if (!filtrados.length) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-xs" style="color:var(--text-muted);">No se encontraron registros.</td></tr>`;
+                return;
             }
-            grid.innerHTML = html || `<p class="col-span-full text-center py-4 text-xs" style="color:var(--text-muted);">Sin datos de promotores.</p>`;
+
+            let html = '';
+            filtrados.forEach(d => {
+                html += `<tr>
+                    <td class="font-medium" style="color:var(--text-primary);">${getNombreCompleto(d)}<br/><small style="color:var(--text-muted);">${d.cedula || ''}</small></td>
+                    <td>${d.sector || '--'}</td>
+                    <td>${d.plan || '--'}</td>
+                    <td>${d.promotor || '--'}</td>
+                    <td>${getBadgeEstado(d.estado)}</td>
+                    <td>${getBadgeMetodo(d.origen)}</td>
+                    <td class="text-[10px]" style="color:var(--text-secondary);">${d.fecha || d.creado || '--'}</td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
         }
 
-        // ========== DETALLE PROMOTOR ==========
+        function renderizarContratosWeb(docs) {
+            const tbody = document.getElementById('tabla-web-body');
+            const statTotal = document.getElementById('stat-web-total');
+            const filtroPromotor = document.getElementById('filtro-promotor-web')?.value || '';
+            const filtroEstado = document.getElementById('filtro-estado-web')?.value || '';
+
+            if (!tbody) return;
+
+            let webDocs = docs.filter(d => (d.origen || '').toLowerCase() === 'web');
+            let filtrados = webDocs.filter(d => {
+                if (filtroPromotor && (d.promotor || '') !== filtroPromotor) return false;
+                if (filtroEstado && (d.estado || 'Pendiente') !== filtroEstado) return false;
+                return true;
+            });
+
+            if (statTotal) statTotal.innerText = webDocs.length;
+            if (!filtrados.length) {
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-xs" style="color:var(--text-muted);">No hay contratos web.</td></tr>`;
+                return;
+            }
+
+            let html = '';
+            filtrados.forEach(d => {
+                html += `<tr>
+                    <td class="font-medium" style="color:var(--text-primary);">${getNombreCompleto(d)}<br/><small style="color:var(--text-muted);">${d.cedula || ''}</small></td>
+                    <td>${d.sector || '--'}</td>
+                    <td>${d.plan || '--'}</td>
+                    <td>${d.promotor || '--'}</td>
+                    <td>${getBadgeEstado(d.estado)}</td>
+                    <td>${getBadgeMetodo(d.origen)}</td>
+                    <td class="text-[10px]" style="color:var(--text-secondary);">${d.fecha || d.creado || '--'}</td>
+                    <td class="text-center whitespace-nowrap">
+                        <button onclick="verDetalle('${d.id}')" class="btn-action ver" title="Ver detalle"><i class="fa-regular fa-eye"></i></button>
+                        <button onclick="abrirEditarCenso('${d.id}')" class="btn-action editar" title="Editar estado"><i class="fa-regular fa-pen-to-square"></i></button>
+                    </td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function renderizarCompletados(docs) {
+            const tbody = document.getElementById('tabla-completados-body');
+            const statTotal = document.getElementById('stat-completados-total');
+            const filtroPromotor = document.getElementById('filtro-promotor-completados')?.value || '';
+            const busqueda = document.getElementById('busqueda-completados')?.value.toLowerCase() || '';
+
+            if (!tbody) return;
+
+            let completados = docs.filter(d => {
+                const est = (d.estado || '').toLowerCase();
+                return est.includes('completado') || est.includes('activo');
+            });
+
+            let filtrados = completados.filter(d => {
+                if (filtroPromotor && (d.promotor || '') !== filtroPromotor) return false;
+                if (busqueda) {
+                    const texto = `${getNombreCompleto(d)} ${d.cedula || ''} ${d.sector || ''} ${d.plan || ''}`.toLowerCase();
+                    if (!texto.includes(busqueda)) return false;
+                }
+                return true;
+            });
+
+            if (statTotal) statTotal.innerText = completados.length;
+            if (!filtrados.length) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-xs" style="color:var(--text-muted);">No hay contratos completados.</td></tr>`;
+                return;
+            }
+
+            let html = '';
+            filtrados.forEach(d => {
+                html += `<tr>
+                    <td class="font-medium" style="color:var(--text-primary);">${getNombreCompleto(d)}<br/><small style="color:var(--text-muted);">${d.cedula || ''}</small></td>
+                    <td>${d.sector || '--'}</td>
+                    <td>${d.plan || '--'}</td>
+                    <td>${d.promotor || '--'}</td>
+                    <td>${getBadgeMetodo(d.origen)}</td>
+                    <td class="text-[10px]" style="color:var(--text-secondary);">${d.fecha || d.creado || '--'}</td>
+                    <td class="text-center whitespace-nowrap">
+                        <button onclick="verDetalle('${d.id}')" class="btn-action ver" title="Ver detalle"><i class="fa-regular fa-eye"></i></button>
+                    </td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function renderizarRankingPromotores(docs) {
+            const grid = document.getElementById('promotores-ranking-grid');
+            if (!grid) return;
+
+            const conteo = {};
+            docs.forEach(d => {
+                const p = d.promotor || 'Sin promotor';
+                conteo[p] = (conteo[p] || 0) + 1;
+            });
+
+            const sorted = Object.entries(conteo).sort((a, b) => b[1] - a[1]);
+            if (!sorted.length) {
+                grid.innerHTML = `<p class="col-span-full text-center py-4 text-xs" style="color:var(--text-muted);">No hay datos de promotores.</p>`;
+                return;
+            }
+
+            let html = '';
+            sorted.forEach(([promotor, total], index) => {
+                const colores = ['border-l-4 border-blue-500', 'border-l-4 border-emerald-500', 'border-l-4 border-purple-500', 'border-l-4 border-amber-500'];
+                const claseBorde = colores[index % colores.length];
+                html += `<div class="glass-card rounded-2xl p-4 shadow-lg ${claseBorde} flex items-center justify-between">
+                    <div>
+                        <p class="text-[10px] uppercase font-semibold" style="color:var(--text-secondary);">Promotor #${index + 1}</p>
+                        <h4 class="font-bold text-sm mt-0.5" style="color:var(--text-primary);">${promotor}</h4>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-2xl font-black" style="color:var(--accent);">${total}</span>
+                        <p class="text-[9px]" style="color:var(--text-muted);">Registros</p>
+                    </div>
+                </div>`;
+            });
+            grid.innerHTML = html;
+        }
+
         function renderizarDetallePromotorSeleccionado(promotorSeleccionado, docs) {
             const tbody = document.getElementById('tabla-promotores-body');
-            const titulo = document.getElementById('titulo-tabla-promotor');
-            const contador = document.getElementById('contador-promotor-sel');
-            titulo.innerHTML = `<i class="fa-solid fa-list-check text-purple-400"></i> Registros: <span class="text-purple-400 font-mono">${promotorSeleccionado || 'Todos'}</span>`;
-            let count = 0, html = '';
-            docs.forEach(d => {
-                const p = d.promotor || 'Sin Asignar';
-                if (promotorSeleccionado && p !== promotorSeleccionado) return;
-                count++;
-                const nombre = getNombreCompleto(d);
-                const cedula = d.cedula || 'S/C';
-                const sector = d.sector || d.ciudad || 'General';
-                const plan = d.plan || 'Estándar';
-                const estado = d.estado || 'Pendiente';
-                const metodo = d.origen || 'App';
-                const fecha = getFecha(d);
+            const tituloSpan = document.getElementById('titulo-tabla-promotor');
+            const contadorSpan = document.getElementById('contador-promotor-sel');
+            if (!tbody) return;
+
+            let filtrados = docs;
+            if (promotorSeleccionado) {
+                filtrados = docs.filter(d => (d.promotor || '') === promotorSeleccionado);
+            }
+
+            if (tituloSpan) {
+                tituloSpan.innerHTML = `<i class="fa-solid fa-list-check text-purple-400"></i> Registros: <span class="text-purple-400 font-mono">${promotorSeleccionado || 'Todos'}</span>`;
+            }
+            if (contadorSpan) contadorSpan.innerText = filtrados.length;
+
+            if (!filtrados.length) {
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-xs" style="color:var(--text-muted);">No hay registros para este promotor.</td></tr>`;
+                return;
+            }
+
+            let html = '';
+            filtrados.forEach(d => {
                 html += `<tr>
-                    <td class="font-medium" style="color:var(--text-primary);">${nombre}</td>
-                    <td class="font-mono text-[11px]" style="color:var(--text-secondary);">${cedula}</td>
-                    <td>${sector}</td>
-                    <td style="color:var(--accent);">${plan}</td>
-                    <td>${getBadgeEstado(estado)}</td>
-                    <td>${getBadgeMetodo(metodo)}</td>
-                    <td class="font-mono text-[10px]" style="color:var(--text-secondary);">${fecha}</td>
-                    <td class="text-center">
-                        <button onclick="verDetalle('${d.id}')" class="btn-action ver" title="Ver"><i class="fa-regular fa-eye"></i></button>
+                    <td class="font-medium" style="color:var(--text-primary);">${getNombreCompleto(d)}</td>
+                    <td>${d.cedula || '--'}</td>
+                    <td>${d.sector || '--'}</td>
+                    <td>${d.plan || '--'}</td>
+                    <td>${getBadgeEstado(d.estado)}</td>
+                    <td>${getBadgeMetodo(d.origen)}</td>
+                    <td class="text-[10px]" style="color:var(--text-secondary);">${d.fecha || d.creado || '--'}</td>
+                    <td class="text-center whitespace-nowrap">
+                        <button onclick="verDetalle('${d.id}')" class="btn-action ver" title="Ver detalle"><i class="fa-regular fa-eye"></i></button>
                     </td>
                 </tr>`;
             });
-            contador.innerText = count;
-            tbody.innerHTML = count ? html : `<tr><td colspan="8" class="text-center py-4 text-xs" style="color:var(--text-muted);">No hay registros para este promotor.</td></tr>`;
+            tbody.innerHTML = html;
         }
 
         document.getElementById('select-detalle-promotor')?.addEventListener('change', (e) => {
-            if (usuarioPromotor || ADMIN_EMAILS.includes(usuarioEmail)) renderizarDetallePromotorSeleccionado(e.target.value, filtrarPorPromotor(allDocs));
+            renderizarDetallePromotorSeleccionado(e.target.value, filtrarPorPromotor(allDocs));
         });
 
-        // ========== CENSO ==========
         function renderizarCenso(docs) {
-            const promotorFiltro = document.getElementById('filtro-promotor-censo')?.value || '';
-            const estadoFiltro = document.getElementById('filtro-estado-censo')?.value || '';
             const tbody = document.getElementById('tabla-censo-body');
+            const statTotal = document.getElementById('stat-censo-total');
             const resumenContainer = document.getElementById('censo-resumen-promotores');
-            let count = 0, html = '';
-            const resumen = {};
-            docs.forEach(d => {
-                const promotor = d.promotor || 'Sin Asignar';
-                resumen[promotor] = (resumen[promotor] || 0) + 1;
-                const estado = d.estado || 'Prospecto';
-                if (promotorFiltro && promotor !== promotorFiltro) return;
-                if (estadoFiltro && estado !== estadoFiltro) return;
-                count++;
-                const nombre = getNombreCompleto(d);
-                const cedula = d.cedula || 'S/C';
-                const sector = d.sector || 'Nueva Esparta';
-                const metodo = d.origen || 'Censo';
+            const filtroPromotor = document.getElementById('filtro-promotor-censo')?.value || '';
+            const filtroEstado = document.getElementById('filtro-estado-censo')?.value || '';
+
+            if (!tbody) return;
+
+            let censoDocs = docs.filter(d => (d.origen || '').toLowerCase() === 'censo' || d.ciudadano !== undefined);
+            let filtrados = censoDocs.filter(d => {
+                if (filtroPromotor && (d.promotor || '') !== filtroPromotor) return false;
+                if (filtroEstado && (d.estado || 'Pendiente') !== filtroEstado) return false;
+                return true;
+            });
+
+            if (statTotal) statTotal.innerText = censoDocs.length;
+
+            if (resumenContainer) {
+                const conteo = {};
+                censoDocs.forEach(d => {
+                    const p = d.promotor || 'Sin promotor';
+                    conteo[p] = (conteo[p] || 0) + 1;
+                });
+                let resHtml = '';
+                Object.entries(conteo).slice(0, 4).forEach(([p, total]) => {
+                    resHtml += `<div class="glass-card rounded-2xl p-4 shadow-lg border-l-4 border-amber-500">
+                        <p class="text-[10px] uppercase font-semibold truncate" style="color:var(--text-secondary);">${p}</p>
+                        <h3 class="text-xl font-black mt-1 text-amber-400">${total}</h3>
+                    </div>`;
+                });
+                resumenContainer.innerHTML = resHtml || '<p class="col-span-full text-center text-xs text-muted">Sin datos de censo.</p>';
+            }
+
+            if (!filtrados.length) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-xs" style="color:var(--text-muted);">No hay prospectos en el censo.</td></tr>`;
+                return;
+            }
+
+            let html = '';
+            filtrados.forEach(d => {
                 html += `<tr>
-                    <td><span class="font-medium block" style="color:var(--text-primary);">${nombre}</span><span class="text-[10px] font-mono" style="color:var(--text-muted);">C.I: ${cedula}</span></td>
-                    <td>${sector}</td>
-                    <td style="color:#a78bfa;">${promotor}</td>
-                    <td>${getBadgeEstado(estado)}</td>
-                    <td>${getBadgeMetodo(metodo)}</td>
-                    <td class="font-mono text-[10px]" style="color:var(--text-secondary);">${getFecha(d)}</td>
+                    <td class="font-medium" style="color:var(--text-primary);">${getNombreCompleto(d)}<br/><small style="color:var(--text-muted);">${d.cedula || ''}</small></td>
+                    <td>${d.sector || '--'}</td>
+                    <td>${d.promotor || '--'}</td>
+                    <td>${getBadgeEstado(d.estado)}</td>
+                    <td>${getBadgeMetodo(d.origen)}</td>
+                    <td class="text-[10px]" style="color:var(--text-secondary);">${d.fecha || d.creado || '--'}</td>
                     <td class="text-center whitespace-nowrap">
-                        <button onclick="abrirEditarRegistro('${d.id}')" class="btn-action editar" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button>
-                        <button onclick="verDetalle('${d.id}')" class="btn-action ver" title="Ver"><i class="fa-regular fa-eye"></i></button>
-                        <button onclick="eliminarRegistro('${d.id}')" class="btn-action eliminar" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button>
+                        <button onclick="verDetalle('${d.id}')" class="btn-action ver" title="Ver detalle"><i class="fa-regular fa-eye"></i></button>
+                        <button onclick="abrirEditarCenso('${d.id}')" class="btn-action editar" title="Editar estado"><i class="fa-regular fa-pen-to-square"></i></button>
                     </td>
                 </tr>`;
             });
-            document.getElementById('stat-censo-total').innerText = count;
-            tbody.innerHTML = count ? html : `<tr><td colspan="7" class="text-center py-4 text-xs" style="color:var(--text-muted);">No se encontraron prospectos de censo.</td></tr>`;
-            let resHtml = '';
-            for (const [promotor, total] of Object.entries(resumen)) {
-                resHtml += `<div class="glass-card rounded-xl p-4 shadow-lg flex items-center justify-between" style="border-left:4px solid #f59e0b;">
-                    <div><span class="text-[10px] uppercase font-semibold block" style="color:var(--text-secondary);">Prospectos</span><h4 class="font-bold text-xs truncate max-w-[120px] mt-0.5" style="color:var(--text-primary);">${promotor}</h4></div>
-                    <span class="bg-amber-950/60 text-amber-400 border border-amber-800/50 px-3 py-0.5 rounded-full text-sm font-black">${total}</span>
-                </div>`;
-            }
-            resumenContainer.innerHTML = resHtml || `<div class="glass-card rounded-xl p-4 col-span-full text-center text-xs" style="color:var(--text-muted);">No hay promotores activos.</div>`;
+            tbody.innerHTML = html;
         }
 
-        document.getElementById('filtro-promotor-censo')?.addEventListener('change', () => {
-            if (usuarioPromotor || ADMIN_EMAILS.includes(usuarioEmail)) renderizarCenso(filtrarPorPromotor(allDocs));
-        });
-        document.getElementById('filtro-estado-censo')?.addEventListener('change', () => {
-            if (usuarioPromotor || ADMIN_EMAILS.includes(usuarioEmail)) renderizarCenso(filtrarPorPromotor(allDocs));
-        });
+        document.getElementById('filtro-promotor-app')?.addEventListener('change', () => renderizarTodosRegistros(filtrarPorPromotor(allDocs)));
+        document.getElementById('busqueda-ingresados')?.addEventListener('input', () => renderizarTodosRegistros(filtrarPorPromotor(allDocs)));
+        document.getElementById('filtro-promotor-web')?.addEventListener('change', () => renderizarContratosWeb(filtrarPorPromotor(allDocs)));
+        document.getElementById('filtro-estado-web')?.addEventListener('change', () => renderizarContratosWeb(filtrarPorPromotor(allDocs)));
+        document.getElementById('filtro-promotor-completados')?.addEventListener('change', () => renderizarCompletados(filtrarPorPromotor(allDocs)));
+        document.getElementById('busqueda-completados')?.addEventListener('input', () => renderizarCompletados(filtrarPorPromotor(allDocs)));
+        document.getElementById('filtro-promotor-censo')?.addEventListener('change', () => renderizarCenso(filtrarPorPromotor(allDocs)));
+        document.getElementById('filtro-estado-censo')?.addEventListener('change', () => renderizarCenso(filtrarPorPromotor(allDocs)));
 
-        // ========== FUNCIONES GLOBALES ==========
         window.verDetalle = function(id) {
-            const d = allDocs.find(doc => doc.id === id);
-            if (!d) return;
+            const docItem = allDocs.find(d => d.id === id);
+            if (!docItem) {
+                mostrarToast('Registro no encontrado', 'error');
+                return;
+            }
+            document.getElementById('modal-detalle-titulo').innerHTML = `<i class="fa-solid fa-circle-info" style="color:var(--accent);"></i> Detalle: ${getNombreCompleto(docItem)}`;
             let html = '';
-            if (d.foto_binaria && d.foto_binaria.startsWith('data:image')) {
-                html += `<div class="mb-2"><img src="${d.foto_binaria}" alt="Foto" class="imagen-modal" style="max-width:100%; max-height:260px; border-radius:10px; border:1px solid var(--border-color); object-fit:contain; background:var(--bg-body);" /></div>`;
-            }
-            for (const [key, value] of Object.entries(d)) {
-                if (key === 'id' || key === 'foto_binaria') continue;
-                html += `<div class="p-2 rounded-xl" style="background:var(--bg-input); border:1px solid var(--border-color);">
-                    <span class="text-[10px] uppercase font-bold tracking-wider block" style="color:var(--text-secondary);">${key.replace(/_/g, ' ')}</span>
-                    <span class="font-medium text-xs mt-0.5 block" style="color:var(--text-primary);">${value !== undefined && value !== null ? value : 'N/D'}</span>
+            Object.entries(docItem).forEach(([k, v]) => {
+                if (k === 'id') return;
+                html += `<div class="p-2 rounded-xl" style="background:var(--bg-input);">
+                    <strong class="uppercase text-[10px]" style="color:var(--text-muted);">${k}:</strong>
+                    <div style="color:var(--text-primary);">${v !== null && v !== undefined ? v.toString() : '--'}</div>
                 </div>`;
-            }
+            });
             document.getElementById('modal-detalle-contenido').innerHTML = html;
             document.getElementById('modal-detalle').classList.remove('hidden');
         };
-        window.cerrarModalDetalle = function() { document.getElementById('modal-detalle').classList.add('hidden'); };
 
-        window.abrirEditarRegistro = function(id) {
-            const d = allDocs.find(doc => doc.id === id);
-            if (!d) {
+        window.cerrarModalDetalle = function() {
+            document.getElementById('modal-detalle').classList.add('hidden');
+        };
+
+        window.abrirEditarCenso = function(id) {
+            const docItem = allDocs.find(d => d.id === id);
+            if (!docItem) {
                 mostrarToast('Registro no encontrado', 'error');
                 return;
             }
             document.getElementById('edit-censo-id').value = id;
-            document.getElementById('edit-censo-estado').value = d.estado || 'Pendiente';
-            document.getElementById('edit-censo-notas').value = d.notas || '';
-            const tituloSpan = document.getElementById('edit-censo-titulo-texto');
-            if (d.origen && d.origen.toLowerCase() === 'censo') {
-                tituloSpan.textContent = 'Editar Prospecto';
-            } else {
-                tituloSpan.textContent = 'Editar Contrato';
-            }
+            document.getElementById('edit-censo-estado').value = docItem.estado || 'Pendiente';
+            document.getElementById('edit-censo-notas').value = docItem.notas || '';
+            document.getElementById('edit-censo-titulo-texto').innerText = `Editar: ${getNombreCompleto(docItem)}`;
             document.getElementById('modal-editar-censo').classList.remove('hidden');
         };
+
         window.cerrarModalEditarCenso = function() {
             document.getElementById('modal-editar-censo').classList.add('hidden');
         };
+
         window.guardarEdicionCenso = async function() {
             const id = document.getElementById('edit-censo-id').value;
             const estado = document.getElementById('edit-censo-estado').value;
-            const notas = document.getElementById('edit-censo-notas').value;
-            const registro = allDocs.find(d => d.id === id);
-            if (!registro) { mostrarToast('Registro no encontrado', 'error'); return; }
+            const notas = document.getElementById('edit-censo-notas').value.trim();
+            const docItem = allDocs.find(d => d.id === id);
+            if (!docItem) return;
+
+            const coleccion = obtenerColeccionPorOrigen(docItem.origen);
             try {
-                const coleccion = obtenerColeccionPorOrigen(registro.origen);
-                await updateDoc(doc(db, coleccion, id), { estado, notas });
+                const docRef = doc(db, coleccion, id);
+                await updateDoc(docRef, { estado, notas, actualizado: serverTimestamp() });
+                mostrarToast('Registro actualizado correctamente', 'success');
                 cerrarModalEditarCenso();
-                mostrarToast('Registro actualizado', 'success');
             } catch (err) {
                 console.error(err);
-                mostrarToast('Error al guardar', 'error');
+                mostrarToast('Error al actualizar registro', 'error');
             }
         };
 
-        window.cambiarEstadoWeb = async function(id, estadoActual) {
-            const estados = ['Pendiente','En Proceso','Procesado','Completado','Cancelado'];
-            const nuevo = prompt(`Cambiar estado (${estados.join(', ')}):`, estadoActual);
-            if (!nuevo) return;
-            if (!estados.includes(nuevo)) { mostrarToast('Estado no válido', 'error'); return; }
-            const registro = allDocs.find(d => d.id === id);
-            if (!registro) { mostrarToast('Registro no encontrado', 'error'); return; }
-            try {
-                const coleccion = obtenerColeccionPorOrigen(registro.origen);
-                await updateDoc(doc(db, coleccion, id), { estado: nuevo });
-                mostrarToast(`Estado actualizado a ${nuevo}`, 'success');
-            } catch (err) { mostrarToast('Error al actualizar estado', 'error'); }
-        };
-
-        window.eliminarRegistro = async function(id) {
-            if (!ADMIN_EMAILS.includes(usuarioEmail)) {
-                mostrarToast('No tienes permisos para eliminar', 'error');
-                return;
-            }
-            if (!confirm('¿Eliminar este registro permanentemente?')) return;
-            const registro = allDocs.find(d => d.id === id);
-            if (!registro) { mostrarToast('Registro no encontrado', 'error'); return; }
-            try {
-                const coleccion = obtenerColeccionPorOrigen(registro.origen);
-                await deleteDoc(doc(db, coleccion, id));
-                mostrarToast('Registro eliminado', 'success');
-            } catch (err) { mostrarToast('Error al eliminar', 'error'); }
-        };
-
-        // ========== FLUJO DE AUTENTICACIÓN ==========
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 loginContainer.classList.add('hidden');
                 appContainer.classList.remove('hidden');
-                const docSnap = await getDoc(doc(db, "usuarios", user.uid));
-                if (docSnap.exists()) {
-                    currentUserData = docSnap.data();
-                } else {
-                    currentUserData = {};
-                }
-                actualizarPerfilUI(user, currentUserData);
                 await verificarVinculacion(user.uid, user.email);
-                if (!unsubscribeFirestore) {
-                    suscribirseFirestore();
-                    suscribirseUsuarios();
-                    suscribirseUbicaciones();
-                } else {
-                    actualizarUI();
-                }
-                const seccionGuardada = sessionStorage.getItem('seccion') || 'dashboard';
-                cambiarSeccion(seccionGuardada);
+                suscribirseUsuarios();
+                suscribirseFirestore();
+                suscribirseUbicaciones();
+                const savedSec = sessionStorage.getItem('seccion') || 'dashboard';
+                cambiarSeccion(savedSec);
             } else {
-                if (unsubscribeFirestore) { unsubscribeFirestore(); unsubscribeFirestore = null; }
-                if (unsubscribeUbicaciones) { unsubscribeUbicaciones(); unsubscribeUbicaciones = null; }
-                if (unsubscribeUsuarios) { unsubscribeUsuarios(); unsubscribeUsuarios = null; }
-                loginContainer.classList.remove('hidden');
+                if (unsubscribeFirestore) unsubscribeFirestore();
+                if (unsubscribeUbicaciones) unsubscribeUbicaciones();
+                if (unsubscribeUsuarios) unsubscribeUsuarios();
                 appContainer.classList.add('hidden');
-                allDocs = [];
-                previousIds = new Set();
-                ubicacionesPromotores = [];
+                loginContainer.classList.remove('hidden');
+                userAvatar.classList.add('hidden');
+                userNameDisplay.classList.add('hidden');
                 usuarioPromotor = null;
                 usuarioUid = null;
                 usuarioEmail = null;
-                currentUserData = {};
-                modalVinculacion.classList.add('hidden');
-                document.getElementById('modal-perfil').classList.add('hidden');
-                document.getElementById('modal-editar-perfil').classList.add('hidden');
-                document.getElementById('modal-editar-usuario').classList.add('hidden');
-                profileMenu.classList.remove('show');
-                if (mapa) {
-                    mapa.remove();
-                    mapa = null;
-                    marcadoresGrupo = null;
-                    tileLayer = null;
-                }
-                toggleSidebar(false);
+                allDocs = [];
+                previousIds.clear();
             }
         });
-
-        console.log('✅ Tecnicable Pro - Listo para usar.');
     </script>
 </body>
 </html>
