@@ -1067,6 +1067,7 @@
                 "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
                 "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js",
                 "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js",
+                "firebase/database": "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js",
                 "firebase/storage": "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js"
             }
         }
@@ -1093,19 +1094,21 @@
             getDoc,
             setDoc,
             updateDoc,
-            deleteDoc
+            deleteDoc,
+            serverTimestamp
         } from "firebase/firestore";
         import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 
         // ========== CONFIG ==========
         const firebaseConfig = {
-            apiKey: "AIzaSyCaI5NPapzEe1jK8EfZrnTW8lEytfy4eR4",
-            authDomain: "formulario-9b119.firebaseapp.com",
-            projectId: "formulario-9b119",
-            storageBucket: "formulario-9b119.firebasestorage.app",
-            messagingSenderId: "648279847643",
-            appId: "1:648279847643:web:802107ded1f0f5957f52fe",
-            measurementId: "G-VSFYQB6FQ9"
+            apiKey: "AIzaSyAXWVUw7b1B0IICyAU_wlYjYxdkYxMTm_E",
+            authDomain: "tecnicable-e00d3.firebaseapp.com",
+            projectId: "tecnicable-e00d3",
+            storageBucket: "tecnicable-e00d3.firebasestorage.app",
+            messagingSenderId: "830462237822",
+            appId: "1:830462237822:web:9bf4b9c827ebee057c8c2f",
+            measurementId: "G-1J28N8HHXV",
+            databaseURL: "https://tecnicable-e00d3-default-rtdb.firebaseio.com"
         };
         const DOMINIO_INTERNO = "tecnicable.com";
         const ADMIN_EMAILS = ['admin@tecnicable.com', 'supervisor@tecnicable.com', 'luifred1998@gmail.com'];
@@ -1115,7 +1118,7 @@
         const db = getFirestore(app);
         const storage = getStorage(app);
         const googleProvider = new GoogleAuthProvider();
-        googleProvider.setCustomParameters({ prompt: 'select_account' });
+        googleProvider.setCustomParameters({ prompt: 'select_account', hd: 'tecnicable.com' });
 
         // ========== DOM REFS ==========
         const loginContainer = document.getElementById('login-container');
@@ -1148,6 +1151,10 @@
         let allDocs = [];
         let previousIds = new Set();
         let unsubscribeFirestore = null;
+        let unsubscribeCenso = null;
+        let unsubscribeClientesApp = null;
+        let unsubscribePortalWeb = null;
+        let registrosPorFuente = { censo: [], app: [], web: [] };
         let unsubscribeUbicaciones = null;
         let unsubscribeUsuarios = null;
         let currentSection = 'dashboard';
@@ -1179,10 +1186,6 @@
         function reproducirSonido() {
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                // Si el contexto está suspendido, intentar reanudarlo (puede no funcionar sin interacción del usuario)
-                if (audioCtx.state === 'suspended') {
-                    audioCtx.resume();
-                }
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.connect(gain);
@@ -1193,7 +1196,7 @@
                 gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
                 osc.start();
                 osc.stop(audioCtx.currentTime + 0.3);
-            } catch (e) { /* Silencioso si falla */ }
+            } catch (e) {}
         }
 
         // ========== TEMA ==========
@@ -1262,8 +1265,7 @@
             Object.values(views).forEach(v => v.classList.add('hidden'));
             if (views[seccion]) views[seccion].classList.remove('hidden');
             navBtns.forEach(btn => btn.classList.remove('active'));
-            const activeBtn = document.querySelector(`.nav-btn[data-seccion="${seccion}"]`);
-            if (activeBtn) activeBtn.classList.add('active');
+            document.querySelector(`.nav-btn[data-seccion="${seccion}"]`)?.classList.add('active');
             const titulos = {
                 dashboard: 'Dashboard General',
                 ingresados: 'Todos los registros',
@@ -1380,6 +1382,7 @@
                         }
                         vinculoError.classList.add('hidden');
                         try {
+                            // --- CORRECCIÓN: agregamos los campos faltantes ---
                             const newData = {
                                 nombre,
                                 cedula,
@@ -1388,7 +1391,7 @@
                                 telefono: '',
                                 direccion: '',
                                 rol: ADMIN_EMAILS.includes(email) ? 'administrador' : 'promotor',
-                                creado: new Date().toISOString()
+                                creado: serverTimestamp()
                             };
                             await setDoc(docRef, newData);
                             usuarioPromotor = nombre;
@@ -1598,18 +1601,12 @@
                 const sel = document.getElementById(id);
                 if (!sel) return;
                 const valorActual = sel.value;
-                // Reconstruir opciones
                 let opts = '<option value="">Todos los promotores</option>';
                 usuariosPromotores.forEach(p => {
                     opts += `<option value="${p.nombre}">${p.nombre}</option>`;
                 });
                 sel.innerHTML = opts;
-                // Restaurar valor solo si existe en las nuevas opciones
-                if (valorActual && Array.from(sel.options).some(opt => opt.value === valorActual)) {
-                    sel.value = valorActual;
-                } else {
-                    sel.value = ''; // Resetear si ya no existe
-                }
+                sel.value = valorActual;
             });
         }
 
@@ -1646,12 +1643,96 @@
             if (statUsuariosTotal) statUsuariosTotal.innerText = allUsers.length;
         }
 
+        // --- CORRECCIÓN: editarUsuario ahora lee el rol del documento ---
+        window.editarUsuario = function(uid) {
+            const user = allUsers.find(u => u.id === uid);
+            if (!user) {
+                mostrarToast('Usuario no encontrado', 'error');
+                return;
+            }
+            document.getElementById('edit-usuario-uid').value = uid;
+            document.getElementById('edit-usuario-nombre').value = user.nombre || '';
+            document.getElementById('edit-usuario-telefono').value = user.telefono || '';
+            document.getElementById('edit-usuario-direccion').value = user.direccion || '';
+            // Usar el rol guardado o determinarlo por email
+            document.getElementById('edit-usuario-rol').value = user.rol || (ADMIN_EMAILS.includes(user.email) ? 'administrador' : 'promotor');
+            document.getElementById('modal-editar-usuario').classList.remove('hidden');
+        };
+
+        window.cerrarModalEditarUsuario = function() {
+            document.getElementById('modal-editar-usuario').classList.add('hidden');
+        };
+
+        window.guardarEditarUsuario = async function() {
+            const uid = document.getElementById('edit-usuario-uid').value;
+            const nombre = document.getElementById('edit-usuario-nombre').value.trim();
+            const telefono = document.getElementById('edit-usuario-telefono').value.trim();
+            const direccion = document.getElementById('edit-usuario-direccion').value.trim();
+            const rol = document.getElementById('edit-usuario-rol').value;
+            const errorDiv = document.getElementById('edit-usuario-error');
+
+            if (!nombre) {
+                errorDiv.innerText = 'El nombre es obligatorio.';
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+            errorDiv.classList.add('hidden');
+
+            try {
+                const userDoc = doc(db, "usuarios", uid);
+                const updateData = { nombre, telefono, direccion, rol };
+                await updateDoc(userDoc, updateData);
+                mostrarToast('Usuario actualizado correctamente', 'success');
+                cerrarModalEditarUsuario();
+                renderizarUsuarios();
+                if (uid === usuarioUid) {
+                    currentUserData = { ...currentUserData, ...updateData };
+                    actualizarPerfilUI(auth.currentUser, currentUserData);
+                }
+            } catch (err) {
+                console.error(err);
+                errorDiv.innerText = 'Error al guardar: ' + err.message;
+                errorDiv.classList.remove('hidden');
+            }
+        };
+
+        window.cambiarContrasena = function(email) {
+            if (!email) {
+                mostrarToast('El usuario no tiene email', 'error');
+                return;
+            }
+            if (!confirm(`¿Enviar correo de restablecimiento de contraseña a ${email}?`)) return;
+            sendPasswordResetEmail(auth, email)
+                .then(() => {
+                    mostrarToast(`Correo enviado a ${email}`, 'success');
+                })
+                .catch((err) => {
+                    console.error(err);
+                    mostrarToast('Error al enviar correo: ' + err.message, 'error');
+                });
+        };
+
+        window.eliminarUsuario = function(uid) {
+            if (uid === usuarioUid) {
+                mostrarToast('No puedes eliminarte a ti mismo', 'warning');
+                return;
+            }
+            if (!confirm('⚠️ ¿Estás seguro de eliminar este usuario? Esta acción es permanente.')) return;
+            deleteDoc(doc(db, "usuarios", uid))
+                .then(() => {
+                    mostrarToast('✅ Usuario eliminado correctamente', 'success');
+                    renderizarUsuarios();
+                })
+                .catch((err) => {
+                    console.error('Error al eliminar usuario:', err);
+                    mostrarToast('❌ Error al eliminar usuario: ' + err.message, 'error');
+                });
+        };
+
         // ========== FILTRADO ==========
         function filtrarPorPromotor(docs) {
-            // Si es administrador, ver todos
             if (ADMIN_EMAILS.includes(usuarioEmail)) return docs;
-            // Si no tiene promotor vinculado, no mostrar nada (seguridad)
-            if (!usuarioPromotor) return [];
+            if (!usuarioPromotor) return docs;
             const lower = usuarioPromotor.trim().toLowerCase();
             return docs.filter(d => (d.promotor || '').trim().toLowerCase() === lower);
         }
@@ -1810,45 +1891,98 @@
         }
 
         // ========== FIRESTORE ==========
+        // Enrutador: decide a qué colección pertenece un registro según su campo "origen"
+        function obtenerColeccionPorOrigen(origen) {
+            const o = (origen || '').toLowerCase();
+            if (o === 'censo') return 'censo_prospectos';
+            if (o === 'web') return 'portal_web';
+            return 'clientes_app'; // 'app' o cualquier valor por defecto
+        }
+
+        function fusionarYRenderizar() {
+            const newDocs = [
+                ...registrosPorFuente.censo,
+                ...registrosPorFuente.app,
+                ...registrosPorFuente.web
+            ];
+            const currentIds = new Set(newDocs.map(d => d.id));
+
+            if (usuarioPromotor || ADMIN_EMAILS.includes(usuarioEmail)) {
+                const nuevos = newDocs.filter(d => !previousIds.has(d.id));
+                if (nuevos.length > 0 && previousIds.size > 0) {
+                    reproducirSonido();
+                    const nombres = nuevos.map(d => getNombreCompleto(d)).join(', ');
+                    mostrarToast(`📦 Nuevo registro: ${nombres}`, 'success');
+                }
+            }
+
+            allDocs = newDocs;
+            previousIds = currentIds;
+            actualizarUI();
+        }
+
         function suscribirseFirestore() {
-            if (unsubscribeFirestore) { unsubscribeFirestore(); unsubscribeFirestore = null; }
-            unsubscribeFirestore = onSnapshot(
-                collection(db, "Contratos_Web"),
+            if (unsubscribeCenso) { unsubscribeCenso(); unsubscribeCenso = null; }
+            if (unsubscribeClientesApp) { unsubscribeClientesApp(); unsubscribeClientesApp = null; }
+            if (unsubscribePortalWeb) { unsubscribePortalWeb(); unsubscribePortalWeb = null; }
+
+            unsubscribeCenso = onSnapshot(
+                collection(db, "censo_prospectos"),
                 (snapshot) => {
-                    const newDocs = [];
-                    const currentIds = new Set();
-                    snapshot.forEach(doc => {
-                        const data = { id: doc.id, ...doc.data() };
-                        if (!data.origen) {
-                            if (data.estado && data.estado.toLowerCase() === 'completado') data.origen = 'Web';
-                            else data.origen = 'App';
-                        }
-                        newDocs.push(data);
-                        currentIds.add(doc.id);
+                    registrosPorFuente.censo = snapshot.docs.map(d => {
+                        const data = { id: d.id, ...d.data() };
+                        if (!data.origen) data.origen = 'Censo';
+                        return data;
                     });
-                    if (usuarioPromotor || ADMIN_EMAILS.includes(usuarioEmail)) {
-                        const nuevos = [];
-                        currentIds.forEach(id => {
-                            if (!previousIds.has(id)) {
-                                const nuevoDoc = newDocs.find(d => d.id === id);
-                                if (nuevoDoc) nuevos.push(nuevoDoc);
-                            }
-                        });
-                        if (nuevos.length > 0) {
-                            reproducirSonido();
-                            const nombres = nuevos.map(d => getNombreCompleto(d)).join(', ');
-                            mostrarToast(`📦 Nuevo registro: ${nombres}`, 'success');
-                        }
-                    }
-                    allDocs = newDocs;
-                    previousIds = currentIds;
-                    actualizarUI();
+                    fusionarYRenderizar();
                 },
                 (error) => {
-                    console.error('❌ Firestore error:', error);
-                    mostrarToast('Error de sincronización con Firestore', 'error');
+                    console.error('❌ Error censo_prospectos:', error);
+                    mostrarToast('Error de sincronización (Censo)', 'error');
                 }
             );
+
+            unsubscribeClientesApp = onSnapshot(
+                collection(db, "clientes_app"),
+                (snapshot) => {
+                    registrosPorFuente.app = snapshot.docs.map(d => {
+                        const data = { id: d.id, ...d.data() };
+                        if (!data.origen) data.origen = 'App';
+                        return data;
+                    });
+                    fusionarYRenderizar();
+                },
+                (error) => {
+                    console.error('❌ Error clientes_app:', error);
+                    mostrarToast('Error de sincronización (App)', 'error');
+                }
+            );
+
+            unsubscribePortalWeb = onSnapshot(
+                collection(db, "portal_web"),
+                (snapshot) => {
+                    registrosPorFuente.web = snapshot.docs.map(d => {
+                        const data = { id: d.id, ...d.data() };
+                        if (!data.origen) data.origen = 'Web';
+                        return data;
+                    });
+                    fusionarYRenderizar();
+                },
+                (error) => {
+                    console.error('❌ Error portal_web:', error);
+                    mostrarToast('Error de sincronización (Web)', 'error');
+                }
+            );
+
+            // Se mantiene por compatibilidad con el resto del código que revisa unsubscribeFirestore
+            unsubscribeFirestore = () => {
+                if (unsubscribeCenso) unsubscribeCenso();
+                if (unsubscribeClientesApp) unsubscribeClientesApp();
+                if (unsubscribePortalWeb) unsubscribePortalWeb();
+                unsubscribeCenso = null;
+                unsubscribeClientesApp = null;
+                unsubscribePortalWeb = null;
+            };
         }
 
         // ========== ACTUALIZAR UI ==========
@@ -1929,10 +2063,8 @@
         // ========== TODOS LOS REGISTROS ==========
         let busquedaTimeout = null;
         function renderizarTodosRegistros(docs) {
-            const inputBusqueda = document.getElementById('busqueda-ingresados');
-            const texto = inputBusqueda ? inputBusqueda.value.toLowerCase() : '';
-            const selectFiltro = document.getElementById('filtro-promotor-app');
-            const promotorFiltro = selectFiltro ? selectFiltro.value : '';
+            const texto = (document.getElementById('busqueda-ingresados')?.value || '').toLowerCase();
+            const promotorFiltro = document.getElementById('filtro-promotor-app')?.value || '';
             const tbody = document.getElementById('tabla-ingresados-body');
             let count = 0, html = '';
             docs.forEach(d => {
@@ -1970,10 +2102,8 @@
 
         // ========== CONTRATOS WEB ==========
         function renderizarContratosWeb(docs) {
-            const selectPromotor = document.getElementById('filtro-promotor-web');
-            const promotorFiltro = selectPromotor ? selectPromotor.value : '';
-            const selectEstado = document.getElementById('filtro-estado-web');
-            const estadoFiltro = selectEstado ? selectEstado.value : '';
+            const promotorFiltro = document.getElementById('filtro-promotor-web')?.value || '';
+            const estadoFiltro = document.getElementById('filtro-estado-web')?.value || '';
             const tbody = document.getElementById('tabla-web-body');
             let count = 0, html = '';
             docs.forEach(d => {
@@ -2017,10 +2147,8 @@
         // ========== COMPLETADOS ==========
         let busquedaCompletadosTimeout = null;
         function renderizarCompletados(docs) {
-            const inputBusqueda = document.getElementById('busqueda-completados');
-            const texto = inputBusqueda ? inputBusqueda.value.toLowerCase() : '';
-            const selectFiltro = document.getElementById('filtro-promotor-completados');
-            const promotorFiltro = selectFiltro ? selectFiltro.value : '';
+            const texto = (document.getElementById('busqueda-completados')?.value || '').toLowerCase();
+            const promotorFiltro = document.getElementById('filtro-promotor-completados')?.value || '';
             const tbody = document.getElementById('tabla-completados-body');
             const completados = docs.filter(d => (d.estado || '').toLowerCase() === 'completado');
             let count = 0, html = '';
@@ -2134,10 +2262,8 @@
 
         // ========== CENSO ==========
         function renderizarCenso(docs) {
-            const selectPromotor = document.getElementById('filtro-promotor-censo');
-            const promotorFiltro = selectPromotor ? selectPromotor.value : '';
-            const selectEstado = document.getElementById('filtro-estado-censo');
-            const estadoFiltro = selectEstado ? selectEstado.value : '';
+            const promotorFiltro = document.getElementById('filtro-promotor-censo')?.value || '';
+            const estadoFiltro = document.getElementById('filtro-estado-censo')?.value || '';
             const tbody = document.getElementById('tabla-censo-body');
             const resumenContainer = document.getElementById('censo-resumen-promotores');
             let count = 0, html = '';
@@ -2230,5 +2356,99 @@
             const id = document.getElementById('edit-censo-id').value;
             const estado = document.getElementById('edit-censo-estado').value;
             const notas = document.getElementById('edit-censo-notas').value;
+            const registro = allDocs.find(d => d.id === id);
+            if (!registro) { mostrarToast('Registro no encontrado', 'error'); return; }
             try {
-               
+                const coleccion = obtenerColeccionPorOrigen(registro.origen);
+                await updateDoc(doc(db, coleccion, id), { estado, notas });
+                cerrarModalEditarCenso();
+                mostrarToast('Registro actualizado', 'success');
+            } catch (err) {
+                console.error(err);
+                mostrarToast('Error al guardar', 'error');
+            }
+        };
+
+        window.cambiarEstadoWeb = async function(id, estadoActual) {
+            const estados = ['Pendiente','En Proceso','Procesado','Completado','Cancelado'];
+            const nuevo = prompt(`Cambiar estado (${estados.join(', ')}):`, estadoActual);
+            if (!nuevo) return;
+            if (!estados.includes(nuevo)) { mostrarToast('Estado no válido', 'error'); return; }
+            const registro = allDocs.find(d => d.id === id);
+            if (!registro) { mostrarToast('Registro no encontrado', 'error'); return; }
+            try {
+                const coleccion = obtenerColeccionPorOrigen(registro.origen);
+                await updateDoc(doc(db, coleccion, id), { estado: nuevo });
+                mostrarToast(`Estado actualizado a ${nuevo}`, 'success');
+            } catch (err) { mostrarToast('Error al actualizar estado', 'error'); }
+        };
+
+        window.eliminarRegistro = async function(id) {
+            if (!ADMIN_EMAILS.includes(usuarioEmail)) {
+                mostrarToast('No tienes permisos para eliminar', 'error');
+                return;
+            }
+            if (!confirm('¿Eliminar este registro permanentemente?')) return;
+            const registro = allDocs.find(d => d.id === id);
+            if (!registro) { mostrarToast('Registro no encontrado', 'error'); return; }
+            try {
+                const coleccion = obtenerColeccionPorOrigen(registro.origen);
+                await deleteDoc(doc(db, coleccion, id));
+                mostrarToast('Registro eliminado', 'success');
+            } catch (err) { mostrarToast('Error al eliminar', 'error'); }
+        };
+
+        // ========== FLUJO DE AUTENTICACIÓN ==========
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                loginContainer.classList.add('hidden');
+                appContainer.classList.remove('hidden');
+                const docSnap = await getDoc(doc(db, "usuarios", user.uid));
+                if (docSnap.exists()) {
+                    currentUserData = docSnap.data();
+                } else {
+                    currentUserData = {};
+                }
+                actualizarPerfilUI(user, currentUserData);
+                await verificarVinculacion(user.uid, user.email);
+                if (!unsubscribeFirestore) {
+                    suscribirseFirestore();
+                    suscribirseUsuarios();
+                    suscribirseUbicaciones();
+                } else {
+                    actualizarUI();
+                }
+                const seccionGuardada = sessionStorage.getItem('seccion') || 'dashboard';
+                cambiarSeccion(seccionGuardada);
+            } else {
+                if (unsubscribeFirestore) { unsubscribeFirestore(); unsubscribeFirestore = null; }
+                if (unsubscribeUbicaciones) { unsubscribeUbicaciones(); unsubscribeUbicaciones = null; }
+                if (unsubscribeUsuarios) { unsubscribeUsuarios(); unsubscribeUsuarios = null; }
+                loginContainer.classList.remove('hidden');
+                appContainer.classList.add('hidden');
+                allDocs = [];
+                previousIds = new Set();
+                ubicacionesPromotores = [];
+                usuarioPromotor = null;
+                usuarioUid = null;
+                usuarioEmail = null;
+                currentUserData = {};
+                modalVinculacion.classList.add('hidden');
+                document.getElementById('modal-perfil').classList.add('hidden');
+                document.getElementById('modal-editar-perfil').classList.add('hidden');
+                document.getElementById('modal-editar-usuario').classList.add('hidden');
+                profileMenu.classList.remove('show');
+                if (mapa) {
+                    mapa.remove();
+                    mapa = null;
+                    marcadoresGrupo = null;
+                    tileLayer = null;
+                }
+                toggleSidebar(false);
+            }
+        });
+
+        console.log('✅ Tecnicable Pro - Listo para usar.');
+    </script>
+</body>
+</html>
