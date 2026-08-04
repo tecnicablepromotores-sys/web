@@ -359,6 +359,94 @@
             to { opacity: 1; transform: scale(1) translateY(0); }
         }
 
+        /* ========== PRELOADER (evita el flash de login antes del dashboard) ========== */
+        #app-preloader {
+            position: fixed;
+            inset: 0;
+            z-index: 9998;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-body);
+            transition: opacity 0.35s ease, visibility 0.35s ease;
+        }
+        #app-preloader.fade-out {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .preloader-inner { text-align: center; }
+        .preloader-logo {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            background: linear-gradient(135deg, var(--accent), #0f766e);
+            box-shadow: 0 8px 24px rgba(59,130,246,0.35);
+            animation: preloaderPulse 1.4s ease-in-out infinite;
+        }
+        .preloader-logo i { color: #fff; font-size: 1.4rem; }
+        @keyframes preloaderPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+        .preloader-ring {
+            width: 34px;
+            height: 34px;
+            margin: 0 auto;
+            border-radius: 50%;
+            border: 3px solid rgba(255,255,255,0.12);
+            border-top-color: var(--accent);
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .preloader-text {
+            margin-top: 0.9rem;
+            font-size: 0.7rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+        .spinner { animation: spin 0.7s linear infinite; }
+
+        /* ========== VISOR DE FOTO (lightbox) ========== */
+        #modal-foto {
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(6px);
+        }
+        #modal-foto img {
+            max-width: min(90vw, 640px);
+            max-height: 85vh;
+            border-radius: 1rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .foto-detalle-thumb {
+            max-width: 220px;
+            max-height: 160px;
+            border-radius: 0.75rem;
+            border: 1px solid var(--border-color);
+            cursor: zoom-in;
+            display: block;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            object-fit: cover;
+        }
+        .foto-detalle-thumb:hover { transform: scale(1.02); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+        .foto-detalle-placeholder {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            border: 1px dashed var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
         .profile-dropdown .profile-menu {
             display: none;
             position: absolute;
@@ -463,11 +551,20 @@
     </style>
 </head>
 <body>
+    <!-- PRELOADER -->
+    <div id="app-preloader">
+        <div class="preloader-inner">
+            <div class="preloader-logo"><i class="fa-solid fa-network-wired"></i></div>
+            <div class="preloader-ring"></div>
+            <p class="preloader-text">Cargando Tecnicable...</p>
+        </div>
+    </div>
+
     <!-- TOAST -->
     <div id="toast-container" role="status" aria-live="polite"></div>
 
     <!-- LOGIN -->
-    <div id="login-container" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="background:var(--bg-body);">
+    <div id="login-container" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden" style="background:var(--bg-body);">
         <div class="login-card w-full max-w-md p-6 relative">
             <div class="top-bar absolute top-0 left-0 right-0"></div>
             <div class="text-center mt-4">
@@ -894,6 +991,14 @@
         </div>
     </div>
 
+    <!-- MODAL VISOR DE FOTO (lightbox) -->
+    <div id="modal-foto" class="fixed inset-0 z-[60] hidden items-center justify-center p-4" onclick="cerrarModalFoto()">
+        <button onclick="cerrarModalFoto()" class="absolute top-4 right-4 text-white/80 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors">
+            <i class="fa-solid fa-xmark text-2xl"></i>
+        </button>
+        <img id="modal-foto-img" src="" alt="Foto del cliente" onclick="event.stopPropagation();" />
+    </div>
+
     <!-- MODAL EDITAR CENSO -->
     <div id="modal-editar-censo" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="glass-card rounded-2xl max-w-md w-full p-5 shadow-2xl relative modal-content">
@@ -1081,7 +1186,9 @@
             GoogleAuthProvider,
             signOut,
             updateProfile,
-            sendPasswordResetEmail
+            sendPasswordResetEmail,
+            setPersistence,
+            browserLocalPersistence
         } from "firebase/auth";
         import {
             getFirestore,
@@ -1092,7 +1199,8 @@
             setDoc,
             updateDoc,
             deleteDoc,
-            serverTimestamp
+            serverTimestamp,
+            Timestamp
         } from "firebase/firestore";
         import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 
@@ -1114,8 +1222,72 @@
         const db = getFirestore(app);
         const storage = getStorage(app);
         const googleProvider = new GoogleAuthProvider();
-        // 🔽 DOMINIO ELIMINADO: ya no se fuerza 'tecnicable.com'
-        // googleProvider.setCustomParameters({ prompt: 'select_account', hd: 'tecnicable.com' });
+
+        setPersistence(auth, browserLocalPersistence).catch((err) => {
+            console.error('No se pudo establecer la persistencia de sesión:', err);
+        });
+
+        // ========== FUNCIONES HELPER MEJORADAS ==========
+        function getNombreCompleto(d) {
+            if (!d) return 'Sin nombre';
+            if (d.nombres && d.apellidos) {
+                return `${d.nombres} ${d.apellidos}`.trim();
+            }
+            if (d.nombre && d.apellido) {
+                return `${d.nombre} ${d.apellido}`.trim();
+            }
+            if (d.nombre) return d.nombre;
+            if (d.cliente) return d.cliente;
+            if (d.nombreCompleto) return d.nombreCompleto;
+            if (d.ciudadano) return d.ciudadano;
+            if (d.nombres) return d.nombres;
+            if (d.apellidos) return d.apellidos;
+            if (d.apellido) return d.apellido;
+            return 'Sin nombre';
+        }
+
+        function getCedula(d) {
+            if (!d) return '--';
+            return d.cedula || d.ced || d.ci || d.dni || d.identificacion || d.cedulaIdentidad || d.cedula_identidad || '--';
+        }
+
+        function formatearFecha(valor) {
+            if (!valor) return '--';
+            if (valor instanceof Timestamp || (typeof valor === 'object' && valor !== null && 'seconds' in valor && 'nanoseconds' in valor)) {
+                const date = new Date(valor.seconds * 1000 + valor.nanoseconds / 1000000);
+                return date.toLocaleString('es-VE', { hour12: false });
+            }
+            if (typeof valor === 'string') {
+                const date = new Date(valor);
+                if (!isNaN(date.getTime())) {
+                    return date.toLocaleString('es-VE', { hour12: false });
+                }
+                return valor;
+            }
+            if (typeof valor === 'number') {
+                const date = new Date(valor);
+                if (!isNaN(date.getTime())) {
+                    return date.toLocaleString('es-VE', { hour12: false });
+                }
+                return valor.toString();
+            }
+            return valor.toString();
+        }
+
+        function getFecha(d) {
+            const valor = d.fecha || d.creado || d.fecha_registro || d.fechaRegistro || null;
+            return formatearFecha(valor);
+        }
+
+        function esImagen(valor) {
+            if (typeof valor !== 'string') return false;
+            const v = valor.trim();
+            if (/^https?:\/\//i.test(v) && /\.(jpe?g|png|gif|webp|bmp)(\?.*)?$/i.test(v)) return true;
+            if (v.startsWith('data:image/')) return true;
+            return false;
+        }
+
+        // ========== RESTO DEL CÓDIGO (con adaptaciones) ==========
 
         const loginContainer = document.getElementById('login-container');
         const appContainer = document.getElementById('app-container');
@@ -1994,10 +2166,6 @@
             return '<span class="badge badge-app"><i class="fa-solid fa-mobile-screen mr-0.5"></i>App</span>';
         }
 
-        function getNombreCompleto(d) {
-            return d.cliente || d.nombre || d.nombreCompleto || d.ciudadano || 'Sin nombre';
-        }
-
         function procesarDashboard(docs) {
             const total = docs.length;
             const promotoresSet = new Set(docs.map(d => d.promotor).filter(Boolean));
@@ -2009,6 +2177,8 @@
             document.getElementById('stat-dash-estados').innerText = estadosSet.size;
             document.getElementById('stat-dash-planes').innerText = planesSet.size;
         }
+
+        // ===== RENDERIZADORES ACTUALIZADOS =====
 
         function renderizarRecientes(docs) {
             const tbody = document.getElementById('tabla-recientes-body');
@@ -2031,7 +2201,7 @@
                     <td>${d.promotor || '--'}</td>
                     <td>${getBadgeEstado(d.estado)}</td>
                     <td>${getBadgeMetodo(d.origen)}</td>
-                    <td class="text-[10px]" style="color:var(--text-secondary);">${d.fecha || d.creado || '--'}</td>
+                    <td class="text-[10px]" style="color:var(--text-secondary);">${getFecha(d)}</td>
                 </tr>`;
             });
             tbody.innerHTML = html;
@@ -2048,7 +2218,7 @@
             let filtrados = docs.filter(d => {
                 if (filtroPromotor && (d.promotor || '') !== filtroPromotor) return false;
                 if (busqueda) {
-                    const texto = `${getNombreCompleto(d)} ${d.cedula || ''} ${d.sector || ''} ${d.plan || ''}`.toLowerCase();
+                    const texto = `${getNombreCompleto(d)} ${getCedula(d)} ${d.sector || ''} ${d.plan || ''}`.toLowerCase();
                     if (!texto.includes(busqueda)) return false;
                 }
                 return true;
@@ -2063,18 +2233,19 @@
             let html = '';
             filtrados.forEach(d => {
                 html += `<tr>
-                    <td class="font-medium" style="color:var(--text-primary);">${getNombreCompleto(d)}<br/><small style="color:var(--text-muted);">${d.cedula || ''}</small></td>
+                    <td class="font-medium" style="color:var(--text-primary);">${getNombreCompleto(d)}<br/><small style="color:var(--text-muted);">${getCedula(d)}</small></td>
                     <td>${d.sector || '--'}</td>
                     <td>${d.plan || '--'}</td>
                     <td>${d.promotor || '--'}</td>
                     <td>${getBadgeEstado(d.estado)}</td>
                     <td>${getBadgeMetodo(d.origen)}</td>
-                    <td class="text-[10px]" style="color:var(--text-secondary);">${d.fecha || d.creado || '--'}</td>
+                    <td class="text-[10px]" style="color:var(--text-secondary);">${getFecha(d)}</td>
                 </tr>`;
             });
             tbody.innerHTML = html;
         }
 
+        // ===== RENDERIZADOR CON EL BOTÓN DE ELIMINAR =====
         function renderizarContratosWeb(docs) {
             const tbody = document.getElementById('tabla-web-body');
             const statTotal = document.getElementById('stat-web-total');
@@ -2096,19 +2267,24 @@
                 return;
             }
 
+            const esAdmin = ADMIN_EMAILS.includes(usuarioEmail);
+
             let html = '';
             filtrados.forEach(d => {
+                const btnEliminar = esAdmin ? `<button onclick="eliminarContrato('${d.id}')" class="btn-action eliminar" title="Eliminar contrato"><i class="fa-regular fa-trash-can"></i></button>` : '';
+
                 html += `<tr>
-                    <td class="font-medium" style="color:var(--text-primary);">${getNombreCompleto(d)}<br/><small style="color:var(--text-muted);">${d.cedula || ''}</small></td>
+                    <td class="font-medium" style="color:var(--text-primary);">${getNombreCompleto(d)}<br/><small style="color:var(--text-muted);">${getCedula(d)}</small></td>
                     <td>${d.sector || '--'}</td>
                     <td>${d.plan || '--'}</td>
                     <td>${d.promotor || '--'}</td>
                     <td>${getBadgeEstado(d.estado)}</td>
                     <td>${getBadgeMetodo(d.origen)}</td>
-                    <td class="text-[10px]" style="color:var(--text-secondary);">${d.fecha || d.creado || '--'}</td>
+                    <td class="text-[10px]" style="color:var(--text-secondary);">${getFecha(d)}</td>
                     <td class="text-center whitespace-nowrap">
                         <button onclick="verDetalle('${d.id}')" class="btn-action ver" title="Ver detalle"><i class="fa-regular fa-eye"></i></button>
                         <button onclick="abrirEditarCenso('${d.id}')" class="btn-action editar" title="Editar estado"><i class="fa-regular fa-pen-to-square"></i></button>
+                        ${btnEliminar}
                     </td>
                 </tr>`;
             });
@@ -2131,7 +2307,7 @@
             let filtrados = completados.filter(d => {
                 if (filtroPromotor && (d.promotor || '') !== filtroPromotor) return false;
                 if (busqueda) {
-                    const texto = `${getNombreCompleto(d)} ${d.cedula || ''} ${d.sector || ''} ${d.plan || ''}`.toLowerCase();
+                    const texto = `${getNombreCompleto(d)} ${getCedula(d)} ${d.sector || ''} ${d.plan || ''}`.toLowerCase();
                     if (!texto.includes(busqueda)) return false;
                 }
                 return true;
@@ -2146,52 +2322,18 @@
             let html = '';
             filtrados.forEach(d => {
                 html += `<tr>
-                    <td class="font-medium" style="color:var(--text-primary);">${getNombreCompleto(d)}<br/><small style="color:var(--text-muted);">${d.cedula || ''}</small></td>
+                    <td class="font-medium" style="color:var(--text-primary);">${getNombreCompleto(d)}<br/><small style="color:var(--text-muted);">${getCedula(d)}</small></td>
                     <td>${d.sector || '--'}</td>
                     <td>${d.plan || '--'}</td>
                     <td>${d.promotor || '--'}</td>
                     <td>${getBadgeMetodo(d.origen)}</td>
-                    <td class="text-[10px]" style="color:var(--text-secondary);">${d.fecha || d.creado || '--'}</td>
+                    <td class="text-[10px]" style="color:var(--text-secondary);">${getFecha(d)}</td>
                     <td class="text-center whitespace-nowrap">
                         <button onclick="verDetalle('${d.id}')" class="btn-action ver" title="Ver detalle"><i class="fa-regular fa-eye"></i></button>
                     </td>
                 </tr>`;
             });
             tbody.innerHTML = html;
-        }
-
-        function renderizarRankingPromotores(docs) {
-            const grid = document.getElementById('promotores-ranking-grid');
-            if (!grid) return;
-
-            const conteo = {};
-            docs.forEach(d => {
-                const p = d.promotor || 'Sin promotor';
-                conteo[p] = (conteo[p] || 0) + 1;
-            });
-
-            const sorted = Object.entries(conteo).sort((a, b) => b[1] - a[1]);
-            if (!sorted.length) {
-                grid.innerHTML = `<p class="col-span-full text-center py-4 text-xs" style="color:var(--text-muted);">No hay datos de promotores.</p>`;
-                return;
-            }
-
-            let html = '';
-            sorted.forEach(([promotor, total], index) => {
-                const colores = ['border-l-4 border-blue-500', 'border-l-4 border-emerald-500', 'border-l-4 border-purple-500', 'border-l-4 border-amber-500'];
-                const claseBorde = colores[index % colores.length];
-                html += `<div class="glass-card rounded-2xl p-4 shadow-lg ${claseBorde} flex items-center justify-between">
-                    <div>
-                        <p class="text-[10px] uppercase font-semibold" style="color:var(--text-secondary);">Promotor #${index + 1}</p>
-                        <h4 class="font-bold text-sm mt-0.5" style="color:var(--text-primary);">${promotor}</h4>
-                    </div>
-                    <div class="text-right">
-                        <span class="text-2xl font-black" style="color:var(--accent);">${total}</span>
-                        <p class="text-[9px]" style="color:var(--text-muted);">Registros</p>
-                    </div>
-                </div>`;
-            });
-            grid.innerHTML = html;
         }
 
         function renderizarDetallePromotorSeleccionado(promotorSeleccionado, docs) {
@@ -2219,12 +2361,12 @@
             filtrados.forEach(d => {
                 html += `<tr>
                     <td class="font-medium" style="color:var(--text-primary);">${getNombreCompleto(d)}</td>
-                    <td>${d.cedula || '--'}</td>
+                    <td>${getCedula(d)}</td>
                     <td>${d.sector || '--'}</td>
                     <td>${d.plan || '--'}</td>
                     <td>${getBadgeEstado(d.estado)}</td>
                     <td>${getBadgeMetodo(d.origen)}</td>
-                    <td class="text-[10px]" style="color:var(--text-secondary);">${d.fecha || d.creado || '--'}</td>
+                    <td class="text-[10px]" style="color:var(--text-secondary);">${getFecha(d)}</td>
                     <td class="text-center whitespace-nowrap">
                         <button onclick="verDetalle('${d.id}')" class="btn-action ver" title="Ver detalle"><i class="fa-regular fa-eye"></i></button>
                     </td>
@@ -2232,10 +2374,6 @@
             });
             tbody.innerHTML = html;
         }
-
-        document.getElementById('select-detalle-promotor')?.addEventListener('change', (e) => {
-            renderizarDetallePromotorSeleccionado(e.target.value, filtrarPorPromotor(allDocs));
-        });
 
         function renderizarCenso(docs) {
             const tbody = document.getElementById('tabla-censo-body');
@@ -2279,12 +2417,12 @@
             let html = '';
             filtrados.forEach(d => {
                 html += `<tr>
-                    <td class="font-medium" style="color:var(--text-primary);">${getNombreCompleto(d)}<br/><small style="color:var(--text-muted);">${d.cedula || ''}</small></td>
+                    <td class="font-medium" style="color:var(--text-primary);">${getNombreCompleto(d)}<br/><small style="color:var(--text-muted);">${getCedula(d)}</small></td>
                     <td>${d.sector || '--'}</td>
                     <td>${d.promotor || '--'}</td>
                     <td>${getBadgeEstado(d.estado)}</td>
                     <td>${getBadgeMetodo(d.origen)}</td>
-                    <td class="text-[10px]" style="color:var(--text-secondary);">${d.fecha || d.creado || '--'}</td>
+                    <td class="text-[10px]" style="color:var(--text-secondary);">${getFecha(d)}</td>
                     <td class="text-center whitespace-nowrap">
                         <button onclick="verDetalle('${d.id}')" class="btn-action ver" title="Ver detalle"><i class="fa-regular fa-eye"></i></button>
                         <button onclick="abrirEditarCenso('${d.id}')" class="btn-action editar" title="Editar estado"><i class="fa-regular fa-pen-to-square"></i></button>
@@ -2293,6 +2431,44 @@
             });
             tbody.innerHTML = html;
         }
+
+        function renderizarRankingPromotores(docs) {
+            const grid = document.getElementById('promotores-ranking-grid');
+            if (!grid) return;
+
+            const conteo = {};
+            docs.forEach(d => {
+                const p = d.promotor || 'Sin promotor';
+                conteo[p] = (conteo[p] || 0) + 1;
+            });
+
+            const sorted = Object.entries(conteo).sort((a, b) => b[1] - a[1]);
+            if (!sorted.length) {
+                grid.innerHTML = `<p class="col-span-full text-center py-4 text-xs" style="color:var(--text-muted);">No hay datos de promotores.</p>`;
+                return;
+            }
+
+            let html = '';
+            sorted.forEach(([promotor, total], index) => {
+                const colores = ['border-l-4 border-blue-500', 'border-l-4 border-emerald-500', 'border-l-4 border-purple-500', 'border-l-4 border-amber-500'];
+                const claseBorde = colores[index % colores.length];
+                html += `<div class="glass-card rounded-2xl p-4 shadow-lg ${claseBorde} flex items-center justify-between">
+                    <div>
+                        <p class="text-[10px] uppercase font-semibold" style="color:var(--text-secondary);">Promotor #${index + 1}</p>
+                        <h4 class="font-bold text-sm mt-0.5" style="color:var(--text-primary);">${promotor}</h4>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-2xl font-black" style="color:var(--accent);">${total}</span>
+                        <p class="text-[9px]" style="color:var(--text-muted);">Registros</p>
+                    </div>
+                </div>`;
+            });
+            grid.innerHTML = html;
+        }
+
+        document.getElementById('select-detalle-promotor')?.addEventListener('change', (e) => {
+            renderizarDetallePromotorSeleccionado(e.target.value, filtrarPorPromotor(allDocs));
+        });
 
         document.getElementById('filtro-promotor-app')?.addEventListener('change', () => renderizarTodosRegistros(filtrarPorPromotor(allDocs)));
         document.getElementById('busqueda-ingresados')?.addEventListener('input', () => renderizarTodosRegistros(filtrarPorPromotor(allDocs)));
@@ -2303,6 +2479,7 @@
         document.getElementById('filtro-promotor-censo')?.addEventListener('change', () => renderizarCenso(filtrarPorPromotor(allDocs)));
         document.getElementById('filtro-estado-censo')?.addEventListener('change', () => renderizarCenso(filtrarPorPromotor(allDocs)));
 
+        // ===== MODAL DETALLE ACTUALIZADO =====
         window.verDetalle = function(id) {
             const docItem = allDocs.find(d => d.id === id);
             if (!docItem) {
@@ -2310,20 +2487,78 @@
                 return;
             }
             document.getElementById('modal-detalle-titulo').innerHTML = `<i class="fa-solid fa-circle-info" style="color:var(--accent);"></i> Detalle: ${getNombreCompleto(docItem)}`;
+
+            const fotos = [];
             let html = '';
             Object.entries(docItem).forEach(([k, v]) => {
                 if (k === 'id') return;
+
+                if (Array.isArray(v) && v.some(esImagen)) {
+                    v.filter(esImagen).forEach(url => fotos.push({ campo: k, url }));
+                    return;
+                }
+                if (esImagen(v)) {
+                    fotos.push({ campo: k, url: v });
+                    return;
+                }
+
+                // Formatear timestamps
+                let valorMostrar = v;
+                if (v instanceof Timestamp || (typeof v === 'object' && v !== null && 'seconds' in v && 'nanoseconds' in v)) {
+                    valorMostrar = formatearFecha(v);
+                } else if (typeof v === 'object' && v !== null) {
+                    try {
+                        valorMostrar = JSON.stringify(v);
+                    } catch (e) {
+                        valorMostrar = '[Objeto]';
+                    }
+                }
+
                 html += `<div class="p-2 rounded-xl" style="background:var(--bg-input);">
                     <strong class="uppercase text-[10px]" style="color:var(--text-muted);">${k}:</strong>
-                    <div style="color:var(--text-primary);">${v !== null && v !== undefined ? v.toString() : '--'}</div>
+                    <div style="color:var(--text-primary); word-break:break-word;">${valorMostrar !== null && valorMostrar !== undefined && valorMostrar !== '' ? valorMostrar : '--'}</div>
                 </div>`;
             });
-            document.getElementById('modal-detalle-contenido').innerHTML = html;
+
+            let fotosHtml = '';
+            if (fotos.length) {
+                fotosHtml = `<div class="p-2 rounded-xl mb-2" style="background:var(--bg-input);">
+                    <strong class="uppercase text-[10px]" style="color:var(--text-muted);">Fotos adjuntas (${fotos.length}):</strong>
+                    <div class="flex flex-wrap gap-2 mt-2">
+                        ${fotos.map(f => `<img src="${f.url}" alt="${f.campo}" class="foto-detalle-thumb" data-url="${f.url}" loading="lazy" />`).join('')}
+                    </div>
+                </div>`;
+            } else if ((docItem.origen || '').toLowerCase() === 'web') {
+                fotosHtml = `<div class="foto-detalle-placeholder mb-2"><i class="fa-regular fa-image"></i> El cliente no adjuntó ninguna foto en este registro.</div>`;
+            }
+
+            document.getElementById('modal-detalle-contenido').innerHTML = fotosHtml + html;
+            document.getElementById('modal-detalle-contenido').querySelectorAll('.foto-detalle-thumb').forEach(img => {
+                img.addEventListener('click', () => abrirModalFoto(img.dataset.url));
+                img.addEventListener('error', () => {
+                    const ph = document.createElement('div');
+                    ph.className = 'foto-detalle-placeholder';
+                    ph.innerHTML = '<i class="fa-regular fa-image"></i> No se pudo cargar esta foto';
+                    img.replaceWith(ph);
+                });
+            });
             document.getElementById('modal-detalle').classList.remove('hidden');
         };
 
         window.cerrarModalDetalle = function() {
             document.getElementById('modal-detalle').classList.add('hidden');
+        };
+
+        window.abrirModalFoto = function(url) {
+            document.getElementById('modal-foto-img').src = url;
+            document.getElementById('modal-foto').classList.remove('hidden');
+            document.getElementById('modal-foto').classList.add('flex');
+        };
+
+        window.cerrarModalFoto = function() {
+            document.getElementById('modal-foto').classList.add('hidden');
+            document.getElementById('modal-foto').classList.remove('flex');
+            document.getElementById('modal-foto-img').src = '';
         };
 
         window.abrirEditarCenso = function(id) {
@@ -2362,6 +2597,37 @@
             }
         };
 
+        // ===== NUEVA FUNCIÓN ELIMINAR CONTRATO =====
+        window.eliminarContrato = async function(id) {
+            if (!ADMIN_EMAILS.includes(usuarioEmail)) {
+                mostrarToast('No tienes permisos para eliminar contratos', 'warning');
+                return;
+            }
+            const docItem = allDocs.find(d => d.id === id);
+            if (!docItem) {
+                mostrarToast('Registro no encontrado', 'error');
+                return;
+            }
+            if (!confirm(`¿Estás seguro de eliminar este contrato de ${getNombreCompleto(docItem)}? Esta acción no se puede deshacer.`)) return;
+
+            const coleccion = obtenerColeccionPorOrigen(docItem.origen);
+            try {
+                await deleteDoc(doc(db, coleccion, id));
+                mostrarToast('Contrato eliminado correctamente', 'success');
+            } catch (err) {
+                console.error(err);
+                mostrarToast('Error al eliminar contrato', 'error');
+            }
+        };
+
+        function ocultarPreloader() {
+            const preloader = document.getElementById('app-preloader');
+            if (preloader && !preloader.classList.contains('fade-out')) {
+                preloader.classList.add('fade-out');
+                setTimeout(() => preloader.remove(), 400);
+            }
+        }
+
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 loginContainer.classList.add('hidden');
@@ -2386,6 +2652,7 @@
                 allDocs = [];
                 previousIds.clear();
             }
+            ocultarPreloader();
         });
     </script>
 </body>
