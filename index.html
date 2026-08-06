@@ -598,12 +598,12 @@
         </div>
     </div>
 
-    <!-- MODAL VINCULACIÓN -->
+    <!-- MODAL VINCULACIÓN (mejorado) -->
     <div id="modal-vincular" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay hidden">
         <div class="glass-card rounded-2xl max-w-md w-full p-6 shadow-2xl relative modal-content">
             <div class="text-center mb-4">
                 <h3 class="font-bold text-lg" style="color:var(--text-primary);">Vinculación de Promotor</h3>
-                <p class="text-xs mt-1" style="color:var(--text-secondary);">Ingresa los datos con los que te identificarás.</p>
+                <p class="text-xs mt-1" style="color:var(--text-secondary);">Completa tus datos para continuar.</p>
             </div>
             <div class="space-y-3 text-xs">
                 <div>
@@ -613,6 +613,20 @@
                 <div>
                     <label class="block uppercase font-semibold mb-1" style="color:var(--text-secondary);">Cédula de identidad</label>
                     <input type="text" id="vinculacion-cedula" placeholder="Ej: 12345678" class="input-dark" />
+                </div>
+                <div id="vinculacion-password-group" class="hidden">
+                    <div>
+                        <label class="block uppercase font-semibold mb-1" style="color:var(--text-secondary);">Contraseña (para login sin Google)</label>
+                        <input type="password" id="vinculacion-password" placeholder="Mínimo 6 caracteres" class="input-dark" />
+                    </div>
+                    <div>
+                        <label class="block uppercase font-semibold mb-1" style="color:var(--text-secondary);">Confirmar contraseña</label>
+                        <input type="password" id="vinculacion-password-confirm" placeholder="Repite la contraseña" class="input-dark" />
+                    </div>
+                </div>
+                <div>
+                    <label class="block uppercase font-semibold mb-1" style="color:var(--text-secondary);">Teléfono (opcional)</label>
+                    <input type="text" id="vinculacion-telefono" placeholder="0412-1234567" class="input-dark" />
                 </div>
                 <div id="vinculacion-error" class="hidden text-red-400 text-xs mt-1"></div>
             </div>
@@ -1188,7 +1202,9 @@
             updateProfile,
             sendPasswordResetEmail,
             setPersistence,
-            browserLocalPersistence
+            browserLocalPersistence,
+            EmailAuthProvider,
+            linkWithCredential
         } from "firebase/auth";
         import {
             getFirestore,
@@ -1301,8 +1317,12 @@
         const modalVinculacion = document.getElementById('modal-vincular');
         const vinculoNombre = document.getElementById('vinculacion-nombre');
         const vinculoCedula = document.getElementById('vinculacion-cedula');
+        const vinculoPassword = document.getElementById('vinculacion-password');
+        const vinculoPasswordConfirm = document.getElementById('vinculacion-password-confirm');
+        const vinculoTelefono = document.getElementById('vinculacion-telefono');
         const vinculoError = document.getElementById('vinculacion-error');
         const btnVincularGuardar = document.getElementById('btn-vincular-guardar');
+        const vinculoPasswordGroup = document.getElementById('vinculacion-password-group');
         const btnRastreo = document.getElementById('btn-rastreo');
         const userAvatar = document.getElementById('user-avatar');
         const userNameDisplay = document.getElementById('user-name-display');
@@ -1335,6 +1355,7 @@
         let marcadoresGrupo = null;
         let tileLayer = null;
         let currentUserData = {};
+        let isGoogleLogin = false;
 
         function mostrarToast(mensaje, tipo = 'success') {
             const container = document.getElementById('toast-container');
@@ -1495,6 +1516,7 @@
             setCargandoLogin(true);
             try {
                 await signInWithEmailAndPassword(auth, userInput, password);
+                isGoogleLogin = false; // login con email/password
             } catch (error) {
                 mostrarError(traducirErrorFirebase(error.code));
             } finally {
@@ -1506,6 +1528,7 @@
             ocultarError();
             try {
                 await signInWithPopup(auth, googleProvider);
+                isGoogleLogin = true; // login con Google
             } catch (error) {
                 console.error('Error en Google login:', error);
                 mostrarError("Error al autenticar con Google.");
@@ -1532,23 +1555,58 @@
                     actualizarPerfilUI(auth.currentUser, data);
                     modalVinculacion.classList.add('hidden');
                 } else {
+                    // Mostrar modal de vinculación
                     modalVinculacion.classList.remove('hidden');
+                    // Limpiar errores
+                    vinculoError.classList.add('hidden');
+                    // Determinar si es login con Google
+                    const isGoogle = auth.currentUser?.providerData?.some(p => p.providerId === 'google.com') || false;
+                    if (isGoogle) {
+                        vinculoPasswordGroup.classList.remove('hidden');
+                    } else {
+                        vinculoPasswordGroup.classList.add('hidden');
+                    }
+                    // Guardar al hacer clic
                     btnVincularGuardar.onclick = async () => {
                         const nombre = vinculoNombre.value.trim();
                         const cedula = vinculoCedula.value.trim();
+                        const telefono = vinculoTelefono.value.trim();
+                        const password = vinculoPassword.value;
+                        const passwordConfirm = vinculoPasswordConfirm.value;
+
                         if (!nombre || !cedula) {
-                            vinculoError.innerText = 'Todos los campos son obligatorios.';
+                            vinculoError.innerText = 'Nombre y cédula son obligatorios.';
                             vinculoError.classList.remove('hidden');
                             return;
                         }
+                        if (isGoogle) {
+                            if (password.length < 6) {
+                                vinculoError.innerText = 'La contraseña debe tener al menos 6 caracteres.';
+                                vinculoError.classList.remove('hidden');
+                                return;
+                            }
+                            if (password !== passwordConfirm) {
+                                vinculoError.innerText = 'Las contraseñas no coinciden.';
+                                vinculoError.classList.remove('hidden');
+                                return;
+                            }
+                        }
                         vinculoError.classList.add('hidden');
+
                         try {
+                            // Si es Google, vincular la credencial
+                            if (isGoogle) {
+                                const credential = EmailAuthProvider.credential(email, password);
+                                await linkWithCredential(auth.currentUser, credential);
+                            }
+
+                            // Guardar en Firestore
                             const newData = {
                                 nombre,
                                 cedula,
                                 email,
                                 uid,
-                                telefono: '',
+                                telefono: telefono || '',
                                 direccion: '',
                                 rol: ADMIN_EMAILS.includes(email) ? 'administrador' : 'promotor',
                                 creado: serverTimestamp()
@@ -1563,7 +1621,15 @@
                             actualizarUI();
                         } catch (err) {
                             console.error(err);
-                            vinculoError.innerText = 'Error al guardar. Intenta de nuevo.';
+                            let msg = 'Error al guardar. Intenta de nuevo.';
+                            if (err.code === 'auth/email-already-in-use') {
+                                msg = 'Este correo ya está asociado a otra cuenta.';
+                            } else if (err.code === 'auth/weak-password') {
+                                msg = 'La contraseña es muy débil. Debe tener al menos 6 caracteres.';
+                            } else if (err.code === 'auth/credential-already-in-use') {
+                                msg = 'Esta cuenta ya tiene una contraseña establecida.';
+                            }
+                            vinculoError.innerText = msg;
                             vinculoError.classList.remove('hidden');
                         }
                     };
