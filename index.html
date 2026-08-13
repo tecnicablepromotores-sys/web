@@ -2773,8 +2773,8 @@
             const label = escapeHtml(estado || 'Pendiente');
             if (e.includes('completado') || e.includes('activo')) return `<span class="badge badge-estado-completado">${label}</span>`;
             if (e.includes('cancelado') || e.includes('no interesado')) return `<span class="badge badge-estado-cancelado">${label}</span>`;
-            if (e.includes('proceso')) return `<span class="badge badge-estado-proceso">${label}</span>`;
             if (e.includes('procesado')) return `<span class="badge badge-estado-procesado">${label}</span>`;
+            if (e.includes('proceso')) return `<span class="badge badge-estado-proceso">${label}</span>`;
             return `<span class="badge badge-estado-pendiente">${label}</span>`;
         }
 
@@ -2807,8 +2807,8 @@
                 return;
             }
             const sorted = [...docs].sort((a, b) => {
-                const ta = obtenerFechaComparable(a.fecha || a.creado);
-                const tb = obtenerFechaComparable(b.fecha || b.creado);
+                const ta = obtenerFechaComparable(a.fecha || a.creado || a.fecha_registro);
+                const tb = obtenerFechaComparable(b.fecha || b.creado || b.fecha_registro);
                 return tb - ta;
             }).slice(0, 10);
 
