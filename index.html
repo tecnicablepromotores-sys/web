@@ -24,6 +24,10 @@
             --shadow: 0 8px 32px rgba(0,0,0,0.3);
             --accent: #3b82f6;
             --accent-hover: #2563eb;
+            --accent-soft: rgba(59,130,246,0.12);
+            --accent-glow: rgba(59,130,246,0.35);
+            --focus-ring: rgba(59,130,246,0.5);
+            --focus-ring-soft: rgba(59,130,246,0.18);
             --map-tile: 'dark_all';
         }
 
@@ -40,13 +44,20 @@
             --shadow: 0 8px 32px rgba(0,0,0,0.08);
             --accent: #0d9488;
             --accent-hover: #0f766e;
+            --accent-soft: rgba(13,148,136,0.12);
+            --accent-glow: rgba(13,148,136,0.25);
+            --focus-ring: rgba(13,148,136,0.5);
+            --focus-ring-soft: rgba(13,148,136,0.18);
             --map-tile: 'light_all';
         }
 
         * { box-sizing: border-box; }
         body {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background: var(--bg-body);
+            background:
+                radial-gradient(ellipse 90% 55% at 50% -12%, var(--accent-glow), transparent 62%),
+                radial-gradient(ellipse 60% 45% at 100% 100%, var(--accent-soft), transparent 60%),
+                var(--bg-body);
             color: var(--text-primary);
             margin: 0;
             padding: 0;
@@ -102,7 +113,7 @@
             transition: all 0.2s ease;
             font-size: 0.8rem;
             border-radius: 0.75rem;
-            padding: 0.6rem 1rem;
+            padding: 0.55rem 0.9rem;
             margin-bottom: 2px;
             color: var(--text-secondary);
         }
@@ -113,16 +124,43 @@
         }
         .nav-btn:active { transform: scale(0.96); }
         .nav-btn.active {
-            background: rgba(37, 99, 235, 0.15) !important;
+            background: linear-gradient(90deg, var(--accent-soft), rgba(255,255,255,0.02)) !important;
             color: var(--text-primary) !important;
-            border-left: 4px solid var(--accent);
+            border-left: 3px solid var(--accent);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 4px 16px var(--accent-glow);
         }
         .light-theme .nav-btn.active {
-            background: rgba(13, 148, 136, 0.12) !important;
+            background: linear-gradient(90deg, var(--accent-soft), rgba(0,0,0,0.01)) !important;
             border-left-color: var(--accent);
         }
-        .nav-btn.active i { color: var(--accent); }
-        .nav-btn i { width: 1.2rem; font-size: 1.1rem; }
+        .nav-btn.active i {
+            background: var(--accent);
+            color: #fff !important;
+            border-color: transparent;
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+        .nav-btn i {
+            width: 1.7rem;
+            height: 1.7rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.55rem;
+            font-size: 0.85rem;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        .light-theme .nav-btn i { background: rgba(0,0,0,0.03); }
+        .nav-label {
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            padding: 0.85rem 0.9rem 0.35rem;
+        }
 
         .seccion-view { animation: fadeSlide 0.3s ease both; }
         @keyframes fadeSlide {
@@ -198,12 +236,12 @@
             min-width: 600px;
         }
         .table-wrap thead th {
-            background: rgba(20, 20, 26, 0.8);
+            background: linear-gradient(180deg, rgba(20, 20, 26, 0.92), rgba(20, 20, 26, 0.75));
             color: var(--text-secondary);
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.06em;
-            font-size: 0.55rem;
+            font-size: 0.6rem;
             padding: 0.7rem 0.8rem;
             position: sticky;
             top: 0;
@@ -212,7 +250,7 @@
             white-space: nowrap;
         }
         .light-theme .table-wrap thead th {
-            background: rgba(241, 245, 249, 0.8);
+            background: linear-gradient(180deg, rgba(241, 245, 249, 0.9), rgba(241, 245, 249, 0.7));
         }
         .table-wrap tbody td {
             padding: 0.6rem 0.8rem;
@@ -220,22 +258,24 @@
             vertical-align: middle;
             word-break: break-word;
         }
+        .table-wrap tbody tr { transition: background 0.15s ease; }
         .table-wrap tbody tr:nth-child(even) { background: rgba(255,255,255,0.015); }
-        .table-wrap tbody tr:hover { background: rgba(255,255,255,0.04); }
+        .table-wrap tbody tr:hover { background: rgba(255,255,255,0.06); box-shadow: inset 3px 0 0 var(--accent); }
         .light-theme .table-wrap tbody tr:nth-child(even) { background: rgba(0,0,0,0.015); }
-        .light-theme .table-wrap tbody tr:hover { background: rgba(0,0,0,0.04); }
+        .light-theme .table-wrap tbody tr:hover { background: rgba(0,0,0,0.04); box-shadow: inset 3px 0 0 var(--accent); }
 
         .badge {
             display: inline-flex;
             align-items: center;
             gap: 3px;
-            padding: 0.15rem 0.6rem;
+            padding: 0.2rem 0.65rem;
             border-radius: 9999px;
-            font-size: 0.55rem;
+            font-size: 0.6rem;
             font-weight: 700;
             letter-spacing: 0.02em;
             border: 1px solid transparent;
             white-space: nowrap;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
         }
         .badge-app { background: rgba(16,185,129,0.15); color: #6ee7b7; border-color: rgba(16,185,129,0.2); }
         .badge-web { background: rgba(6,182,212,0.15); color: #67e8f9; border-color: rgba(6,182,212,0.2); }
@@ -267,13 +307,13 @@
         .input-dark:focus {
             outline: none;
             border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+            box-shadow: 0 0 0 3px var(--focus-ring-soft);
         }
         .input-dark::placeholder { color: var(--text-muted); }
         .light-theme .input-dark { background: white; }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--accent), #0f766e);
+            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
             color: white;
             font-weight: 600;
             padding: 0.5rem 1.5rem;
@@ -282,11 +322,11 @@
             border: none;
             cursor: pointer;
             font-size: 0.85rem;
-            box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+            box-shadow: 0 4px 12px var(--accent-glow);
         }
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(13, 148, 136, 0.4);
+            box-shadow: 0 8px 20px var(--accent-glow);
         }
         .btn-primary:active { transform: scale(0.97); }
 
@@ -338,6 +378,11 @@
             border: 1px solid var(--border-color);
             border-radius: 2rem;
             box-shadow: var(--shadow);
+            animation: loginIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+        @keyframes loginIn {
+            from { opacity: 0; transform: translateY(26px) scale(0.96); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
         .login-card .top-bar {
             height: 4px;
@@ -348,14 +393,16 @@
         .modal-overlay {
             background: rgba(0,0,0,0.7);
             backdrop-filter: blur(8px);
-            animation: fadeIn 0.2s ease;
+            animation: fadeIn 0.25s ease;
         }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .modal-content {
-            animation: modalSlide 0.25s ease forwards;
+            animation: modalSlide 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            max-height: 90vh;
+            overflow-y: auto;
         }
         @keyframes modalSlide {
-            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            from { opacity: 0; transform: scale(0.96) translateY(14px); }
             to { opacity: 1; transform: scale(1) translateY(0); }
         }
 
@@ -436,6 +483,156 @@
             object-fit: cover;
         }
         .foto-detalle-thumb:hover { transform: scale(1.02); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+        /* ========== MODAL DETALLE PROFESIONAL ========== */
+        .detalle-close-btn {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            z-index: 20;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 9999px;
+            border: none;
+            background: rgba(0,0,0,0.4);
+            color: #fff;
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+            transition: background 0.2s ease, transform 0.15s ease;
+        }
+        .detalle-close-btn:hover { background: rgba(0,0,0,0.6); transform: scale(1.06); }
+
+        .detalle-hero {
+            height: 110px;
+            width: 100%;
+            background: linear-gradient(135deg, var(--accent), #0f766e);
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            filter: saturate(1.05);
+            border-radius: 2rem 2rem 0 0;
+        }
+        .detalle-hero::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.55) 100%);
+        }
+
+        .detalle-avatar {
+            width: 68px;
+            height: 68px;
+            border-radius: 1rem;
+            border: 3px solid var(--bg-card);
+            background: var(--bg-input);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+            overflow: hidden;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .detalle-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+        .detalle-badges { min-height: 1.4rem; }
+
+        .detalle-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.55rem;
+        }
+        @media (min-width: 560px) {
+            .detalle-grid { grid-template-columns: 1fr 1fr; }
+            .detalle-field-wide { grid-column: 1 / -1; }
+        }
+
+        .detalle-field {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 0.85rem;
+            padding: 0.6rem 0.7rem;
+            display: flex;
+            gap: 0.6rem;
+            align-items: flex-start;
+            transition: border-color 0.15s ease;
+        }
+        .detalle-field:hover { border-color: rgba(255,255,255,0.16); }
+        .light-theme .detalle-field:hover { border-color: rgba(0,0,0,0.16); }
+        .detalle-field-icon {
+            width: 26px;
+            height: 26px;
+            border-radius: 0.6rem;
+            background: rgba(59,130,246,0.12);
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .detalle-field-body { min-width: 0; flex: 1; }
+        .detalle-field-label {
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 0.15rem;
+        }
+        .detalle-field-value {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            word-break: break-word;
+            line-height: 1.35;
+        }
+        .detalle-field-value a { color: var(--accent); text-decoration: none; }
+        .detalle-field-value a:hover { text-decoration: underline; }
+        .detalle-field-action {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0.3rem;
+            border-radius: 0.5rem;
+            flex-shrink: 0;
+            font-size: 0.75rem;
+            transition: color 0.15s ease, background 0.15s ease;
+        }
+        .detalle-field-action:hover { color: var(--accent); background: rgba(59,130,246,0.1); }
+
+        .detalle-fotos-section {
+            margin-top: 0.8rem;
+            padding-top: 0.8rem;
+            border-top: 1px solid var(--border-color);
+        }
+        .detalle-fotos-titulo {
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+        .detalle-fotos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+            gap: 0.5rem;
+        }
+        .detalle-fotos-grid img {
+            width: 100%;
+            height: 88px;
+            object-fit: cover;
+            border-radius: 0.65rem;
+            border: 1px solid var(--border-color);
+        }
+
         .foto-detalle-placeholder {
             display: flex;
             align-items: center;
@@ -503,11 +700,18 @@
         .leaflet-popup-content-wrapper {
             background: var(--bg-card) !important;
             color: var(--text-primary) !important;
-            border-radius: 0.75rem !important;
+            border-radius: 0.9rem !important;
             border: 1px solid var(--border-color) !important;
+            box-shadow: 0 14px 36px rgba(0,0,0,0.35) !important;
+            backdrop-filter: blur(8px);
         }
         .leaflet-popup-tip { background: var(--bg-card) !important; }
-        .leaflet-popup-content { font-size: 0.75rem !important; }
+        .leaflet-popup-content { font-size: 0.8rem !important; line-height: 1.55 !important; margin: 0.8rem 1rem !important; }
+        .gps-popup-name { font-weight: 700; color: var(--accent); margin-bottom: 0.25rem; }
+        .gps-popup-name i { margin-right: 0.35rem; }
+        .gps-popup-coords { font-family: 'Consolas', monospace; font-size: 0.72rem; color: var(--text-primary); }
+        .gps-popup-coords i, .gps-popup-time i { color: var(--accent); margin-right: 0.35rem; }
+        .gps-popup-time { font-size: 0.68rem; color: var(--text-secondary); margin-top: 0.2rem; }
         .leaflet-control-zoom a {
             background: var(--bg-card) !important;
             color: var(--text-primary) !important;
@@ -529,13 +733,193 @@
             transition: all 0.2s;
             font-size: 1rem;
         }
+        .theme-toggle i { transition: transform 0.3s ease; }
+        .theme-toggle:active i { transform: rotate(180deg) scale(0.8); }
         .theme-toggle:hover {
             background: rgba(255,255,255,0.05);
             color: var(--text-primary);
+            border-color: var(--accent);
         }
         .light-theme .theme-toggle:hover {
             background: rgba(0,0,0,0.05);
         }
+
+        /* Login: fondo decorativo */
+        .login-bg {
+            background:
+                radial-gradient(ellipse 80% 60% at 20% 8%, var(--accent-glow), transparent 60%),
+                radial-gradient(ellipse 60% 50% at 85% 92%, rgba(139,92,246,0.18), transparent 55%),
+                radial-gradient(ellipse 45% 40% at 75% 15%, rgba(6,182,212,0.12), transparent 55%),
+                var(--bg-body) !important;
+        }
+        .login-logo {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1rem;
+            border-radius: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            color: #fff;
+            background: linear-gradient(135deg, var(--accent), #0f766e);
+            border: 1px solid rgba(255,255,255,0.15);
+            box-shadow: 0 12px 32px var(--accent-glow);
+            animation: loginLogoFloat 3.2s ease-in-out infinite;
+        }
+        @keyframes loginLogoFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        /* Tarjetas de estadísticas */
+        .stat-card {
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 16px 44px rgba(0,0,0,0.35);
+        }
+        .light-theme .stat-card:hover {
+            box-shadow: 0 16px 44px rgba(0,0,0,0.12);
+        }
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(120% 120% at 100% 0%, var(--accent-glow), transparent 55%);
+            opacity: 0;
+            transition: opacity 0.25s ease;
+            pointer-events: none;
+        }
+        .stat-card:hover::after { opacity: 1; }
+        .stat-card > * { position: relative; z-index: 1; }
+        .stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: #fff;
+            flex-shrink: 0;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.28);
+        }
+        .stat-icon i { font-size: 1.15rem; }
+        .rank-badge {
+            width: 34px;
+            height: 34px;
+            border-radius: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: #fff;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, var(--accent), #0f766e);
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+
+        /* Indicador "en vivo" */
+        .live-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 9999px;
+            background: rgba(16,185,129,0.15);
+            color: #6ee7b7;
+            border: 1px solid rgba(16,185,129,0.25);
+            font-size: 0.7rem;
+            font-weight: 700;
+            white-space: nowrap;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+        }
+        .light-theme .live-badge { background: rgba(16,185,129,0.15); color: #047857; }
+        .live-badge .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.45; transform: scale(0.8); }
+        }
+
+        /* Marcadores GPS del mapa */
+        .gps-marker { background: transparent; border: none; }
+        .gps-marker-wrap { position: relative; width: 34px; height: 34px; }
+        .gps-marker-pin {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 28px;
+            height: 28px;
+            margin: -14px 0 0 -14px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), #0f766e);
+            border: 2px solid rgba(255,255,255,0.9);
+            box-shadow: 0 4px 14px var(--accent-glow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+        }
+        .gps-marker-pin i { color: #fff; font-size: 0.7rem; }
+        .gps-marker-pulse {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 28px;
+            height: 28px;
+            margin: -14px 0 0 -14px;
+            border-radius: 50%;
+            background: var(--accent);
+            animation: gpsPulse 1.8s ease-out infinite;
+        }
+        @keyframes gpsPulse {
+            0% { transform: scale(0.6); opacity: 0.45; }
+            70% { transform: scale(1.7); opacity: 0; }
+            100% { transform: scale(1.7); opacity: 0; }
+        }
+        #mapa-rastreo { box-shadow: inset 0 0 0 1px var(--border-color); }
+
+        /* Accesibilidad: focus visible global */
+        :focus-visible {
+            outline: 2px solid var(--focus-ring);
+            outline-offset: 2px;
+            border-radius: 6px;
+        }
+        .btn-action:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 1px; }
+
+        /* Toast: barra de progreso */
+        .toast { position: relative; overflow: hidden; }
+        .toast::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            height: 2px;
+            width: 100%;
+            background: currentColor;
+            opacity: 0.45;
+            animation: toastBar 4s linear forwards;
+        }
+        @keyframes toastBar { from { width: 100%; } to { width: 0%; } }
+
+        /* Menú de perfil: entrada suave */
+        .profile-menu { animation: menuIn 0.2s ease both; }
+        @keyframes menuIn {
+            from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .profile-actions button.text-red:hover { background: rgba(248,113,113,0.15) !important; }
 
         @media (max-width: 640px) {
             .table-wrap table { font-size: 0.65rem; min-width: 480px; }
@@ -564,10 +948,11 @@
     <div id="toast-container" role="status" aria-live="polite"></div>
 
     <!-- LOGIN -->
-    <div id="login-container" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden" style="background:var(--bg-body);">
+    <div id="login-container" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden login-bg">
         <div class="login-card w-full max-w-md p-6 relative">
             <div class="top-bar absolute top-0 left-0 right-0"></div>
-            <div class="text-center mt-4">
+            <div class="text-center mt-5">
+                <div class="login-logo"><i class="fa-solid fa-network-wired"></i></div>
                 <span class="inline-block bg-blue-600/10 text-blue-400 border border-blue-600/20 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Tecnicable C.A.</span>
                 <h2 class="text-2xl font-bold tracking-tight mt-3" style="color:var(--text-primary);">TECNICABLE <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">PRO</span></h2>
                 <p class="text-xs mt-0.5" style="color:var(--text-secondary);">Monitoreo y Auditoría de Red</p>
@@ -651,49 +1036,55 @@
                 </button>
             </div>
             <nav class="flex-1 overflow-y-auto p-3 space-y-0.5 custom-scrollbar" id="sidebar-nav">
+                <div class="nav-label">Menú principal</div>
                 <button data-seccion="dashboard" class="nav-btn active w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium cursor-pointer">
-                    <i class="fa-solid fa-chart-pie w-4 text-sm"></i> Dashboard
+                    <i class="fa-solid fa-chart-pie"></i> Dashboard
                 </button>
                 <button data-seccion="ingresados" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium cursor-pointer">
-                    <i class="fa-solid fa-list w-4 text-sm"></i> Todos los registros
+                    <i class="fa-solid fa-list"></i> Todos los registros
                 </button>
                 <button data-seccion="web" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium cursor-pointer">
-                    <i class="fa-solid fa-globe w-4 text-sm"></i> Contratos Web
+                    <i class="fa-solid fa-globe"></i> Contratos Web
                 </button>
                 <button data-seccion="completados" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium cursor-pointer">
-                    <i class="fa-solid fa-check-double w-4 text-sm"></i> Completados
+                    <i class="fa-solid fa-check-double"></i> Completados
                 </button>
                 <button data-seccion="promotores" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium cursor-pointer">
-                    <i class="fa-solid fa-id-card-clip w-4 text-sm"></i> Promotores
+                    <i class="fa-solid fa-id-card-clip"></i> Promotores
                 </button>
+                <div class="nav-label">Gestión</div>
                 <button data-seccion="censo" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium cursor-pointer">
-                    <i class="fa-solid fa-map-location-dot w-4 text-sm"></i> Censo
+                    <i class="fa-solid fa-map-location-dot"></i> Censo
                 </button>
                 <button data-seccion="rastreo" id="btn-rastreo" class="nav-btn hidden w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium cursor-pointer">
-                    <i class="fa-solid fa-satellite-dish w-4 text-sm"></i> Rastreo GPS
+                    <i class="fa-solid fa-satellite-dish"></i> Rastreo GPS
                 </button>
             </nav>
-            <div class="p-3 border-t flex text-xs justify-end md:hidden" style="border-color:var(--border-color);">
+            <div class="p-3 border-t flex text-xs items-center justify-between" style="border-color:var(--border-color);">
+                <span class="text-[9px] uppercase tracking-widest hidden md:block" style="color:var(--text-muted);">Tecnicable PRO · v2.4</span>
                 <button id="btn-logout-sidebar" class="text-red-400 hover:text-red-300 cursor-pointer p-1.5 rounded-lg hover:bg-red-950/30 transition-colors flex items-center gap-1.5">
                     <i class="fa-solid fa-right-from-bracket text-xs"></i> Cerrar sesión
                 </button>
             </div>
         </aside>
 
-        <div class="flex-1 flex flex-col overflow-hidden min-w-0" style="background:var(--bg-body);">
+        <div class="flex-1 flex flex-col overflow-hidden min-w-0" style="background:transparent;">
             <header class="h-14 flex items-center justify-between px-4 sticky top-0 z-20 shrink-0 gap-2" style="background:var(--bg-header); backdrop-filter:blur(8px); border-bottom:1px solid var(--border-color);">
                 <div class="flex items-center gap-2 min-w-0">
                     <button class="hamburger-btn md:hidden" onclick="toggleSidebar(true)" aria-label="Abrir menú" style="background:transparent; border:none; color:var(--text-primary); font-size:1.4rem; cursor:pointer; padding:0.2rem 0.4rem; border-radius:0.4rem; transition:background 0.15s;">
                         <i class="fa-solid fa-bars"></i>
                     </button>
-                    <h1 id="seccion-titulo" class="font-bold text-lg tracking-tight truncate" style="color:var(--text-primary);">Dashboard General</h1>
+                    <div class="min-w-0 leading-tight">
+                        <p class="text-[9px] uppercase tracking-widest hidden sm:block" style="color:var(--text-muted);">Tecnicable · Panel de gestión</p>
+                        <h1 id="seccion-titulo" class="font-bold text-lg tracking-tight truncate" style="color:var(--text-primary);">Dashboard General</h1>
+                    </div>
                 </div>
                 <div class="flex items-center gap-2 flex-shrink-0">
-                    <button id="theme-toggle" class="theme-toggle" title="Cambiar tema">
+                    <button id="theme-toggle" class="theme-toggle" title="Cambiar tema" aria-label="Cambiar tema">
                         <i class="fa-solid fa-moon"></i>
                     </button>
                     <div class="profile-dropdown" id="profile-dropdown">
-                        <div class="flex items-center gap-1.5 cursor-pointer" onclick="toggleProfileMenu()">
+                        <div class="flex items-center gap-2 cursor-pointer rounded-full p-1 pr-2 transition-colors hover:bg-white/5" onclick="toggleProfileMenu()">
                             <img id="user-avatar" src="" alt="Avatar" class="w-8 h-8 rounded-full border-2 object-cover hidden" style="border-color:var(--accent);" />
                             <span id="user-name-display" class="text-sm font-medium hidden truncate max-w-[90px]" style="color:var(--text-primary);"></span>
                             <i class="fa-solid fa-chevron-down text-[10px]" style="color:var(--text-muted);"></i>
@@ -720,50 +1111,50 @@
                 <!-- DASHBOARD -->
                 <div id="view-dashboard" class="seccion-view space-y-4">
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div class="glass-card rounded-2xl p-5 shadow-lg" style="border-left:4px solid var(--accent);">
+                        <div class="glass-card stat-card rounded-2xl p-5 shadow-lg" style="border-left:4px solid var(--accent);">
                             <div class="flex justify-between items-start">
                                 <div>
                                     <p class="text-[10px] uppercase tracking-wider font-semibold" style="color:var(--text-secondary);">Total</p>
                                     <h3 id="stat-dash-total" class="text-2xl md:text-3xl font-black mt-1" style="color:var(--text-primary);">0</h3>
                                 </div>
-                                <div class="p-3 rounded-full" style="background:rgba(13,148,136,0.1);">
-                                    <i class="fa-solid fa-database text-xl" style="color:var(--accent);"></i>
+                                <div class="stat-icon" style="background:linear-gradient(135deg,#14b8a6,#0d9488);">
+                                    <i class="fa-solid fa-database"></i>
                                 </div>
                             </div>
                             <span class="text-[8px] font-medium" style="color:var(--accent);"><i class="fa-solid fa-check-circle mr-0.5"></i>Firestore</span>
                         </div>
-                        <div class="glass-card rounded-2xl p-5 shadow-lg" style="border-left:4px solid #06b6d4;">
+                        <div class="glass-card stat-card rounded-2xl p-5 shadow-lg" style="border-left:4px solid #06b6d4;">
                             <div class="flex justify-between items-start">
                                 <div>
                                     <p class="text-[10px] uppercase tracking-wider font-semibold" style="color:var(--text-secondary);">Promotores</p>
                                     <h3 id="stat-dash-promotores" class="text-2xl md:text-3xl font-black mt-1" style="color:var(--text-primary);">0</h3>
                                 </div>
-                                <div class="p-3 rounded-full" style="background:rgba(6,182,212,0.1);">
-                                    <i class="fa-solid fa-users text-cyan-400 text-xl"></i>
+                                <div class="stat-icon" style="background:linear-gradient(135deg,#22d3ee,#0891b2);">
+                                    <i class="fa-solid fa-users"></i>
                                 </div>
                             </div>
                             <span class="text-[8px] text-cyan-400 font-medium"><i class="fa-solid fa-id-card mr-0.5"></i>Activos</span>
                         </div>
-                        <div class="glass-card rounded-2xl p-5 shadow-lg" style="border-left:4px solid #f59e0b;">
+                        <div class="glass-card stat-card rounded-2xl p-5 shadow-lg" style="border-left:4px solid #f59e0b;">
                             <div class="flex justify-between items-start">
                                 <div>
                                     <p class="text-[10px] uppercase tracking-wider font-semibold" style="color:var(--text-secondary);">Estados</p>
                                     <h3 id="stat-dash-estados" class="text-2xl md:text-3xl font-black mt-1" style="color:var(--text-primary);">0</h3>
                                 </div>
-                                <div class="p-3 rounded-full" style="background:rgba(245,158,11,0.1);">
-                                    <i class="fa-solid fa-tags text-amber-400 text-xl"></i>
+                                <div class="stat-icon" style="background:linear-gradient(135deg,#fbbf24,#d97706);">
+                                    <i class="fa-solid fa-tags"></i>
                                 </div>
                             </div>
                             <span class="text-[8px] text-amber-400 font-medium"><i class="fa-solid fa-rotate mr-0.5"></i>Variados</span>
                         </div>
-                        <div class="glass-card rounded-2xl p-5 shadow-lg" style="border-left:4px solid #8b5cf6;">
+                        <div class="glass-card stat-card rounded-2xl p-5 shadow-lg" style="border-left:4px solid #8b5cf6;">
                             <div class="flex justify-between items-start">
                                 <div>
                                     <p class="text-[10px] uppercase tracking-wider font-semibold" style="color:var(--text-secondary);">Planes</p>
                                     <h3 id="stat-dash-planes" class="text-2xl md:text-3xl font-black mt-1" style="color:var(--text-primary);">0</h3>
                                 </div>
-                                <div class="p-3 rounded-full" style="background:rgba(139,92,246,0.1);">
-                                    <i class="fa-solid fa-wifi text-purple-400 text-xl"></i>
+                                <div class="stat-icon" style="background:linear-gradient(135deg,#a78bfa,#7c3aed);">
+                                    <i class="fa-solid fa-wifi"></i>
                                 </div>
                             </div>
                             <span class="text-[8px] text-purple-400 font-medium"><i class="fa-solid fa-signal mr-0.5"></i>Activos</span>
@@ -774,9 +1165,7 @@
                             <h3 class="font-bold text-xs tracking-wider uppercase flex items-center gap-2" style="color:var(--text-primary);">
                                 <i class="fa-solid fa-clock-rotate-left" style="color:var(--accent);"></i> Últimos 10
                             </h3>
-                            <span class="text-[10px] flex items-center gap-1" style="color:var(--text-secondary);">
-                                <span class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span> En vivo
-                            </span>
+                            <span class="live-badge"><span class="dot"></span> En vivo</span>
                         </div>
                         <div class="table-wrap">
                             <table>
@@ -962,7 +1351,7 @@
                             <p class="text-[10px]" style="color:var(--text-secondary);">Ubicación de promotores</p>
                         </div>
                         <div class="flex items-center gap-3">
-                            <span class="text-xs" style="color:var(--text-secondary);">Activos: <strong id="stat-rastreo-total" class="text-cyan-400">0</strong></span>
+                            <span class="live-badge"><span class="dot"></span> Activos: <strong id="stat-rastreo-total">0</strong></span>
                             <button id="btn-centrar-mapa" class="px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all inline-flex items-center gap-1" style="background:rgba(13,148,136,0.15); color:var(--accent); border:1px solid rgba(13,148,136,0.2);">
                                 <i class="fa-solid fa-crosshairs"></i> Centrar
                             </button>
@@ -988,19 +1377,25 @@
     <!-- ========== MODALES ========== -->
 
     <!-- MODAL DETALLE -->
-    <div id="modal-detalle" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="glass-card rounded-2xl max-w-lg w-full p-5 shadow-2xl relative modal-content">
-            <div class="flex items-center justify-between pb-2" style="border-bottom:1px solid var(--border-color); margin-bottom:0.75rem;">
-                <h3 id="modal-detalle-titulo" class="font-bold text-sm flex items-center gap-2" style="color:var(--text-primary);">
-                    <i class="fa-solid fa-circle-info" style="color:var(--accent);"></i> Detalle
-                </h3>
-                <button onclick="cerrarModalDetalle()" class="text-gray-400 hover:text-white p-1.5 rounded-lg hover:bg-zinc-800 transition-colors">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <div id="modal-detalle-contenido" class="space-y-2 text-xs max-h-[55vh] overflow-y-auto custom-scrollbar pr-1" style="color:var(--text-secondary);"></div>
-            <div class="mt-4 pt-2 text-right" style="border-top:1px solid var(--border-color);">
-                <button onclick="cerrarModalDetalle()" class="btn-ghost">Cerrar</button>
+    <div id="modal-detalle" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay hidden">
+        <div class="glass-card rounded-2xl max-w-2xl w-full shadow-2xl relative modal-content overflow-y-auto overflow-x-hidden">
+            <button onclick="cerrarModalDetalle()" class="detalle-close-btn" aria-label="Cerrar">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div id="modal-detalle-hero" class="detalle-hero"></div>
+            <div class="px-5 pb-5 -mt-8 relative z-10">
+                <div class="flex items-end gap-3 mb-4">
+                    <div id="modal-detalle-avatar" class="detalle-avatar"></div>
+                    <div class="flex-1 min-w-0 pb-1">
+                        <h3 id="modal-detalle-titulo" class="font-bold text-base leading-tight truncate" style="color:var(--text-primary);">Detalle</h3>
+                        <div id="modal-detalle-badges" class="detalle-badges flex flex-wrap gap-1.5 mt-1"></div>
+                    </div>
+                </div>
+                <div id="modal-detalle-contenido" class="detalle-grid max-h-[42vh] overflow-y-auto custom-scrollbar pr-1"></div>
+                <div id="modal-detalle-fotos"></div>
+                <div class="mt-4 pt-3 text-right" style="border-top:1px solid var(--border-color);">
+                    <button onclick="cerrarModalDetalle()" class="btn-ghost">Cerrar</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1014,7 +1409,7 @@
     </div>
 
     <!-- MODAL EDITAR CENSO -->
-    <div id="modal-editar-censo" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div id="modal-editar-censo" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay hidden">
         <div class="glass-card rounded-2xl max-w-md w-full p-5 shadow-2xl relative modal-content">
             <div class="flex items-center justify-between pb-2" style="border-bottom:1px solid var(--border-color); margin-bottom:0.75rem;">
                 <h3 id="edit-censo-titulo" class="font-bold text-sm flex items-center gap-2" style="color:var(--text-primary);">
@@ -1295,6 +1690,16 @@
             return formatearFecha(valor);
         }
 
+        function obtenerFechaComparable(valor) {
+            if (!valor) return 0;
+            if (valor instanceof Timestamp || (typeof valor === 'object' && valor !== null && 'seconds' in valor && 'nanoseconds' in valor)) {
+                return valor.seconds * 1000 + valor.nanoseconds / 1000000;
+            }
+            if (typeof valor === 'number' && !isNaN(valor)) return valor;
+            const ms = Date.parse(valor);
+            return isNaN(ms) ? 0 : ms;
+        }
+
         function esImagen(valor) {
             if (typeof valor !== 'string') return false;
             const v = valor.trim();
@@ -1302,6 +1707,66 @@
             if (v.startsWith('data:image/')) return true;
             return false;
         }
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function escaparJsAttr(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/"/g, '&quot;')
+                .replace(/\\/g, '\\\\')
+                .replace(/'/g, "\\'");
+        }
+
+        // ===== Metadatos de campos para el modal de detalle =====
+        const DETALLE_CAMPO_ICONOS = {
+            correo: 'fa-envelope', email: 'fa-envelope',
+            promotor: 'fa-user-tie',
+            direccion: 'fa-location-dot',
+            telefono1: 'fa-phone', telefono: 'fa-phone', telefono2: 'fa-phone', celular: 'fa-mobile-screen-button',
+            nombres: 'fa-id-card', nombre: 'fa-id-card', apellidos: 'fa-id-card', apellido: 'fa-id-card',
+            cedula: 'fa-address-card', ci: 'fa-address-card', dni: 'fa-address-card', identificacion: 'fa-address-card',
+            coordenadas: 'fa-map-pin', ubicacion: 'fa-map-pin',
+            notas: 'fa-note-sticky', origen: 'fa-tag', cliente: 'fa-user',
+            fecha: 'fa-calendar-days', creado: 'fa-calendar-days', actualizado: 'fa-calendar-days',
+            fecha_registro: 'fa-calendar-days', fechaRegistro: 'fa-calendar-days'
+        };
+        const DETALLE_CAMPO_LABELS = {
+            correo: 'Correo electrónico', email: 'Correo electrónico',
+            promotor: 'Promotor', direccion: 'Dirección',
+            telefono1: 'Teléfono principal', telefono: 'Teléfono', telefono2: 'Teléfono secundario', celular: 'Celular',
+            nombres: 'Nombres', nombre: 'Nombre', apellidos: 'Apellidos', apellido: 'Apellido',
+            cedula: 'Cédula', ci: 'Cédula', dni: 'Cédula', identificacion: 'Cédula',
+            coordenadas: 'Coordenadas', ubicacion: 'Ubicación',
+            notas: 'Notas', origen: 'Origen del registro', cliente: 'Cliente',
+            fecha: 'Fecha', creado: 'Fecha de creación', actualizado: 'Última actualización',
+            fecha_registro: 'Fecha de registro', fechaRegistro: 'Fecha de registro'
+        };
+        function iconoCampo(keyLower) {
+            return DETALLE_CAMPO_ICONOS[keyLower] || 'fa-circle-info';
+        }
+        function labelCampo(key) {
+            const keyLower = key.toLowerCase();
+            if (DETALLE_CAMPO_LABELS[keyLower]) return DETALLE_CAMPO_LABELS[keyLower];
+            return key.replace(/_/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2')
+                .replace(/^\w/, c => c.toUpperCase());
+        }
+        window.copiarAlPortapapeles = function(texto, etiqueta) {
+            if (!navigator.clipboard) {
+                mostrarToast('Tu navegador no permite copiar automáticamente', 'warning');
+                return;
+            }
+            navigator.clipboard.writeText(texto)
+                .then(() => mostrarToast(`${etiqueta} copiado al portapapeles`, 'success'))
+                .catch(() => mostrarToast('No se pudo copiar', 'error'));
+        };
 
         // ========== RESTO DEL CÓDIGO (con adaptaciones) ==========
 
@@ -1355,14 +1820,13 @@
         let marcadoresGrupo = null;
         let tileLayer = null;
         let currentUserData = {};
-        let isGoogleLogin = false;
 
         function mostrarToast(mensaje, tipo = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             toast.className = `toast toast-${tipo}`;
             const iconMap = { success: 'fa-circle-check', error: 'fa-circle-exclamation', warning: 'fa-triangle-exclamation' };
-            toast.innerHTML = `<i class="fa-solid ${iconMap[tipo] || iconMap.success}"></i><span>${mensaje}</span>`;
+            toast.innerHTML = `<i class="fa-solid ${iconMap[tipo] || iconMap.success}"></i><span>${escapeHtml(mensaje)}</span>`;
             container.appendChild(toast);
             setTimeout(() => {
                 toast.classList.add('toast-out');
@@ -1516,7 +1980,6 @@
             setCargandoLogin(true);
             try {
                 await signInWithEmailAndPassword(auth, userInput, password);
-                isGoogleLogin = false; // login con email/password
             } catch (error) {
                 mostrarError(traducirErrorFirebase(error.code));
             } finally {
@@ -1528,7 +1991,6 @@
             ocultarError();
             try {
                 await signInWithPopup(auth, googleProvider);
-                isGoogleLogin = true; // login con Google
             } catch (error) {
                 console.error('Error en Google login:', error);
                 mostrarError("Error al autenticar con Google.");
@@ -1536,7 +1998,7 @@
         });
 
         function cerrarSesion() {
-            signOut(auth);
+            signOut(auth).catch((err) => console.error('Error al cerrar sesión:', err));
         }
         btnLogoutSidebar.addEventListener('click', cerrarSesion);
         btnLogoutHeader.addEventListener('click', cerrarSesion);
@@ -1682,27 +2144,33 @@
             }
         }
 
+        let profileMenuCloseHandler = null;
+        function cerrarMenuPerfil() {
+            if (profileMenuCloseHandler) {
+                document.removeEventListener('click', profileMenuCloseHandler);
+                profileMenuCloseHandler = null;
+            }
+            profileMenu.classList.remove('show');
+        }
         window.toggleProfileMenu = function() {
-            const menu = profileMenu;
-            const isOpen = menu.classList.contains('show');
+            const isOpen = profileMenu.classList.contains('show');
             document.querySelectorAll('.profile-menu.show').forEach(m => m.classList.remove('show'));
-            if (!isOpen) {
-                menu.classList.add('show');
-                const close = (e) => {
+            if (isOpen) {
+                cerrarMenuPerfil();
+            } else {
+                profileMenu.classList.add('show');
+                profileMenuCloseHandler = (e) => {
                     if (!document.getElementById('profile-dropdown').contains(e.target)) {
-                        menu.classList.remove('show');
-                        document.removeEventListener('click', close);
+                        cerrarMenuPerfil();
                     }
                 };
-                setTimeout(() => document.addEventListener('click', close), 10);
-            } else {
-                menu.classList.remove('show');
+                setTimeout(() => document.addEventListener('click', profileMenuCloseHandler), 10);
             }
         };
 
         window.abrirPerfil = function() {
             document.getElementById('modal-perfil').classList.remove('hidden');
-            profileMenu.classList.remove('show');
+            cerrarMenuPerfil();
             if (ADMIN_EMAILS.includes(usuarioEmail)) {
                 renderizarUsuarios();
             }
@@ -1768,7 +2236,7 @@
                     telefono,
                     direccion,
                     foto: fotoURL,
-                    actualizado: new Date().toISOString()
+                    actualizado: serverTimestamp()
                 };
                 await updateDoc(userDoc, updateData);
 
@@ -1823,7 +2291,7 @@
                 const valorActual = sel.value;
                 let opts = '<option value="">Todos los promotores</option>';
                 usuariosPromotores.forEach(p => {
-                    opts += `<option value="${p.nombre}">${p.nombre}</option>`;
+                    opts += `<option value="${escapeHtml(p.nombre)}">${escapeHtml(p.nombre)}</option>`;
                 });
                 sel.innerHTML = opts;
                 sel.value = valorActual;
@@ -1847,15 +2315,15 @@
                 const esAdmin = ADMIN_EMAILS.includes(u.email);
                 const esActual = u.id === usuarioUid;
                 html += `<tr>
-                    <td class="font-medium" style="color:var(--text-primary);">${u.nombre || 'Sin nombre'}</td>
-                    <td style="color:var(--text-secondary);">${u.email || '--'}</td>
-                    <td>${u.cedula || '--'}</td>
-                    <td>${u.telefono || '--'}</td>
+                    <td class="font-medium" style="color:var(--text-primary);">${escapeHtml(u.nombre || 'Sin nombre')}</td>
+                    <td style="color:var(--text-secondary);">${escapeHtml(u.email || '--')}</td>
+                    <td>${escapeHtml(u.cedula || '--')}</td>
+                    <td>${escapeHtml(u.telefono || '--')}</td>
                     <td><span class="badge ${esAdmin ? 'badge-estado-completado' : 'badge-estado-pendiente'}">${esAdmin ? 'Administrador' : 'Promotor'}</span></td>
                     <td class="text-center whitespace-nowrap">
-                        <button onclick="editarUsuario('${u.id}')" class="btn-action editar" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button>
-                        <button onclick="cambiarContrasena('${u.email}')" class="btn-action estado" title="Cambiar contraseña"><i class="fa-solid fa-key"></i></button>
-                        ${!esActual ? `<button onclick="eliminarUsuario('${u.id}')" class="btn-action eliminar" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button>` : ''}
+                        <button onclick="editarUsuario('${escaparJsAttr(u.id)}')" class="btn-action editar" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button>
+                        <button onclick="cambiarContrasena('${escaparJsAttr(u.email)}')" class="btn-action estado" title="Cambiar contraseña"><i class="fa-solid fa-key"></i></button>
+                        ${!esActual ? `<button onclick="eliminarUsuario('${escaparJsAttr(u.id)}')" class="btn-action eliminar" title="Eliminar"><i class="fa-regular fa-trash-can"></i></button>` : ''}
                     </td>
                 </tr>`;
             });
@@ -1882,6 +2350,10 @@
         };
 
         window.guardarEditarUsuario = async function() {
+            if (!ADMIN_EMAILS.includes(usuarioEmail)) {
+                mostrarToast('No tienes permisos para gestionar usuarios', 'warning');
+                return;
+            }
             const uid = document.getElementById('edit-usuario-uid').value;
             const nombre = document.getElementById('edit-usuario-nombre').value.trim();
             const telefono = document.getElementById('edit-usuario-telefono').value.trim();
@@ -1931,6 +2403,10 @@
         };
 
         window.eliminarUsuario = function(uid) {
+            if (!ADMIN_EMAILS.includes(usuarioEmail)) {
+                mostrarToast('No tienes permisos para eliminar usuarios', 'warning');
+                return;
+            }
             if (uid === usuarioUid) {
                 mostrarToast('No puedes eliminarte a ti mismo', 'warning');
                 return;
@@ -2026,12 +2502,21 @@
                 const lng = parseFloat(ubic.lng);
                 if (isNaN(lat) || isNaN(lng)) return;
                 const popupContent = `
-                    <strong>${ubic.promotor}</strong><br />
-                    Lat: ${lat.toFixed(6)}<br />
-                    Lng: ${lng.toFixed(6)}<br />
-                    <small>${ubic.timestamp ? new Date(ubic.timestamp).toLocaleString('es-VE', { hour12: false }) : 'Reciente'}</small>
+                    <div class="gps-popup">
+                        <div class="gps-popup-name"><i class="fa-solid fa-user"></i> ${escapeHtml(ubic.promotor)}</div>
+                        <div class="gps-popup-coords"><i class="fa-solid fa-location-dot"></i> ${lat.toFixed(6)}, ${lng.toFixed(6)}</div>
+                        <div class="gps-popup-time"><i class="fa-regular fa-clock"></i> ${escapeHtml(formatearFecha(ubic.timestamp || ''))}</div>
+                    </div>
                 `;
+                const icon = L.divIcon({
+                    className: 'gps-marker',
+                    html: '<div class="gps-marker-wrap"><span class="gps-marker-pulse"></span><div class="gps-marker-pin"><i class="fa-solid fa-user"></i></div></div>',
+                    iconSize: [34, 34],
+                    iconAnchor: [17, 17],
+                    popupAnchor: [0, -16]
+                });
                 const marker = L.marker([lat, lng], {
+                    icon: icon,
                     title: ubic.promotor,
                     riseOnHover: true
                 }).bindPopup(popupContent);
@@ -2070,9 +2555,9 @@
             }
             let html = '';
             const sorted = [...ubicacionesPromotores].sort((a, b) => {
-                const ta = a.timestamp || a.ultima_actualizacion || '';
-                const tb = b.timestamp || b.ultima_actualizacion || '';
-                return tb.localeCompare(ta);
+                const ta = obtenerFechaComparable(a.timestamp || a.ultima_actualizacion);
+                const tb = obtenerFechaComparable(b.timestamp || b.ultima_actualizacion);
+                return tb - ta;
             });
             sorted.forEach(ubic => {
                 const promotor = ubic.promotor || 'Desconocido';
@@ -2088,12 +2573,12 @@
                 } catch (e) {}
                 const mapaUrl = `https://www.google.com/maps?q=${lat},${lng}`;
                 html += `<tr>
-                    <td class="font-medium" style="color:var(--text-primary);">${promotor}</td>
-                    <td class="font-mono" style="color:var(--accent);">${lat}</td>
-                    <td class="font-mono" style="color:var(--accent);">${lng}</td>
-                    <td class="text-[10px]" style="color:var(--text-secondary);">${fechaFormateada}</td>
+                    <td class="font-medium" style="color:var(--text-primary);">${escapeHtml(promotor)}</td>
+                    <td class="font-mono" style="color:var(--accent);">${escapeHtml(lat)}</td>
+                    <td class="font-mono" style="color:var(--accent);">${escapeHtml(lng)}</td>
+                    <td class="text-[10px]" style="color:var(--text-secondary);">${escapeHtml(fechaFormateada)}</td>
                     <td class="text-center">
-                        <a href="${mapaUrl}" target="_blank" rel="noopener noreferrer" 
+                        <a href="${escapeHtml(mapaUrl)}" target="_blank" rel="noopener noreferrer" 
                            class="px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all inline-flex items-center gap-1" style="background:rgba(16,185,129,0.15); color:#6ee7b7; border:1px solid rgba(16,185,129,0.2);">
                             <i class="fa-solid fa-map-location-dot"></i> Mapa
                         </a>
@@ -2218,11 +2703,12 @@
 
         function getBadgeEstado(estado) {
             const e = (estado || 'Pendiente').toLowerCase();
-            if (e.includes('completado') || e.includes('activo')) return `<span class="badge badge-estado-completado">${estado}</span>`;
-            if (e.includes('cancelado') || e.includes('no interesado')) return `<span class="badge badge-estado-cancelado">${estado}</span>`;
-            if (e.includes('proceso')) return `<span class="badge badge-estado-proceso">${estado}</span>`;
-            if (e.includes('procesado')) return `<span class="badge badge-estado-procesado">${estado}</span>`;
-            return `<span class="badge badge-estado-pendiente">${estado}</span>`;
+            const label = escapeHtml(estado || 'Pendiente');
+            if (e.includes('completado') || e.includes('activo')) return `<span class="badge badge-estado-completado">${label}</span>`;
+            if (e.includes('cancelado') || e.includes('no interesado')) return `<span class="badge badge-estado-cancelado">${label}</span>`;
+            if (e.includes('proceso')) return `<span class="badge badge-estado-proceso">${label}</span>`;
+            if (e.includes('procesado')) return `<span class="badge badge-estado-procesado">${label}</span>`;
+            return `<span class="badge badge-estado-pendiente">${label}</span>`;
         }
 
         function getBadgeMetodo(origen) {
@@ -2254,20 +2740,20 @@
                 return;
             }
             const sorted = [...docs].sort((a, b) => {
-                const ta = a.fecha || a.creado || '';
-                const tb = b.fecha || b.creado || '';
-                return tb.localeCompare(ta);
+                const ta = obtenerFechaComparable(a.fecha || a.creado);
+                const tb = obtenerFechaComparable(b.fecha || b.creado);
+                return tb - ta;
             }).slice(0, 10);
 
             let html = '';
             sorted.forEach(d => {
                 html += `<tr>
-                    <td class="font-medium" style="color:var(--text-primary);">${getNombreCompleto(d)}</td>
-                    <td>${d.plan || '--'}</td>
-                    <td>${d.promotor || '--'}</td>
+                    <td class="font-medium" style="color:var(--text-primary);">${escapeHtml(getNombreCompleto(d))}</td>
+                    <td>${escapeHtml(d.plan || '--')}</td>
+                    <td>${escapeHtml(d.promotor || '--')}</td>
                     <td>${getBadgeEstado(d.estado)}</td>
                     <td>${getBadgeMetodo(d.origen)}</td>
-                    <td class="text-[10px]" style="color:var(--text-secondary);">${getFecha(d)}</td>
+                    <td class="text-[10px]" style="color:var(--text-secondary);">${escapeHtml(getFecha(d))}</td>
                 </tr>`;
             });
             tbody.innerHTML = html;
@@ -2299,13 +2785,13 @@
             let html = '';
             filtrados.forEach(d => {
                 html += `<tr>
-                    <td class="font-medium" style="color:var(--text-primary);">${getNombreCompleto(d)}<br/><small style="color:var(--text-muted);">${getCedula(d)}</small></td>
-                    <td>${d.sector || '--'}</td>
-                    <td>${d.plan || '--'}</td>
-                    <td>${d.promotor || '--'}</td>
+                    <td class="font-medium" style="color:var(--text-primary);">${escapeHtml(getNombreCompleto(d))}<br/><small style="color:var(--text-muted);">${escapeHtml(getCedula(d))}</small></td>
+                    <td>${escapeHtml(d.sector || '--')}</td>
+                    <td>${escapeHtml(d.plan || '--')}</td>
+                    <td>${escapeHtml(d.promotor || '--')}</td>
                     <td>${getBadgeEstado(d.estado)}</td>
                     <td>${getBadgeMetodo(d.origen)}</td>
-                    <td class="text-[10px]" style="color:var(--text-secondary);">${getFecha(d)}</td>
+                    <td class="text-[10px]" style="color:var(--text-secondary);">${escapeHtml(getFecha(d))}</td>
                 </tr>`;
             });
             tbody.innerHTML = html;
@@ -2337,19 +2823,19 @@
 
             let html = '';
             filtrados.forEach(d => {
-                const btnEliminar = esAdmin ? `<button onclick="eliminarContrato('${d.id}')" class="btn-action eliminar" title="Eliminar contrato"><i class="fa-regular fa-trash-can"></i></button>` : '';
+                const btnEliminar = esAdmin ? `<button onclick="eliminarContrato('${escaparJsAttr(d.id)}')" class="btn-action eliminar" title="Eliminar contrato"><i class="fa-regular fa-trash-can"></i></button>` : '';
 
                 html += `<tr>
-                    <td class="font-medium" style="color:var(--text-primary);">${getNombreCompleto(d)}<br/><small style="color:var(--text-muted);">${getCedula(d)}</small></td>
-                    <td>${d.sector || '--'}</td>
-                    <td>${d.plan || '--'}</td>
-                    <td>${d.promotor || '--'}</td>
+                    <td class="font-medium" style="color:var(--text-primary);">${escapeHtml(getNombreCompleto(d))}<br/><small style="color:var(--text-muted);">${escapeHtml(getCedula(d))}</small></td>
+                    <td>${escapeHtml(d.sector || '--')}</td>
+                    <td>${escapeHtml(d.plan || '--')}</td>
+                    <td>${escapeHtml(d.promotor || '--')}</td>
                     <td>${getBadgeEstado(d.estado)}</td>
                     <td>${getBadgeMetodo(d.origen)}</td>
-                    <td class="text-[10px]" style="color:var(--text-secondary);">${getFecha(d)}</td>
+                    <td class="text-[10px]" style="color:var(--text-secondary);">${escapeHtml(getFecha(d))}</td>
                     <td class="text-center whitespace-nowrap">
-                        <button onclick="verDetalle('${d.id}')" class="btn-action ver" title="Ver detalle"><i class="fa-regular fa-eye"></i></button>
-                        <button onclick="abrirEditarCenso('${d.id}')" class="btn-action editar" title="Editar estado"><i class="fa-regular fa-pen-to-square"></i></button>
+                        <button onclick="verDetalle('${escaparJsAttr(d.id)}')" class="btn-action ver" title="Ver detalle"><i class="fa-regular fa-eye"></i></button>
+                        <button onclick="abrirEditarCenso('${escaparJsAttr(d.id)}')" class="btn-action editar" title="Editar estado"><i class="fa-regular fa-pen-to-square"></i></button>
                         ${btnEliminar}
                     </td>
                 </tr>`;
@@ -2388,14 +2874,14 @@
             let html = '';
             filtrados.forEach(d => {
                 html += `<tr>
-                    <td class="font-medium" style="color:var(--text-primary);">${getNombreCompleto(d)}<br/><small style="color:var(--text-muted);">${getCedula(d)}</small></td>
-                    <td>${d.sector || '--'}</td>
-                    <td>${d.plan || '--'}</td>
-                    <td>${d.promotor || '--'}</td>
+                    <td class="font-medium" style="color:var(--text-primary);">${escapeHtml(getNombreCompleto(d))}<br/><small style="color:var(--text-muted);">${escapeHtml(getCedula(d))}</small></td>
+                    <td>${escapeHtml(d.sector || '--')}</td>
+                    <td>${escapeHtml(d.plan || '--')}</td>
+                    <td>${escapeHtml(d.promotor || '--')}</td>
                     <td>${getBadgeMetodo(d.origen)}</td>
-                    <td class="text-[10px]" style="color:var(--text-secondary);">${getFecha(d)}</td>
+                    <td class="text-[10px]" style="color:var(--text-secondary);">${escapeHtml(getFecha(d))}</td>
                     <td class="text-center whitespace-nowrap">
-                        <button onclick="verDetalle('${d.id}')" class="btn-action ver" title="Ver detalle"><i class="fa-regular fa-eye"></i></button>
+                        <button onclick="verDetalle('${escaparJsAttr(d.id)}')" class="btn-action ver" title="Ver detalle"><i class="fa-regular fa-eye"></i></button>
                     </td>
                 </tr>`;
             });
@@ -2414,7 +2900,7 @@
             }
 
             if (tituloSpan) {
-                tituloSpan.innerHTML = `<i class="fa-solid fa-list-check text-purple-400"></i> Registros: <span class="text-purple-400 font-mono">${promotorSeleccionado || 'Todos'}</span>`;
+                tituloSpan.innerHTML = `<i class="fa-solid fa-list-check text-purple-400"></i> Registros: <span class="text-purple-400 font-mono">${escapeHtml(promotorSeleccionado || 'Todos')}</span>`;
             }
             if (contadorSpan) contadorSpan.innerText = filtrados.length;
 
@@ -2426,15 +2912,15 @@
             let html = '';
             filtrados.forEach(d => {
                 html += `<tr>
-                    <td class="font-medium" style="color:var(--text-primary);">${getNombreCompleto(d)}</td>
-                    <td>${getCedula(d)}</td>
-                    <td>${d.sector || '--'}</td>
-                    <td>${d.plan || '--'}</td>
+                    <td class="font-medium" style="color:var(--text-primary);">${escapeHtml(getNombreCompleto(d))}</td>
+                    <td>${escapeHtml(getCedula(d))}</td>
+                    <td>${escapeHtml(d.sector || '--')}</td>
+                    <td>${escapeHtml(d.plan || '--')}</td>
                     <td>${getBadgeEstado(d.estado)}</td>
                     <td>${getBadgeMetodo(d.origen)}</td>
-                    <td class="text-[10px]" style="color:var(--text-secondary);">${getFecha(d)}</td>
+                    <td class="text-[10px]" style="color:var(--text-secondary);">${escapeHtml(getFecha(d))}</td>
                     <td class="text-center whitespace-nowrap">
-                        <button onclick="verDetalle('${d.id}')" class="btn-action ver" title="Ver detalle"><i class="fa-regular fa-eye"></i></button>
+                        <button onclick="verDetalle('${escaparJsAttr(d.id)}')" class="btn-action ver" title="Ver detalle"><i class="fa-regular fa-eye"></i></button>
                     </td>
                 </tr>`;
             });
@@ -2467,9 +2953,14 @@
                 });
                 let resHtml = '';
                 Object.entries(conteo).slice(0, 4).forEach(([p, total]) => {
-                    resHtml += `<div class="glass-card rounded-2xl p-4 shadow-lg border-l-4 border-amber-500">
-                        <p class="text-[10px] uppercase font-semibold truncate" style="color:var(--text-secondary);">${p}</p>
-                        <h3 class="text-xl font-black mt-1 text-amber-400">${total}</h3>
+                    resHtml += `<div class="glass-card stat-card rounded-2xl p-4 shadow-lg border-l-4 border-amber-500">
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="min-w-0">
+                                <p class="text-[10px] uppercase font-semibold truncate" style="color:var(--text-secondary);">${escapeHtml(p)}</p>
+                                <h3 class="text-xl font-black mt-1 text-amber-400">${total}</h3>
+                            </div>
+                            <div class="stat-icon" style="background:linear-gradient(135deg,#fbbf24,#d97706);"><i class="fa-solid fa-map-location-dot"></i></div>
+                        </div>
                     </div>`;
                 });
                 resumenContainer.innerHTML = resHtml || '<p class="col-span-full text-center text-xs text-muted">Sin datos de censo.</p>';
@@ -2483,15 +2974,15 @@
             let html = '';
             filtrados.forEach(d => {
                 html += `<tr>
-                    <td class="font-medium" style="color:var(--text-primary);">${getNombreCompleto(d)}<br/><small style="color:var(--text-muted);">${getCedula(d)}</small></td>
-                    <td>${d.sector || '--'}</td>
-                    <td>${d.promotor || '--'}</td>
+                    <td class="font-medium" style="color:var(--text-primary);">${escapeHtml(getNombreCompleto(d))}<br/><small style="color:var(--text-muted);">${escapeHtml(getCedula(d))}</small></td>
+                    <td>${escapeHtml(d.sector || '--')}</td>
+                    <td>${escapeHtml(d.promotor || '--')}</td>
                     <td>${getBadgeEstado(d.estado)}</td>
                     <td>${getBadgeMetodo(d.origen)}</td>
-                    <td class="text-[10px]" style="color:var(--text-secondary);">${getFecha(d)}</td>
+                    <td class="text-[10px]" style="color:var(--text-secondary);">${escapeHtml(getFecha(d))}</td>
                     <td class="text-center whitespace-nowrap">
-                        <button onclick="verDetalle('${d.id}')" class="btn-action ver" title="Ver detalle"><i class="fa-regular fa-eye"></i></button>
-                        <button onclick="abrirEditarCenso('${d.id}')" class="btn-action editar" title="Editar estado"><i class="fa-regular fa-pen-to-square"></i></button>
+                        <button onclick="verDetalle('${escaparJsAttr(d.id)}')" class="btn-action ver" title="Ver detalle"><i class="fa-regular fa-eye"></i></button>
+                        <button onclick="abrirEditarCenso('${escaparJsAttr(d.id)}')" class="btn-action editar" title="Editar estado"><i class="fa-regular fa-pen-to-square"></i></button>
                     </td>
                 </tr>`;
             });
@@ -2518,12 +3009,15 @@
             sorted.forEach(([promotor, total], index) => {
                 const colores = ['border-l-4 border-blue-500', 'border-l-4 border-emerald-500', 'border-l-4 border-purple-500', 'border-l-4 border-amber-500'];
                 const claseBorde = colores[index % colores.length];
-                html += `<div class="glass-card rounded-2xl p-4 shadow-lg ${claseBorde} flex items-center justify-between">
-                    <div>
-                        <p class="text-[10px] uppercase font-semibold" style="color:var(--text-secondary);">Promotor #${index + 1}</p>
-                        <h4 class="font-bold text-sm mt-0.5" style="color:var(--text-primary);">${promotor}</h4>
+                html += `<div class="glass-card stat-card rounded-2xl p-4 shadow-lg ${claseBorde} flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <span class="rank-badge">${index + 1}</span>
+                        <div class="min-w-0">
+                            <p class="text-[10px] uppercase font-semibold" style="color:var(--text-secondary);">Promotor</p>
+                            <h4 class="font-bold text-sm mt-0.5 truncate" style="color:var(--text-primary);">${escapeHtml(promotor)}</h4>
+                        </div>
                     </div>
-                    <div class="text-right">
+                    <div class="text-right flex-shrink-0">
                         <span class="text-2xl font-black" style="color:var(--accent);">${total}</span>
                         <p class="text-[9px]" style="color:var(--text-muted);">Registros</p>
                     </div>
@@ -2552,23 +3046,53 @@
                 mostrarToast('Registro no encontrado', 'error');
                 return;
             }
-            document.getElementById('modal-detalle-titulo').innerHTML = `<i class="fa-solid fa-circle-info" style="color:var(--accent);"></i> Detalle: ${getNombreCompleto(docItem)}`;
 
+            const nombreCompleto = getNombreCompleto(docItem);
+            document.getElementById('modal-detalle-titulo').textContent = nombreCompleto;
+
+            // 1) Recolectar fotos del registro
             const fotos = [];
-            let html = '';
             Object.entries(docItem).forEach(([k, v]) => {
-                if (k === 'id') return;
-
                 if (Array.isArray(v) && v.some(esImagen)) {
                     v.filter(esImagen).forEach(url => fotos.push({ campo: k, url }));
-                    return;
-                }
-                if (esImagen(v)) {
+                } else if (esImagen(v)) {
                     fotos.push({ campo: k, url: v });
-                    return;
                 }
+            });
 
-                // Formatear timestamps
+            // 2) Hero + avatar
+            const heroEl = document.getElementById('modal-detalle-hero');
+            const avatarEl = document.getElementById('modal-detalle-avatar');
+            if (fotos.length) {
+                const iniciales = nombreCompleto.split(' ').filter(Boolean).slice(0, 2).map(p => p[0]).join('').toUpperCase() || '?';
+                heroEl.style.backgroundImage = `url("${fotos[0].url.replace(/["'\\]/g, '')}")`;
+                avatarEl.innerHTML = `<img src="${escapeHtml(fotos[0].url)}" alt="${escapeHtml(nombreCompleto)}" onerror="this.parentElement.textContent='${escaparJsAttr(iniciales)}';" />`;
+            } else {
+                heroEl.style.backgroundImage = '';
+                const iniciales = nombreCompleto.split(' ').filter(Boolean).slice(0, 2).map(p => p[0]).join('').toUpperCase() || '?';
+                avatarEl.textContent = iniciales;
+            }
+
+            // 3) Badges (origen + estado)
+            let badgesHtml = '';
+            if (docItem.origen) {
+                const o = String(docItem.origen).toLowerCase();
+                const badgeClass = o === 'app' ? 'badge-app' : o === 'web' ? 'badge-web' : 'badge-censo';
+                badgesHtml += `<span class="badge ${badgeClass}"><i class="fa-solid fa-tag"></i> ${escapeHtml(docItem.origen)}</span>`;
+            }
+            if (docItem.estado) {
+                badgesHtml += getBadgeEstado(docItem.estado);
+            }
+            document.getElementById('modal-detalle-badges').innerHTML = badgesHtml;
+
+            // 4) Campos de información (excluye id, fotos, estado y origen ya mostrados)
+            const camposOcultos = new Set(['id', 'estado', 'origen']);
+            let html = '';
+            Object.entries(docItem).forEach(([k, v]) => {
+                if (camposOcultos.has(k)) return;
+                if (Array.isArray(v) && v.some(esImagen)) return;
+                if (esImagen(v)) return;
+
                 let valorMostrar = v;
                 if (v instanceof Timestamp || (typeof v === 'object' && v !== null && 'seconds' in v && 'nanoseconds' in v)) {
                     valorMostrar = formatearFecha(v);
@@ -2580,34 +3104,69 @@
                     }
                 }
 
-                html += `<div class="p-2 rounded-xl" style="background:var(--bg-input);">
-                    <strong class="uppercase text-[10px]" style="color:var(--text-muted);">${k}:</strong>
-                    <div style="color:var(--text-primary); word-break:break-word;">${valorMostrar !== null && valorMostrar !== undefined && valorMostrar !== '' ? valorMostrar : '--'}</div>
+                const tieneValor = valorMostrar !== null && valorMostrar !== undefined && valorMostrar !== '';
+                const keyLower = k.toLowerCase();
+                let valorHtml = tieneValor ? escapeHtml(String(valorMostrar)) : '--';
+                let accionesHtml = '';
+                let widthClass = '';
+
+                if (tieneValor) {
+                    const valorStr = String(valorMostrar);
+                    const valorEscapadoJs = escaparJsAttr(valorStr);
+
+                    if (keyLower.includes('correo') || keyLower.includes('email')) {
+                        valorHtml = `<a href="mailto:${escapeHtml(valorStr)}">${escapeHtml(valorStr)}</a>`;
+                        accionesHtml = `<button class="detalle-field-action" onclick="copiarAlPortapapeles('${valorEscapadoJs}', 'Correo')" title="Copiar correo"><i class="fa-regular fa-copy"></i></button>`;
+                    } else if ((keyLower.includes('telefono') || keyLower.includes('celular')) && valorStr !== '--') {
+                        valorHtml = `<a href="tel:${escapeHtml(valorStr)}">${escapeHtml(valorStr)}</a>`;
+                        accionesHtml = `<button class="detalle-field-action" onclick="copiarAlPortapapeles('${valorEscapadoJs}', 'Teléfono')" title="Copiar teléfono"><i class="fa-regular fa-copy"></i></button>`;
+                    } else if (keyLower.includes('coordenada') || keyLower.includes('ubicacion')) {
+                        const coords = valorStr.replace(/\s/g, '');
+                        valorHtml = `<a href="https://www.google.com/maps?q=${encodeURIComponent(coords)}" target="_blank" rel="noopener">${escapeHtml(valorStr)} <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.65em;"></i></a>`;
+                        widthClass = 'detalle-field-wide';
+                    } else if (keyLower.includes('nota') || keyLower.includes('direccion')) {
+                        widthClass = 'detalle-field-wide';
+                    }
+                }
+
+                html += `<div class="detalle-field ${widthClass}">
+                    <div class="detalle-field-icon"><i class="fa-solid ${iconoCampo(keyLower)}"></i></div>
+                    <div class="detalle-field-body">
+                        <div class="detalle-field-label">${escapeHtml(labelCampo(k))}</div>
+                        <div class="detalle-field-value">${valorHtml}</div>
+                    </div>
+                    ${accionesHtml}
                 </div>`;
             });
 
-            let fotosHtml = '';
+            document.getElementById('modal-detalle-contenido').innerHTML = html || `<div class="detalle-field detalle-field-wide">
+                <div class="detalle-field-body"><div class="detalle-field-value" style="color:var(--text-muted);">No hay información adicional disponible.</div></div>
+            </div>`;
+
+            // 5) Galería de fotos
+            const fotosSection = document.getElementById('modal-detalle-fotos');
             if (fotos.length) {
-                fotosHtml = `<div class="p-2 rounded-xl mb-2" style="background:var(--bg-input);">
-                    <strong class="uppercase text-[10px]" style="color:var(--text-muted);">Fotos adjuntas (${fotos.length}):</strong>
-                    <div class="flex flex-wrap gap-2 mt-2">
-                        ${fotos.map(f => `<img src="${f.url}" alt="${f.campo}" class="foto-detalle-thumb" data-url="${f.url}" loading="lazy" />`).join('')}
+                fotosSection.innerHTML = `<div class="detalle-fotos-section">
+                    <div class="detalle-fotos-titulo">Fotos adjuntas (${fotos.length})</div>
+                    <div class="detalle-fotos-grid">
+                        ${fotos.map(f => `<img src="${f.url}" alt="${escapeHtml(f.campo)}" class="foto-detalle-thumb" data-url="${f.url}" loading="lazy" />`).join('')}
                     </div>
                 </div>`;
+                fotosSection.querySelectorAll('.foto-detalle-thumb').forEach(img => {
+                    img.addEventListener('click', () => abrirModalFoto(img.dataset.url));
+                    img.addEventListener('error', () => {
+                        const ph = document.createElement('div');
+                        ph.className = 'foto-detalle-placeholder';
+                        ph.innerHTML = '<i class="fa-regular fa-image"></i> No se pudo cargar esta foto';
+                        img.replaceWith(ph);
+                    });
+                });
             } else if ((docItem.origen || '').toLowerCase() === 'web') {
-                fotosHtml = `<div class="foto-detalle-placeholder mb-2"><i class="fa-regular fa-image"></i> El cliente no adjuntó ninguna foto en este registro.</div>`;
+                fotosSection.innerHTML = `<div class="detalle-fotos-section"><div class="foto-detalle-placeholder"><i class="fa-regular fa-image"></i> El cliente no adjuntó ninguna foto en este registro.</div></div>`;
+            } else {
+                fotosSection.innerHTML = '';
             }
 
-            document.getElementById('modal-detalle-contenido').innerHTML = fotosHtml + html;
-            document.getElementById('modal-detalle-contenido').querySelectorAll('.foto-detalle-thumb').forEach(img => {
-                img.addEventListener('click', () => abrirModalFoto(img.dataset.url));
-                img.addEventListener('error', () => {
-                    const ph = document.createElement('div');
-                    ph.className = 'foto-detalle-placeholder';
-                    ph.innerHTML = '<i class="fa-regular fa-image"></i> No se pudo cargar esta foto';
-                    img.replaceWith(ph);
-                });
-            });
             document.getElementById('modal-detalle').classList.remove('hidden');
         };
 
@@ -2626,6 +3185,30 @@
             document.getElementById('modal-foto').classList.remove('flex');
             document.getElementById('modal-foto-img').src = '';
         };
+
+        window.cerrarModalVincular = function() {
+            modalVinculacion.classList.add('hidden');
+        };
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key !== 'Escape') return;
+            const cierres = [
+                ['modal-foto', 'cerrarModalFoto'],
+                ['modal-detalle', 'cerrarModalDetalle'],
+                ['modal-perfil', 'cerrarPerfil'],
+                ['modal-editar-perfil', 'cerrarEditarPerfil'],
+                ['modal-editar-censo', 'cerrarModalEditarCenso'],
+                ['modal-editar-usuario', 'cerrarModalEditarUsuario'],
+                ['modal-vincular', 'cerrarModalVincular']
+            ];
+            for (const [id, fn] of cierres) {
+                const el = document.getElementById(id);
+                if (el && !el.classList.contains('hidden')) {
+                    window[fn]();
+                    break;
+                }
+            }
+        });
 
         window.abrirEditarCenso = function(id) {
             const docItem = allDocs.find(d => d.id === id);
