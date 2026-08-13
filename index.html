@@ -20,7 +20,7 @@
             --border-color: rgba(255, 255, 255, 0.06);
             --text-primary: #e2e8f0;
             --text-secondary: #9ca3af;
-            --text-muted: #4b4b55;
+            --text-muted: #6a6a76;
             --shadow: 0 8px 32px rgba(0,0,0,0.3);
             --accent: #3b82f6;
             --accent-hover: #2563eb;
@@ -922,15 +922,64 @@
         .profile-actions button.text-red:hover { background: rgba(248,113,113,0.15) !important; }
 
         @media (max-width: 640px) {
-            .table-wrap table { font-size: 0.65rem; min-width: 480px; }
-            .table-wrap thead th, .table-wrap tbody td { padding: 0.4rem 0.5rem; }
+            .table-wrap table { font-size: 0.7rem; min-width: 480px; }
+            .table-wrap thead th { font-size: 0.6rem; padding: 0.45rem 0.5rem; }
+            .table-wrap tbody td { padding: 0.45rem 0.5rem; }
             .glass-card { padding: 0.8rem !important; }
             .profile-dropdown .profile-menu { right: -10px; min-width: 180px; }
             #toast-container { right: 0.8rem; bottom: 0.8rem; max-width: 300px; }
-            .btn-action { width: 26px; height: 26px; font-size: 0.7rem; }
+            .btn-action { width: 30px; height: 30px; font-size: 0.75rem; }
+            .stat-card { padding: 0.9rem 1rem !important; }
+            .input-dark, select.input-dark { min-height: 42px; }
         }
         @media (prefers-reduced-motion: reduce) {
             * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+        }
+
+        /* ========== REFINAMIENTOS UI/UX (solo presentación) ========== */
+
+        /* --- Móvil: elimina el flash gris del toque (Android/iOS) --- */
+        button, a, select, input, textarea, [onclick], .stat-card, .nav-btn, .profile-dropdown > div {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* --- Texto seleccionado coherente con el tema --- */
+        ::selection { background: var(--accent-soft); color: var(--text-primary); }
+
+        /* --- Consistencia de microinteracciones botón ghost --- */
+        .btn-ghost { transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.15s; }
+        .btn-ghost:hover { color: var(--text-primary); border-color: var(--accent); }
+        .btn-ghost:active { transform: scale(0.97); }
+
+        /* --- Botón hamburguesa: hover/focus visible coherente --- */
+        .hamburger-btn:hover { background: var(--accent-soft) !important; color: var(--accent) !important; }
+        .hamburger-btn:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+
+        /* --- Estados focus visibles consistentes para controles principales --- */
+        .btn-primary:focus-visible, .btn-ghost:focus-visible,
+        .nav-btn:focus-visible, .stat-card:focus-visible,
+        .theme-toggle:focus-visible {
+            outline: 2px solid var(--focus-ring);
+            outline-offset: 2px;
+        }
+
+        /* --- Campos de formulario: caret y altura táctil --- */
+        .input-dark { caret-color: var(--accent); min-height: 40px; }
+        select.input-dark { min-height: 40px; }
+        textarea.input-dark { min-height: 84px; }
+
+        /* --- Coherencia teal en tema claro (iconos de detalle) --- */
+        .light-theme .detalle-field-icon { background: rgba(13,148,136,0.12); }
+        .light-theme .detalle-field-action:hover { background: rgba(13,148,136,0.1); }
+
+        /* --- Scrollbar Firefox (consistente con WebKit) --- */
+        .custom-scrollbar { scrollbar-width: thin; scrollbar-color: #3b3b44 transparent; }
+        .light-theme .custom-scrollbar { scrollbar-color: #cbd5e1 transparent; }
+
+        /* --- Móvil: respeta el notch/barra de gestos en el menú lateral --- */
+        @media (max-width: 767px) {
+            .sidebar { padding-bottom: env(safe-area-inset-bottom); }
+            #app-container { padding-bottom: env(safe-area-inset-bottom); }
         }
     </style>
 </head>
