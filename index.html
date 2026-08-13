@@ -304,6 +304,7 @@
             transition: border 0.2s, box-shadow 0.2s;
             width: 100%;
         }
+        .input-dark:hover { border-color: rgba(255,255,255,0.16); }
         .input-dark:focus {
             outline: none;
             border-color: var(--accent);
@@ -311,6 +312,7 @@
         }
         .input-dark::placeholder { color: var(--text-muted); }
         .light-theme .input-dark { background: white; }
+        .light-theme .input-dark:hover { border-color: rgba(0,0,0,0.16); }
 
         .btn-primary {
             background: linear-gradient(135deg, var(--accent), var(--accent-hover));
@@ -2318,7 +2320,12 @@
                     if (data.nombre) lista.push(data);
                 });
                 allUsers = lista;
-                usuariosPromotores = lista.map(u => ({ id: u.id, nombre: u.nombre, cedula: u.cedula }));
+                // Solo promotores (mismo criterio que el formulario web y el sync)
+                const esPromotor = (u) => {
+                    const r = (u.rol || '').trim().toLowerCase();
+                    return r === 'promotor' || r === 'promotor(a)';
+                };
+                usuariosPromotores = lista.filter(esPromotor).map(u => ({ id: u.id, nombre: u.nombre, cedula: u.cedula }));
                 actualizarSelectsPromotores();
                 if (!document.getElementById('modal-perfil').classList.contains('hidden') && ADMIN_EMAILS.includes(usuarioEmail)) {
                     renderizarUsuarios();
@@ -2359,8 +2366,19 @@
                 if (statUsuariosTotal) statUsuariosTotal.innerText = '0';
                 return;
             }
+            // Mostrar solo promotores (mismo criterio que el formulario web y el sync)
+            const esPromotor = (u) => {
+                const r = (u.rol || '').trim().toLowerCase();
+                return r === 'promotor' || r === 'promotor(a)';
+            };
+            const soloPromotores = allUsers.filter(esPromotor);
+            if (!soloPromotores.length) {
+                tablaUsuariosBody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-xs" style="color:var(--text-muted);">No hay promotores registrados.</td></tr>`;
+                if (statUsuariosTotal) statUsuariosTotal.innerText = '0';
+                return;
+            }
             let html = '';
-            allUsers.forEach(u => {
+            soloPromotores.forEach(u => {
                 const esAdmin = ADMIN_EMAILS.includes(u.email);
                 const esActual = u.id === usuarioUid;
                 html += `<tr>
@@ -2368,7 +2386,7 @@
                     <td style="color:var(--text-secondary);">${escapeHtml(u.email || '--')}</td>
                     <td>${escapeHtml(u.cedula || '--')}</td>
                     <td>${escapeHtml(u.telefono || '--')}</td>
-                    <td><span class="badge ${esAdmin ? 'badge-estado-completado' : 'badge-estado-pendiente'}">${esAdmin ? 'Administrador' : 'Promotor'}</span></td>
+                    <td><span class="badge badge-estado-pendiente">Promotor</span></td>
                     <td class="text-center whitespace-nowrap">
                         <button onclick="editarUsuario('${escaparJsAttr(u.id)}')" class="btn-action editar" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button>
                         <button onclick="cambiarContrasena('${escaparJsAttr(u.email)}')" class="btn-action estado" title="Cambiar contraseña"><i class="fa-solid fa-key"></i></button>
@@ -2377,7 +2395,7 @@
                 </tr>`;
             });
             tablaUsuariosBody.innerHTML = html;
-            if (statUsuariosTotal) statUsuariosTotal.innerText = allUsers.length;
+            if (statUsuariosTotal) statUsuariosTotal.innerText = soloPromotores.length;
         }
 
         window.editarUsuario = function(uid) {
