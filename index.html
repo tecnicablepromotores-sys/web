@@ -3,21 +3,24 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <meta name="description" content="Panel de gestión Tecnicable: monitoreo de contratos, promotores, censo y rastreo GPS en tiempo real." />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://*.gstatic.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com; font-src 'self' https://fonts.gstatic.com; frame-src https://www.google.com; worker-src 'self' blob:;">
     <title>Tecnicable · Gestión Firebase</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📡</text></svg>" />
     <style>
-        /* ========== VARIABLES TEMAS ========== */
-        :root {
-            --bg-body: #0d0d12;
+/* ========== DESIGN SYSTEM VISUAL - TECHNICABLE ========== */
+:root {
+  --bg-body: #0d0d12;
             --bg-card: rgba(24, 24, 28, 0.5);
-            --bg-sidebar: rgba(17, 17, 22, 0.85);
-            --bg-header: rgba(17, 17, 22, 0.8);
-            --bg-input: rgba(24, 24, 28, 0.6);
-            --border-color: rgba(255, 255, 255, 0.06);
+            --bg-sidebar: rgba(16, 16, 20, 0.85);
+  --bg-header: rgba(16, 16, 20, 0.85);
+            --bg-input: rgba(20, 20, 28, 0.7);
+  --border-color: rgba(255, 255, 255, 0.06);
             --text-primary: #e2e8f0;
             --text-secondary: #9ca3af;
             --text-muted: #6a6a76;
@@ -28,8 +31,13 @@
             --accent-glow: rgba(59,130,246,0.35);
             --focus-ring: rgba(59,130,246,0.5);
             --focus-ring-soft: rgba(59,130,246,0.18);
-            --map-tile: 'dark_all';
         }
+
+        /* ========== MEJORAS VISUALES GLOBALES ========== */
+        .glass-card { border-radius: 1rem; }
+        .stat-card { border-radius: 1rem; }
+        .table-wrap { border-radius: 1rem; }
+        .form-wrapper { border-radius: 2rem; }
 
         body.light-theme {
             --bg-body: #f0f4f8;
@@ -48,7 +56,6 @@
             --accent-glow: rgba(13,148,136,0.25);
             --focus-ring: rgba(13,148,136,0.5);
             --focus-ring-soft: rgba(13,148,136,0.18);
-            --map-tile: 'light_all';
         }
 
         * { box-sizing: border-box; }
@@ -63,12 +70,21 @@
             padding: 0;
             transition: background 0.3s, color 0.3s;
         }
+        :focus-visible {
+            outline: 2px solid var(--focus-ring);
+            outline-offset: 2px;
+            border-radius: 6px;
+        }
+        ::selection { background: var(--accent-soft); color: var(--text-primary); }
+
         .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: var(--bg-card); border-radius: 8px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #3b3b44; border-radius: 8px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #5a5a66; }
         .light-theme .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; }
         .light-theme .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        html { scrollbar-width: thin; scrollbar-color: #3b3b44 transparent; }
+        .light-theme html { scrollbar-color: #cbd5e1 transparent; }
 
         /* Sidebar */
         .sidebar {
@@ -293,6 +309,14 @@
         .light-theme .badge-estado-proceso   { background: rgba(59,130,246,0.2); color: #1e40af; }
         .light-theme .badge-estado-cancelado { background: rgba(239,68,68,0.2); color: #991b1b; }
         .light-theme .badge-estado-procesado { background: rgba(16,185,129,0.2); color: #065f46; }
+
+        /* ===== Badges de rol (jerarquía: administrador > supervisor > promotor) ===== */
+        .badge-rol-admin { background: rgba(139,92,246,0.15); color: #c4b5fd; border-color: rgba(139,92,246,0.25); }
+        .badge-rol-supervisor { background: rgba(6,182,212,0.15); color: #67e8f9; border-color: rgba(6,182,212,0.25); }
+        .badge-rol-promotor { background: rgba(16,185,129,0.15); color: #6ee7b7; border-color: rgba(16,185,129,0.25); }
+        .light-theme .badge-rol-admin { background: rgba(139,92,246,0.18); color: #6d28d9; }
+        .light-theme .badge-rol-supervisor { background: rgba(6,182,212,0.18); color: #0e7490; }
+        .light-theme .badge-rol-promotor { background: rgba(16,185,129,0.18); color: #065f46; }
 
         .input-dark {
             background: var(--bg-input);
@@ -697,7 +721,9 @@
             border-radius: 1rem;
             border: 1px solid var(--border-color);
             background: #1a1a1e;
+            box-shadow: inset 0 0 0 1px var(--border-color);
         }
+        .light-theme #mapa-rastreo { background: #eef2f7; }
         @media (min-width: 768px) { #mapa-rastreo { height: 450px; } }
         .leaflet-popup-content-wrapper {
             background: var(--bg-card) !important;
@@ -752,7 +778,7 @@
                 radial-gradient(ellipse 80% 60% at 20% 8%, var(--accent-glow), transparent 60%),
                 radial-gradient(ellipse 60% 50% at 85% 92%, rgba(139,92,246,0.18), transparent 55%),
                 radial-gradient(ellipse 45% 40% at 75% 15%, rgba(6,182,212,0.12), transparent 55%),
-                var(--bg-body) !important;
+                var(--bg-body);
         }
         .login-logo {
             width: 64px;
@@ -890,8 +916,6 @@
             70% { transform: scale(1.7); opacity: 0; }
             100% { transform: scale(1.7); opacity: 0; }
         }
-        #mapa-rastreo { box-shadow: inset 0 0 0 1px var(--border-color); }
-
         /* Accesibilidad: focus visible global */
         :focus-visible {
             outline: 2px solid var(--focus-ring);
@@ -983,6 +1007,30 @@
             .sidebar { padding-bottom: env(safe-area-inset-bottom); }
             #app-container { padding-bottom: env(safe-area-inset-bottom); }
         }
+
+        /* ===== Ajustes contraste tema claro (colores Tailwind -400) ===== */
+        .light-theme .text-cyan-400  { color: #0e7490 !important; }
+        .light-theme .text-amber-400 { color: #b45309 !important; }
+        .light-theme .text-purple-400{ color: #7c3aed !important; }
+        .light-theme .text-emerald-400{ color: #047857 !important; }
+        .light-theme .text-green-400 { color: #15803d !important; }
+        .light-theme .text-blue-400  { color: #1d4ed8 !important; }
+
+        /* Botón de cierre del sidebar en móvil: visible en tema claro */
+        .light-theme .sidebar button.md\:hidden:hover { color: #0f172a !important; }
+
+        /* Botones «X» de cierre de modales: hover coherente en tema claro */
+        .light-theme .modal-overlay button.text-gray-400:hover {
+            background: rgba(0,0,0,0.06) !important;
+            color: var(--text-secondary) !important;
+        }
+
+        /* Defensa: hidden siempre gana sobre flex (Tailwind) */
+        .hidden { display: none !important; }
+        /* Restaura el patrón responsive "hidden sm:block" / "hidden md:block" (Tailwind),
+           que el !important de .hidden rompería en pantallas medianas/grandes. */
+        @media (min-width: 640px) { .hidden.sm\:block { display: block !important; } }
+        @media (min-width: 768px) { .hidden.md\:block { display: block !important; } }
     </style>
 </head>
 <body>
@@ -1146,6 +1194,7 @@
                                 <div>
                                     <div class="font-semibold text-sm" style="color:var(--text-primary);" id="profile-name">Usuario</div>
                                     <div class="text-xs" style="color:var(--text-secondary);" id="profile-email">correo@ejemplo.com</div>
+                                    <div class="mt-1" id="profile-rol-badge"></div>
                                 </div>
                             </div>
                             <div class="profile-actions">
@@ -1162,19 +1211,19 @@
                 <!-- DASHBOARD -->
                 <div id="view-dashboard" class="seccion-view space-y-4">
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div class="glass-card stat-card rounded-2xl p-5 shadow-lg" style="border-left:4px solid var(--accent);">
+                        <div class="glass-card stat-card rounded-2xl p-5 shadow-lg border-l-4 border-[var(--accent)] hover:shadow-xl hover:translate-y-1 transition-all duration-300" style="border-left-color:var(--accent);">
                             <div class="flex justify-between items-start">
                                 <div>
                                     <p class="text-[10px] uppercase tracking-wider font-semibold" style="color:var(--text-secondary);">Total</p>
                                     <h3 id="stat-dash-total" class="text-2xl md:text-3xl font-black mt-1" style="color:var(--text-primary);">0</h3>
                                 </div>
-                                <div class="stat-icon" style="background:linear-gradient(135deg,#14b8a6,#0d9488);">
+                                <div class="stat-icon" style="background:linear-gradient(135deg,var(--accent),var(--accent-hover));">
                                     <i class="fa-solid fa-database"></i>
                                 </div>
                             </div>
                             <span class="text-[8px] font-medium" style="color:var(--accent);"><i class="fa-solid fa-check-circle mr-0.5"></i>Firestore</span>
                         </div>
-                        <div class="glass-card stat-card rounded-2xl p-5 shadow-lg" style="border-left:4px solid #06b6d4;">
+                        <div class="glass-card stat-card rounded-2xl p-5 shadow-lg border-l-4 border-cyan-500 hover:shadow-xl hover:translate-y-1 transition-all duration-300" style="border-left-color:#06b6d4;">
                             <div class="flex justify-between items-start">
                                 <div>
                                     <p class="text-[10px] uppercase tracking-wider font-semibold" style="color:var(--text-secondary);">Promotores</p>
@@ -1186,7 +1235,7 @@
                             </div>
                             <span class="text-[8px] text-cyan-400 font-medium"><i class="fa-solid fa-id-card mr-0.5"></i>Activos</span>
                         </div>
-                        <div class="glass-card stat-card rounded-2xl p-5 shadow-lg" style="border-left:4px solid #f59e0b;">
+                        <div class="glass-card stat-card rounded-2xl p-5 shadow-lg border-l-4 border-amber-500 hover:shadow-xl hover:translate-y-1 transition-all duration-300" style="border-left-color:#f59e0b;">
                             <div class="flex justify-between items-start">
                                 <div>
                                     <p class="text-[10px] uppercase tracking-wider font-semibold" style="color:var(--text-secondary);">Estados</p>
@@ -1198,7 +1247,7 @@
                             </div>
                             <span class="text-[8px] text-amber-400 font-medium"><i class="fa-solid fa-rotate mr-0.5"></i>Variados</span>
                         </div>
-                        <div class="glass-card stat-card rounded-2xl p-5 shadow-lg" style="border-left:4px solid #8b5cf6;">
+                        <div class="glass-card stat-card rounded-2xl p-5 shadow-lg border-l-4 border-purple-500 hover:shadow-xl hover:translate-y-1 transition-all duration-300" style="border-left-color:#8b5cf6;">
                             <div class="flex justify-between items-start">
                                 <div>
                                     <p class="text-[10px] uppercase tracking-wider font-semibold" style="color:var(--text-secondary);">Planes</p>
@@ -1211,17 +1260,28 @@
                             <span class="text-[8px] text-purple-400 font-medium"><i class="fa-solid fa-signal mr-0.5"></i>Activos</span>
                         </div>
                     </div>
-                    <div class="glass-card rounded-2xl p-5 shadow-lg">
-                        <div class="flex items-center justify-between mb-3 pb-2" style="border-bottom:1px solid var(--border-color);">
+                    <div class="glass-card rounded-2xl p-5 shadow-lg border-b border-dashed border-[var(--border-color)] mb-3">
+                        <div class="flex items-center justify-between mb-2">
                             <h3 class="font-bold text-xs tracking-wider uppercase flex items-center gap-2" style="color:var(--text-primary);">
                                 <i class="fa-solid fa-clock-rotate-left" style="color:var(--accent);"></i> Últimos 10
                             </h3>
                             <span class="live-badge"><span class="dot"></span> En vivo</span>
                         </div>
                         <div class="table-wrap">
-                            <table>
-                                <thead><tr><th>Cliente</th><th>Plan</th><th>Promotor</th><th>Estado</th><th>Método</th><th>Fecha</th></tr></thead>
-                                <tbody id="tabla-recientes-body"><tr><td colspan="6" class="text-center py-4 text-xs" style="color:var(--text-muted);">Cargando...</td></tr></tbody>
+                            <table class="min-w-full">
+                                <thead>
+                                    <tr class="border-b border-[var(--border-color)]">
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Cliente</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Plan</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Promotor</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Estado</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Método</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Fecha</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-recientes-body">
+                                    <tr><td colspan="6" class="p-4 text-center text-xs" style="color:var(--text-muted);">Cargando...</td></tr>
+                                </tbody>
                             </table>
                         </div>
                     </div>
@@ -1246,14 +1306,26 @@
                             <input type="text" id="busqueda-ingresados" placeholder="Buscar..." class="input-dark w-full md:w-48" />
                         </div>
                     </div>
-                    <div class="glass-card rounded-2xl p-5 shadow-lg">
+                    <div class="glass-card rounded-2xl p-5 shadow-lg mt-1">
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-xs" style="color:var(--text-secondary);">Total: <strong id="stat-ing-total" class="text-emerald-400">0</strong></span>
                         </div>
-                        <div class="table-wrap max-h-[420px] overflow-y-auto custom-scrollbar">
-                            <table>
-                                <thead><tr><th>Cliente / Cédula</th><th>Sector</th><th>Plan</th><th>Promotor</th><th>Estado</th><th>Método</th><th>Fecha</th></tr></thead>
-                                <tbody id="tabla-ingresados-body"><tr><td colspan="7" class="text-center py-4 text-xs" style="color:var(--text-muted);">Cargando...</td></tr></tbody>
+                        <div class="table-wrap max-h-[420px] overflow-y-auto rounded-xl custom-scrollbar">
+                            <table class="min-w-full">
+                                <thead>
+                                    <tr class="border-b border-[var(--border-color)]">
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Cliente / Cédula</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Sector</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Plan</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Promotor</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Estado</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Método</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Fecha</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-ingresados-body">
+                                    <tr><td colspan="7" class="p-4 text-center text-xs" style="color:var(--text-muted);">Cargando...</td></tr>
+                                </tbody>
                             </table>
                         </div>
                     </div>
@@ -1287,10 +1359,23 @@
                         </div>
                     </div>
                     <div class="glass-card rounded-2xl p-5 shadow-lg">
-                        <div class="table-wrap max-h-[420px] overflow-y-auto custom-scrollbar">
-                            <table>
-                                <thead><tr><th>Cliente / Cédula</th><th>Sector</th><th>Plan</th><th>Promotor</th><th>Estado</th><th>Método</th><th>Fecha</th><th class="text-center">Acciones</th></tr></thead>
-                                <tbody id="tabla-web-body"><tr><td colspan="8" class="text-center py-4 text-xs" style="color:var(--text-muted);">Cargando...</td></tr></tbody>
+                        <div class="table-wrap max-h-[420px] overflow-y-auto rounded-xl custom-scrollbar">
+                            <table class="min-w-full">
+                                <thead>
+                                    <tr class="border-b border-[var(--border-color)]">
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Cliente / Cédula</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Sector</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Plan</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Promotor</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Estado</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Método</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Fecha</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-web-body">
+                                    <tr><td colspan="8" class="p-4 text-center text-xs" style="color:var(--text-muted);">Cargando...</td></tr>
+                                </tbody>
                             </table>
                         </div>
                     </div>
@@ -1349,10 +1434,23 @@
                             </h3>
                             <span class="text-xs" style="color:var(--text-secondary);">Total: <strong id="contador-promotor-sel" style="color:var(--text-primary);">0</strong></span>
                         </div>
-                        <div class="table-wrap max-h-[380px] overflow-y-auto custom-scrollbar">
-                            <table>
-                                <thead><tr><th>Cliente</th><th>Cédula</th><th>Sector</th><th>Plan</th><th>Estado</th><th>Método</th><th>Fecha</th><th class="text-center">Acciones</th></tr></thead>
-                                <tbody id="tabla-promotores-body"><tr><td colspan="8" class="text-center py-4 text-xs" style="color:var(--text-muted);">Selecciona un promotor</td></tr></tbody>
+                        <div class="table-wrap max-h-[380px] overflow-y-auto rounded-xl custom-scrollbar">
+                            <table class="min-w-full">
+                                <thead>
+                                    <tr class="border-b border-[var(--border-color)]">
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Cliente</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Cédula</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Sector</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Plan</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Estado</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Método</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Fecha</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-promotores-body">
+                                    <tr><td colspan="8" class="p-4 text-center text-xs" style="color:var(--text-muted);">Selecciona un promotor</td></tr>
+                                </tbody>
                             </table>
                         </div>
                     </div>
@@ -1385,10 +1483,22 @@
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-xs" style="color:var(--text-secondary);">Total: <strong id="stat-censo-total" class="text-amber-400">0</strong></span>
                         </div>
-                        <div class="table-wrap max-h-[420px] overflow-y-auto custom-scrollbar">
-                            <table>
-                                <thead><tr><th>Ciudadano / Cédula</th><th>Sector</th><th>Promotor</th><th>Estado</th><th>Método</th><th>Fecha</th><th class="text-center">Acciones</th></tr></thead>
-                                <tbody id="tabla-censo-body"><tr><td colspan="7" class="text-center py-4 text-xs" style="color:var(--text-muted);">Cargando...</td></tr></tbody>
+                        <div class="table-wrap max-h-[420px] overflow-y-auto rounded-xl custom-scrollbar">
+                            <table class="min-w-full">
+                                <thead>
+                                    <tr class="border-b border-[var(--border-color)]">
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Ciudadano / Cédula</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Sector</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Promotor</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Estado</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Método</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Fecha</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-censo-body">
+                                    <tr><td colspan="7" class="p-4 text-center text-xs" style="color:var(--text-muted);">Cargando...</td></tr>
+                                </tbody>
                             </table>
                         </div>
                     </div>
@@ -1412,10 +1522,20 @@
                         <div id="mapa-rastreo"></div>
                     </div>
                     <div class="glass-card rounded-2xl p-5 shadow-lg">
-                        <div class="table-wrap max-h-[320px] overflow-y-auto custom-scrollbar">
-                            <table>
-                                <thead><tr><th>Promotor</th><th>Latitud</th><th>Longitud</th><th>Última act.</th><th class="text-center">Acción</th></tr></thead>
-                                <tbody id="tabla-rastreo-body"><tr><td colspan="5" class="text-center py-4 text-xs" style="color:var(--text-muted);">Cargando...</td></tr></tbody>
+                        <div class="table-wrap max-h-[420px] overflow-y-auto rounded-xl custom-scrollbar">
+                            <table class="min-w-full">
+                                <thead>
+                                    <tr class="border-b border-[var(--border-color)]">
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Promotor</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Latitud</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Longitud</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Última act.</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap text-center">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-rastreo-body">
+                                    <tr><td colspan="5" class="p-4 text-center text-xs" style="color:var(--text-muted);">Cargando...</td></tr>
+                                </tbody>
                             </table>
                         </div>
                     </div>
@@ -1530,12 +1650,23 @@
                     </h4>
                     <span class="text-xs" style="color:var(--text-secondary);">Total: <strong id="stat-usuarios-total" class="text-blue-400">0</strong></span>
                 </div>
-                <div class="table-wrap max-h-[300px] overflow-y-auto custom-scrollbar">
-                    <table>
-                        <thead><tr><th>Nombre</th><th>Email</th><th>Cédula</th><th>Teléfono</th><th>Rol</th><th class="text-center">Acciones</th></tr></thead>
-                        <tbody id="tabla-usuarios-body"><tr><td colspan="6" class="text-center py-4 text-xs" style="color:var(--text-muted);">Cargando usuarios...</td></tr></tbody>
-                    </table>
-                </div>
+                <div class="table-wrap max-h-[300px] overflow-y-auto rounded-xl custom-scrollbar">
+                            <table class="min-w-full">
+                                <thead>
+                                    <tr class="border-b border-[var(--border-color)]">
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Nombre</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Email</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Cédula</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Teléfono</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap">Rol</th>
+                                        <th class="p-4 font-medium text-xs font-semibold tracking-wider text-left text-[var(--text-secondary)] uppercase whitespace-nowrap text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-usuarios-body">
+                                    <tr><td colspan="6" class="p-4 text-center text-xs" style="color:var(--text-muted);">Cargando usuarios...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
             </div>
 
             <div class="mt-4 pt-3 text-right" style="border-top:1px solid var(--border-color);">
@@ -1610,8 +1741,9 @@
                 <div>
                     <label class="block uppercase font-semibold mb-1" style="color:var(--text-secondary);">Rol</label>
                     <select id="edit-usuario-rol" class="input-dark">
-                        <option value="promotor">Promotor</option>
-                        <option value="administrador">Administrador</option>
+                        <option value="promotor">Promotor (Nivel 1)</option>
+                        <option value="supervisor">Supervisor (Nivel 2)</option>
+                        <option value="administrador">Administrador (Nivel 3)</option>
                     </select>
                 </div>
                 <div id="edit-usuario-error" class="hidden text-red-400 text-xs mt-1"></div>
@@ -1627,11 +1759,11 @@
     <script type="importmap">
         {
             "imports": {
-                "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
-                "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js",
-                "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js",
-                "firebase/database": "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js",
-                "firebase/storage": "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js"
+                "firebase/app": "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js",
+                "firebase/auth": "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js",
+                "firebase/firestore": "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js",
+                "firebase/database": "https://www.gstatic.com/firebasejs/11.0.0/firebase-database.js",
+                "firebase/storage": "https://www.gstatic.com/firebasejs/11.0.0/firebase-storage.js"
             }
         }
     </script>
@@ -1677,7 +1809,46 @@
             databaseURL: "https://tecnicable-e00d3-default-rtdb.firebaseio.com"
         };
         const DOMINIO_INTERNO = "tecnicable.com";
-        const ADMIN_EMAILS = ['admin@tecnicable.com', 'supervisor@tecnicable.com', 'luifred1998@gmail.com'];
+
+        // ========== JERARQUÍA DE ROLES ==========
+        // Nivel 3 (máximo): Administrador Supremo (ÚNICO administrador)
+        const ADMIN_SUPREMO_EMAILS = ['luifred1998@gmail.com'];
+        // Cuentas heredadas sin rango de administrador (el único admin es ADMIN_SUPREMO_EMAILS)
+        const LEGACY_ADMIN_EMAILS = [];
+        // Cuentas de dominio con nivel de supervisor (sin cuentas heredadas por defecto)
+        const LEGACY_SUPERVISOR_EMAILS = [];
+        // Lista completa de correos con acceso al panel (compatibilidad con la versión previa)
+        const ADMIN_EMAILS = [...ADMIN_SUPREMO_EMAILS, ...LEGACY_ADMIN_EMAILS, ...LEGACY_SUPERVISOR_EMAILS];
+
+        const NIVELES_ROL = { administrador: 3, admin: 3, supervisor: 2, promotor: 1, 'promotor(a)': 1 };
+
+        // Devuelve el nivel jerárquico (3 máximo, 1 mínimo) de un usuario.
+        // El administrador supremo (luifred1998@gmail.com) SIEMPRE es nivel 3.
+        function getNivelUsuario(email, rol) {
+            const r = String(rol || '').trim().toLowerCase();
+            if (ADMIN_SUPREMO_EMAILS.includes(email)) return 3;
+            if (LEGACY_ADMIN_EMAILS.includes(email) || r === 'administrador' || r === 'admin') return 3;
+            if (LEGACY_SUPERVISOR_EMAILS.includes(email) || r === 'supervisor') return 2;
+            return 1; // promotor
+        }
+        function esAdmin(email, rol) { return getNivelUsuario(email, rol) >= 3; }
+        function esSupervisor(email, rol) { return getNivelUsuario(email, rol) >= 2; }
+
+        // Normaliza el rol efectivo de un usuario según la jerarquía.
+        function getRolUsuario(email, rol) {
+            const nivel = getNivelUsuario(email, rol);
+            if (nivel >= 3) return 'administrador';
+            if (nivel === 2) return 'supervisor';
+            return 'promotor';
+        }
+        // Devuelve el badge HTML del rol con su nivel (para insertar en tablas/perfil).
+        function getBadgeRol(email, rol) {
+            const r = getRolUsuario(email, rol);
+            const nivel = getNivelUsuario(email, rol);
+            if (r === 'administrador') return `<span class="badge badge-rol-admin"><i class="fa-solid fa-crown"></i> Administrador · Nivel ${nivel}</span>`;
+            if (r === 'supervisor') return `<span class="badge badge-rol-supervisor"><i class="fa-solid fa-user-shield"></i> Supervisor · Nivel ${nivel}</span>`;
+            return `<span class="badge badge-rol-promotor"><i class="fa-solid fa-user"></i> Promotor · Nivel ${nivel}</span>`;
+        }
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -1692,25 +1863,25 @@
         // ========== FUNCIONES HELPER MEJORADAS ==========
         function getNombreCompleto(d) {
             if (!d) return 'Sin nombre';
-            if (d.nombres && d.apellidos) {
+            if (d.nombres && d.nombres.trim() && d.apellidos && d.apellidos.trim()) {
                 return `${d.nombres} ${d.apellidos}`.trim();
             }
-            if (d.nombre && d.apellido) {
+            if (d.nombre && d.nombre.trim() && d.apellido && d.apellido.trim()) {
                 return `${d.nombre} ${d.apellido}`.trim();
             }
-            if (d.nombre) return d.nombre;
-            if (d.cliente) return d.cliente;
-            if (d.nombreCompleto) return d.nombreCompleto;
-            if (d.ciudadano) return d.ciudadano;
-            if (d.nombres) return d.nombres;
-            if (d.apellidos) return d.apellidos;
-            if (d.apellido) return d.apellido;
+            if (d.nombre && d.nombre.trim()) return d.nombre;
+            if (d.cliente && d.cliente.trim()) return d.cliente;
+            if (d.nombreCompleto && d.nombreCompleto.trim()) return d.nombreCompleto;
+            if (d.ciudadano && d.ciudadano.trim()) return d.ciudadano;
+            if (d.nombres && d.nombres.trim()) return d.nombres;
+            if (d.apellidos && d.apellidos.trim()) return d.apellidos;
+            if (d.apellido && d.apellido.trim()) return d.apellido;
             return 'Sin nombre';
         }
 
         function getCedula(d) {
             if (!d) return '--';
-            return d.cedula || d.ced || d.ci || d.dni || d.identificacion || d.cedulaIdentidad || d.cedula_identidad || '--';
+            return (d.cedula != null ? d.cedula : d.ced != null ? d.ced : d.ci != null ? d.ci : d.dni != null ? d.dni : d.identificacion != null ? d.identificacion : d.cedulaIdentidad != null ? d.cedulaIdentidad : d.cedula_identidad != null ? d.cedula_identidad : '--');
         }
 
         function formatearFecha(valor) {
@@ -1747,6 +1918,17 @@
                 return valor.seconds * 1000 + valor.nanoseconds / 1000000;
             }
             if (typeof valor === 'number' && !isNaN(valor)) return valor;
+            if (typeof valor === 'string') {
+                // Detecta formato dd/mm/aaaa o dd-mm-aaaa y lo convierte a ISO (YYYY-MM-DD)
+                // para que Date.parse() y el ordenamiento funcionen correctamente.
+                const m = valor.trim().match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+                if (m) {
+                    const dia = m[1].padStart(2, '0');
+                    const mes = m[2].padStart(2, '0');
+                    const anio = m[3].length === 2 ? '20' + m[3] : m[3];
+                    valor = `${anio}-${mes}-${dia}`;
+                }
+            }
             const ms = Date.parse(valor);
             return isNaN(ms) ? 0 : ms;
         }
@@ -1773,7 +1955,11 @@
                 .replace(/&/g, '&amp;')
                 .replace(/"/g, '&quot;')
                 .replace(/\\/g, '\\\\')
-                .replace(/'/g, "\\'");
+                .replace(/'/g, "\\'")
+                .replace(/\n/g, '\\n')
+                .replace(/\r/g, '\\r')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
         }
 
         // ===== Metadatos de campos para el modal de detalle =====
@@ -1871,6 +2057,12 @@
         let marcadoresGrupo = null;
         let tileLayer = null;
         let currentUserData = {};
+        // Evita el toast espurio de "Nuevo registro" durante el primer login:
+        // solo se activa tras completar la primera carga de las tres suscripciones.
+        let primeraCargaCompletada = false;
+        let cargasCompletadas = 0;
+        // Guarda anti-race para la vinculación de cuentas Google (evita reentrada).
+        let vinculando = false;
 
         function mostrarToast(mensaje, tipo = 'success') {
             const container = document.getElementById('toast-container');
@@ -1957,9 +2149,9 @@
         const tituloSeccion = document.getElementById('seccion-titulo');
 
         function cambiarSeccion(seccion) {
-            if (seccion === 'rastreo' && !ADMIN_EMAILS.includes(usuarioEmail)) {
+            if (seccion === 'rastreo' && !esSupervisor(usuarioEmail, currentUserData.rol)) {
                 seccion = 'dashboard';
-                mostrarToast('Acceso restringido a administradores', 'warning');
+                mostrarToast('Acceso restringido a administradores y supervisores', 'warning');
             }
             Object.values(views).forEach(v => v.classList.add('hidden'));
             if (views[seccion]) views[seccion].classList.remove('hidden');
@@ -2081,39 +2273,45 @@
                     }
                     // Guardar al hacer clic
                     btnVincularGuardar.onclick = async () => {
-                        const nombre = vinculoNombre.value.trim();
-                        const cedula = vinculoCedula.value.trim();
-                        const telefono = vinculoTelefono.value.trim();
-                        const password = vinculoPassword.value;
-                        const passwordConfirm = vinculoPasswordConfirm.value;
-
-                        if (!nombre || !cedula) {
-                            vinculoError.innerText = 'Nombre y cédula son obligatorios.';
-                            vinculoError.classList.remove('hidden');
-                            return;
-                        }
-                        if (isGoogle) {
-                            if (password.length < 6) {
-                                vinculoError.innerText = 'La contraseña debe tener al menos 6 caracteres.';
-                                vinculoError.classList.remove('hidden');
-                                return;
-                            }
-                            if (password !== passwordConfirm) {
-                                vinculoError.innerText = 'Las contraseñas no coinciden.';
-                                vinculoError.classList.remove('hidden');
-                                return;
-                            }
-                        }
-                        vinculoError.classList.add('hidden');
-
+                        // Guarda anti-race: si ya hay una vinculación en curso, ignorar.
+                        // linkWithCredential dispara un segundo onAuthStateChanged que podría
+                        // re-mostrar el modal; mantener la guarda cubriendo todo el bloque try.
+                        if (vinculando) return;
+                        vinculando = true;
                         try {
+                            const nombre = vinculoNombre.value.trim();
+                            const cedula = vinculoCedula.value.trim();
+                            const telefono = vinculoTelefono.value.trim();
+                            const password = vinculoPassword.value;
+                            const passwordConfirm = vinculoPasswordConfirm.value;
+
+                            if (!nombre || !cedula) {
+                                vinculoError.innerText = 'Nombre y cédula son obligatorios.';
+                                vinculoError.classList.remove('hidden');
+                                return;
+                            }
+                            if (isGoogle) {
+                                if (password.length < 6) {
+                                    vinculoError.innerText = 'La contraseña debe tener al menos 6 caracteres.';
+                                    vinculoError.classList.remove('hidden');
+                                    return;
+                                }
+                                if (password !== passwordConfirm) {
+                                    vinculoError.innerText = 'Las contraseñas no coinciden.';
+                                    vinculoError.classList.remove('hidden');
+                                    return;
+                                }
+                            }
+                            vinculoError.classList.add('hidden');
+
                             // Si es Google, vincular la credencial
                             if (isGoogle) {
                                 const credential = EmailAuthProvider.credential(email, password);
                                 await linkWithCredential(auth.currentUser, credential);
                             }
 
-                            // Guardar en Firestore
+                            // Guardar en Firestore inmediatamente tras vincular, para que el
+                            // segundo onAuthStateChanged no re-muestre el modal (doc ya existe).
                             const newData = {
                                 nombre,
                                 cedula,
@@ -2121,7 +2319,7 @@
                                 uid,
                                 telefono: telefono || '',
                                 direccion: '',
-                                rol: ADMIN_EMAILS.includes(email) ? 'administrador' : 'promotor',
+                                rol: getRolUsuario(email, ''),
                                 creado: serverTimestamp()
                             };
                             await setDoc(docRef, newData);
@@ -2144,6 +2342,8 @@
                             }
                             vinculoError.innerText = msg;
                             vinculoError.classList.remove('hidden');
+                        } finally {
+                            vinculando = false;
                         }
                     };
                 }
@@ -2179,15 +2379,17 @@
             document.getElementById('perfil-cedula').innerText = `Cédula: ${data.cedula || '--'}`;
             document.getElementById('perfil-telefono').innerText = `Teléfono: ${data.telefono || '--'}`;
             document.getElementById('perfil-direccion').innerText = `Dirección: ${data.direccion || '--'}`;
-            const esAdmin = ADMIN_EMAILS.includes(email);
-            document.getElementById('perfil-rol').innerText = `Rol: ${esAdmin ? 'Administrador' : 'Promotor'}`;
+            const esAdminUsuario = esAdmin(email, data.rol);
+            document.getElementById('perfil-rol').innerHTML = `Rol: ${getBadgeRol(email, data.rol)}`;
+            const profileRolBadge = document.getElementById('profile-rol-badge');
+            if (profileRolBadge) profileRolBadge.innerHTML = getBadgeRol(email, data.rol);
             document.getElementById('perfil-avatar').src = userAvatar.src;
             document.getElementById('edit-perfil-nombre').value = displayName;
             document.getElementById('edit-perfil-telefono').value = data.telefono || '';
             document.getElementById('edit-perfil-direccion').value = data.direccion || '';
             document.getElementById('edit-perfil-avatar-preview').src = userAvatar.src;
 
-            if (esAdmin) {
+            if (esAdminUsuario) {
                 adminSection.classList.remove('hidden');
                 renderizarUsuarios();
             } else {
@@ -2222,7 +2424,7 @@
         window.abrirPerfil = function() {
             document.getElementById('modal-perfil').classList.remove('hidden');
             cerrarMenuPerfil();
-            if (ADMIN_EMAILS.includes(usuarioEmail)) {
+            if (esAdmin(usuarioEmail, currentUserData.rol)) {
                 renderizarUsuarios();
             }
         };
@@ -2320,14 +2522,19 @@
                     if (data.nombre) lista.push(data);
                 });
                 allUsers = lista;
-                // Solo promotores (mismo criterio que el formulario web y el sync)
-                const esPromotor = (u) => {
+                // Requisito de negocio: para no-supervisores, limita la colección de
+                // usuarios en memoria a su propio registro (reduce exposición de datos).
+                if (!esSupervisor(usuarioEmail, currentUserData.rol)) {
+                    allUsers = lista.filter(u => u.id === usuarioUid);
+                }
+                // Promotores y supervisores (mismo criterio que el formulario web y el sync)
+                const esPersonalTerreno = (u) => {
                     const r = (u.rol || '').trim().toLowerCase();
-                    return r === 'promotor' || r === 'promotor(a)';
+                    return r === 'promotor' || r === 'promotor(a)' || r === 'supervisor';
                 };
-                usuariosPromotores = lista.filter(esPromotor).map(u => ({ id: u.id, nombre: u.nombre, cedula: u.cedula }));
+                usuariosPromotores = lista.filter(esPersonalTerreno).map(u => ({ id: u.id, nombre: u.nombre, cedula: u.cedula, rol: u.rol }));
                 actualizarSelectsPromotores();
-                if (!document.getElementById('modal-perfil').classList.contains('hidden') && ADMIN_EMAILS.includes(usuarioEmail)) {
+                if (!document.getElementById('modal-perfil').classList.contains('hidden') && esAdmin(usuarioEmail, currentUserData.rol)) {
                     renderizarUsuarios();
                 }
             }, (error) => console.error('Error en suscripción de usuarios:', error));
@@ -2341,12 +2548,27 @@
                 'select-detalle-promotor',
                 'filtro-promotor-censo'
             ];
+            const esSuper = esSupervisor(usuarioEmail, currentUserData.rol);
+            // Requisito de negocio: un promotor (no supervisor/admin) solo debe poder
+            // elegir su propio nombre en los filtros, nunca el de otros promotores.
+            let listaPromotores = usuariosPromotores;
+            if (!esSuper) {
+                const propioNorm = (usuarioPromotor || '')
+                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
+                const propiaCedula = currentUserData.cedula || currentUserData.ced || currentUserData.ci || vinculoCedula.value || '';
+                listaPromotores = usuariosPromotores.filter(p => {
+                    const nombreNorm = (p.nombre || '')
+                        .normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
+                    return nombreNorm === propioNorm ||
+                           (p.cedula && propiaCedula && String(p.cedula).trim() === String(propiaCedula).trim());
+                });
+            }
             selects.forEach(id => {
                 const sel = document.getElementById(id);
                 if (!sel) return;
                 const valorActual = sel.value;
                 let opts = '<option value="">Todos los promotores</option>';
-                usuariosPromotores.forEach(p => {
+                listaPromotores.forEach(p => {
                     opts += `<option value="${escapeHtml(p.nombre)}">${escapeHtml(p.nombre)}</option>`;
                 });
                 sel.innerHTML = opts;
@@ -2356,7 +2578,7 @@
 
         function renderizarUsuarios() {
             if (!tablaUsuariosBody) return;
-            if (!ADMIN_EMAILS.includes(usuarioEmail)) {
+            if (!esAdmin(usuarioEmail, currentUserData.rol)) {
                 tablaUsuariosBody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-xs" style="color:var(--text-muted);">Acceso restringido</td></tr>`;
                 if (statUsuariosTotal) statUsuariosTotal.innerText = '0';
                 return;
@@ -2366,27 +2588,15 @@
                 if (statUsuariosTotal) statUsuariosTotal.innerText = '0';
                 return;
             }
-            // Mostrar solo promotores (mismo criterio que el formulario web y el sync)
-            const esPromotor = (u) => {
-                const r = (u.rol || '').trim().toLowerCase();
-                return r === 'promotor' || r === 'promotor(a)';
-            };
-            const soloPromotores = allUsers.filter(esPromotor);
-            if (!soloPromotores.length) {
-                tablaUsuariosBody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-xs" style="color:var(--text-muted);">No hay promotores registrados.</td></tr>`;
-                if (statUsuariosTotal) statUsuariosTotal.innerText = '0';
-                return;
-            }
             let html = '';
-            soloPromotores.forEach(u => {
-                const esAdmin = ADMIN_EMAILS.includes(u.email);
+            allUsers.forEach(u => {
                 const esActual = u.id === usuarioUid;
                 html += `<tr>
                     <td class="font-medium" style="color:var(--text-primary);">${escapeHtml(u.nombre || 'Sin nombre')}</td>
                     <td style="color:var(--text-secondary);">${escapeHtml(u.email || '--')}</td>
                     <td>${escapeHtml(u.cedula || '--')}</td>
                     <td>${escapeHtml(u.telefono || '--')}</td>
-                    <td><span class="badge badge-estado-pendiente">Promotor</span></td>
+                    <td>${getBadgeRol(u.email, u.rol)}</td>
                     <td class="text-center whitespace-nowrap">
                         <button onclick="editarUsuario('${escaparJsAttr(u.id)}')" class="btn-action editar" title="Editar"><i class="fa-regular fa-pen-to-square"></i></button>
                         <button onclick="cambiarContrasena('${escaparJsAttr(u.email)}')" class="btn-action estado" title="Cambiar contraseña"><i class="fa-solid fa-key"></i></button>
@@ -2395,7 +2605,7 @@
                 </tr>`;
             });
             tablaUsuariosBody.innerHTML = html;
-            if (statUsuariosTotal) statUsuariosTotal.innerText = soloPromotores.length;
+            if (statUsuariosTotal) statUsuariosTotal.innerText = allUsers.length;
         }
 
         window.editarUsuario = function(uid) {
@@ -2408,7 +2618,7 @@
             document.getElementById('edit-usuario-nombre').value = user.nombre || '';
             document.getElementById('edit-usuario-telefono').value = user.telefono || '';
             document.getElementById('edit-usuario-direccion').value = user.direccion || '';
-            document.getElementById('edit-usuario-rol').value = user.rol || (ADMIN_EMAILS.includes(user.email) ? 'administrador' : 'promotor');
+            document.getElementById('edit-usuario-rol').value = getRolUsuario(user.email, user.rol);
             document.getElementById('modal-editar-usuario').classList.remove('hidden');
         };
 
@@ -2417,7 +2627,7 @@
         };
 
         window.guardarEditarUsuario = async function() {
-            if (!ADMIN_EMAILS.includes(usuarioEmail)) {
+            if (!esAdmin(usuarioEmail, currentUserData.rol)) {
                 mostrarToast('No tienes permisos para gestionar usuarios', 'warning');
                 return;
             }
@@ -2454,6 +2664,10 @@
         };
 
         window.cambiarContrasena = function(email) {
+            if (!esAdmin(usuarioEmail, currentUserData.rol)) {
+                mostrarToast('No tienes permisos', 'warning');
+                return;
+            }
             if (!email) {
                 mostrarToast('El usuario no tiene email', 'error');
                 return;
@@ -2470,7 +2684,7 @@
         };
 
         window.eliminarUsuario = function(uid) {
-            if (!ADMIN_EMAILS.includes(usuarioEmail)) {
+            if (!esAdmin(usuarioEmail, currentUserData.rol)) {
                 mostrarToast('No tienes permisos para eliminar usuarios', 'warning');
                 return;
             }
@@ -2491,10 +2705,26 @@
         };
 
         function filtrarPorPromotor(docs) {
-            if (ADMIN_EMAILS.includes(usuarioEmail)) return docs;
+            // Administradores y supervisores ven todos los registros.
+            if (esSupervisor(usuarioEmail, currentUserData.rol)) return docs;
             if (!usuarioPromotor) return docs;
-            const lower = usuarioPromotor.trim().toLowerCase();
-            return docs.filter(d => (d.promotor || '').trim().toLowerCase() === lower);
+            // Normaliza acentos en ambos lados (p.ej. "María" == "Maria").
+            const normalizar = (s) => String(s || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            const lower = normalizar(usuarioPromotor);
+            // Cédula del promotor logueado (desde currentUserData o del input de vinculación).
+            const cedulaPromotor = (currentUserData && (currentUserData.cedula != null || currentUserData.ced != null || currentUserData.ci != null))
+                ? String(currentUserData.cedula != null ? currentUserData.cedula : currentUserData.ced != null ? currentUserData.ced : currentUserData.ci).trim().toLowerCase()
+                : (vinculoCedula && vinculoCedula.value) ? String(vinculoCedula.value).trim().toLowerCase() : '';
+            return docs.filter(d => {
+                // Comparación por nombre como base.
+                if (normalizar(d.promotor) === lower) return true;
+                // Comparación por cédula del promotor asociado al documento.
+                const cedulaDoc = d.promotor_cedula != null ? String(d.promotor_cedula) :
+                                  d.promotorCedula != null ? String(d.promotorCedula) :
+                                  d.promotor_ci != null ? String(d.promotor_ci) : '';
+                if (cedulaPromotor && cedulaDoc && cedulaDoc.trim().toLowerCase() === cedulaPromotor) return true;
+                return false;
+            });
         }
 
         function suscribirseUbicaciones() {
@@ -2610,7 +2840,7 @@
             const tbody = document.getElementById('tabla-rastreo-body');
             const totalSpan = document.getElementById('stat-rastreo-total');
             if (!tbody) return;
-            if (!ADMIN_EMAILS.includes(usuarioEmail)) {
+            if (!esSupervisor(usuarioEmail, currentUserData.rol)) {
                 tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-xs" style="color:var(--text-muted);">Acceso restringido</td></tr>`;
                 if (totalSpan) totalSpan.innerText = '0';
                 return;
@@ -2631,21 +2861,17 @@
                 const lat = ubic.lat ?? ubic.latitude ?? 'N/D';
                 const lng = ubic.lng ?? ubic.longitude ?? 'N/D';
                 const timestamp = ubic.timestamp || ubic.ultima_actualizacion || 'Reciente';
-                let fechaFormateada = timestamp;
-                try {
-                    const date = new Date(timestamp);
-                    if (!isNaN(date.getTime())) {
-                        fechaFormateada = date.toLocaleString('es-VE', { hour12: false });
-                    }
-                } catch (e) {}
-                const mapaUrl = `https://www.google.com/maps?q=${lat},${lng}`;
+                // formatearFecha ya maneja Timestamps de Firestore y strings ISO.
+                let fechaFormateada = formatearFecha(timestamp);
+                if (fechaFormateada === '--') fechaFormateada = timestamp;
+                const mapaUrl = `https://www.google.com/maps?q=${encodeURIComponent(lat)},${encodeURIComponent(lng)}`;
                 html += `<tr>
                     <td class="font-medium" style="color:var(--text-primary);">${escapeHtml(promotor)}</td>
                     <td class="font-mono" style="color:var(--accent);">${escapeHtml(lat)}</td>
                     <td class="font-mono" style="color:var(--accent);">${escapeHtml(lng)}</td>
                     <td class="text-[10px]" style="color:var(--text-secondary);">${escapeHtml(fechaFormateada)}</td>
                     <td class="text-center">
-                        <a href="${escapeHtml(mapaUrl)}" target="_blank" rel="noopener noreferrer" 
+                        <a href="${mapaUrl}" target="_blank" rel="noopener noreferrer" 
                            class="px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all inline-flex items-center gap-1" style="background:rgba(16,185,129,0.15); color:#6ee7b7; border:1px solid rgba(16,185,129,0.2);">
                             <i class="fa-solid fa-map-location-dot"></i> Mapa
                         </a>
@@ -2669,19 +2895,46 @@
                 ...registrosPorFuente.app,
                 ...registrosPorFuente.web
             ];
-            const currentIds = new Set(newDocs.map(d => d.id));
+            // Requisito de negocio: si NO es supervisor/admin, el promotor solo debe mantener
+            // en memoria (allDocs) SUS propios registros. Supervisores/admins ven todo.
+            const docsParaMemoria = esSupervisor(usuarioEmail, currentUserData.rol)
+                ? newDocs
+                : filtrarPorPromotor(newDocs);
+            const currentIds = new Set(docsParaMemoria.map(d => d.id));
 
-            if (usuarioPromotor || ADMIN_EMAILS.includes(usuarioEmail)) {
-                const nuevos = newDocs.filter(d => !previousIds.has(d.id));
-                if (nuevos.length > 0 && previousIds.size > 0) {
+            if (usuarioPromotor || esSupervisor(usuarioEmail, currentUserData.rol)) {
+                const nuevos = docsParaMemoria.filter(d => !previousIds.has(d.id));
+                // Toast solo para registros nuevos REALES: se omite en el primer login,
+                // cuando previousIds aún está vacío o la primera carga no ha terminado.
+                if (nuevos.length > 0 && previousIds.size > 0 && primeraCargaCompletada) {
                     reproducirSonido();
                     const nombres = nuevos.map(d => getNombreCompleto(d)).join(', ');
                     mostrarToast(`📦 Nuevo registro: ${nombres}`, 'success');
                 }
             }
 
-            allDocs = newDocs;
+            allDocs = docsParaMemoria;
             previousIds = currentIds;
+
+            // Requisito de negocio: para no-supervisores, deja de conservar en memoria
+            // las fuentes crudas (que contienen PII de otros promotores). Solo guarda
+            // los registros del promotor actual.
+            if (!esSupervisor(usuarioEmail, currentUserData.rol)) {
+                const origenLower = (d) => String(d.origen || '').toLowerCase();
+                registrosPorFuente.censo = docsParaMemoria.filter(d => origenLower(d) === 'censo');
+                registrosPorFuente.app   = docsParaMemoria.filter(d => origenLower(d) === 'app');
+                registrosPorFuente.web   = docsParaMemoria.filter(d => origenLower(d) === 'web');
+            }
+
+            // Marca la primera carga como completada cuando las tres suscripciones
+            // (censo, app, web) hayan emitido al menos una vez.
+            if (!primeraCargaCompletada) {
+                cargasCompletadas++;
+                if (cargasCompletadas >= 3) {
+                    primeraCargaCompletada = true;
+                }
+            }
+
             actualizarUI();
         }
 
@@ -2749,8 +3002,8 @@
         }
 
         function actualizarUI() {
-            const esAdmin = ADMIN_EMAILS.includes(usuarioEmail);
-            if (esAdmin) {
+            // Rastreo GPS: visible para administradores y supervisores (nivel >= 2)
+            if (esSupervisor(usuarioEmail, currentUserData.rol)) {
                 btnRastreo.classList.remove('hidden');
             } else {
                 btnRastreo.classList.add('hidden');
@@ -2886,11 +3139,11 @@
                 return;
             }
 
-            const esAdmin = ADMIN_EMAILS.includes(usuarioEmail);
+            const esAdminActual = esAdmin(usuarioEmail, currentUserData.rol);
 
             let html = '';
             filtrados.forEach(d => {
-                const btnEliminar = esAdmin ? `<button onclick="eliminarContrato('${escaparJsAttr(d.id)}')" class="btn-action eliminar" title="Eliminar contrato"><i class="fa-regular fa-trash-can"></i></button>` : '';
+                const btnEliminar = esAdminActual ? `<button onclick="eliminarContrato('${escaparJsAttr(d.id)}')" class="btn-action eliminar" title="Eliminar contrato"><i class="fa-regular fa-trash-can"></i></button>` : '';
 
                 html += `<tr>
                     <td class="font-medium" style="color:var(--text-primary);">${escapeHtml(getNombreCompleto(d))}<br/><small style="color:var(--text-muted);">${escapeHtml(getCedula(d))}</small></td>
@@ -3132,7 +3385,13 @@
             const avatarEl = document.getElementById('modal-detalle-avatar');
             if (fotos.length) {
                 const iniciales = nombreCompleto.split(' ').filter(Boolean).slice(0, 2).map(p => p[0]).join('').toUpperCase() || '?';
-                heroEl.style.backgroundImage = `url("${fotos[0].url.replace(/["'\\]/g, '')}")`;
+                // Validación de URL del hero: solo se aceptan http/https (evita inyección CSS vía url()).
+                let heroUrl = '';
+                try {
+                    const u = new URL(String(fotos[0].url || '').trim());
+                    if (u.protocol === 'https:' || u.protocol === 'http:') heroUrl = u.href;
+                } catch (e) { /* URL inválida: no se aplica */ }
+                heroEl.style.backgroundImage = heroUrl ? `url("${heroUrl.replace(/"/g, '')}")` : '';
                 avatarEl.innerHTML = `<img src="${escapeHtml(fotos[0].url)}" alt="${escapeHtml(nombreCompleto)}" onerror="this.parentElement.textContent='${escaparJsAttr(iniciales)}';" />`;
             } else {
                 heroEl.style.backgroundImage = '';
@@ -3189,7 +3448,7 @@
                         accionesHtml = `<button class="detalle-field-action" onclick="copiarAlPortapapeles('${valorEscapadoJs}', 'Teléfono')" title="Copiar teléfono"><i class="fa-regular fa-copy"></i></button>`;
                     } else if (keyLower.includes('coordenada') || keyLower.includes('ubicacion')) {
                         const coords = valorStr.replace(/\s/g, '');
-                        valorHtml = `<a href="https://www.google.com/maps?q=${encodeURIComponent(coords)}" target="_blank" rel="noopener">${escapeHtml(valorStr)} <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.65em;"></i></a>`;
+                        valorHtml = `<a href="https://www.google.com/maps?q=${encodeURIComponent(coords)}" target="_blank" rel="noopener noreferrer">${escapeHtml(valorStr)} <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.65em;"></i></a>`;
                         widthClass = 'detalle-field-wide';
                     } else if (keyLower.includes('nota') || keyLower.includes('direccion')) {
                         widthClass = 'detalle-field-wide';
@@ -3210,28 +3469,44 @@
                 <div class="detalle-field-body"><div class="detalle-field-value" style="color:var(--text-muted);">No hay información adicional disponible.</div></div>
             </div>`;
 
-            // 5) Galería de fotos
+            // 5) Galería de fotos - XSS fix: usar DOM methods en lugar de innerHTML con URLs
             const fotosSection = document.getElementById('modal-detalle-fotos');
+            fotosSection.innerHTML = ''; // limpiar
             if (fotos.length) {
-                fotosSection.innerHTML = `<div class="detalle-fotos-section">
-                    <div class="detalle-fotos-titulo">Fotos adjuntas (${fotos.length})</div>
-                    <div class="detalle-fotos-grid">
-                        ${fotos.map(f => `<img src="${f.url}" alt="${escapeHtml(f.campo)}" class="foto-detalle-thumb" data-url="${f.url}" loading="lazy" />`).join('')}
-                    </div>
-                </div>`;
-                fotosSection.querySelectorAll('.foto-detalle-thumb').forEach(img => {
-                    img.addEventListener('click', () => abrirModalFoto(img.dataset.url));
+                const section = document.createElement('div');
+                section.className = 'detalle-fotos-section';
+                const titulo = document.createElement('div');
+                titulo.className = 'detalle-fotos-titulo';
+                titulo.textContent = `Fotos adjuntas (${fotos.length})`;
+                const grid = document.createElement('div');
+                grid.className = 'detalle-fotos-grid';
+                fotos.forEach(f => {
+                    const img = document.createElement('img');
+                    // Validar URL: solo http/https
+                    const url = (f.url || '').trim();
+                    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:image/')) {
+                        img.src = url;
+                    } else {
+                        img.src = ''; // URL inválida, no cargar
+                    }
+                    img.alt = escapeHtml(f.campo || 'Foto');
+                    img.className = 'foto-detalle-thumb';
+                    img.dataset.url = url;
+                    img.loading = 'lazy';
+                    img.addEventListener('click', () => abrirModalFoto(url));
                     img.addEventListener('error', () => {
                         const ph = document.createElement('div');
                         ph.className = 'foto-detalle-placeholder';
                         ph.innerHTML = '<i class="fa-regular fa-image"></i> No se pudo cargar esta foto';
                         img.replaceWith(ph);
                     });
+                    grid.appendChild(img);
                 });
+                section.appendChild(titulo);
+                section.appendChild(grid);
+                fotosSection.appendChild(section);
             } else if ((docItem.origen || '').toLowerCase() === 'web') {
                 fotosSection.innerHTML = `<div class="detalle-fotos-section"><div class="foto-detalle-placeholder"><i class="fa-regular fa-image"></i> El cliente no adjuntó ninguna foto en este registro.</div></div>`;
-            } else {
-                fotosSection.innerHTML = '';
             }
 
             document.getElementById('modal-detalle').classList.remove('hidden');
@@ -3295,6 +3570,13 @@
         };
 
         window.guardarEdicionCenso = async function() {
+            // Solo supervisores/administradores pueden editar registros. Como allDocs ya
+            // está filtrado para promotores, un promotor solo podría operar sobre los suyos;
+            // aun así, se bloquea la edición por jerarquía de roles.
+            if (!esSupervisor(usuarioEmail, currentUserData.rol)) {
+                mostrarToast('No tienes permisos para editar registros', 'warning');
+                return;
+            }
             const id = document.getElementById('edit-censo-id').value;
             const estado = document.getElementById('edit-censo-estado').value;
             const notas = document.getElementById('edit-censo-notas').value.trim();
@@ -3315,7 +3597,7 @@
 
         // ===== NUEVA FUNCIÓN ELIMINAR CONTRATO =====
         window.eliminarContrato = async function(id) {
-            if (!ADMIN_EMAILS.includes(usuarioEmail)) {
+            if (!esAdmin(usuarioEmail, currentUserData.rol)) {
                 mostrarToast('No tienes permisos para eliminar contratos', 'warning');
                 return;
             }
@@ -3351,7 +3633,11 @@
                 await verificarVinculacion(user.uid, user.email);
                 suscribirseUsuarios();
                 suscribirseFirestore();
-                suscribirseUbicaciones();
+                // Requisito de negocio: el rastreo GPS (ubicación de promotores) es
+                // exclusivo de administradores y supervisores.
+                if (esSupervisor(usuarioEmail, currentUserData.rol)) {
+                    suscribirseUbicaciones();
+                }
                 const savedSec = sessionStorage.getItem('seccion') || 'dashboard';
                 cambiarSeccion(savedSec);
             } else {
